@@ -1,31 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="my">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tiles Hop EDM Rush (Mini App)</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📖 Text Reader</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div id="app-container">
-        <header>
-            <h1 id="user-info">Login ဝင်နေသည်...</h1>
-            <div id="score-display">ရမှတ်: <span id="current-score">0</span></div>
-        </header>
+  <div class="container">
+    <h1>📚 Text Reader</h1>
 
-        <div id="game-area" onmousedown="handleJump()" ontouchstart="handleJump()">
-            <div id="ball"></div>
-            </div>
-
-        <div id="leaderboard-section">
-            <h2>🏆 Top Scores (Local Save)</h2>
-            <ul id="leaderboard-list">
-                </ul>
-            <button onclick="resetScores()">ရမှတ်များ ဖျက်ရန်</button>
-        </div>
+    <div id="admin-panel">
+      <textarea id="newText" placeholder="စာအသစ်ရေးပါ..."></textarea>
+      <button id="addTextBtn">စာတင်မည် 🚀</button>
     </div>
 
-    <script src="game.js"></script>
+    <h2>ဖတ်ရန်စာများ</h2>
+    <div id="textList"></div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
