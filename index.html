@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📖 Shared Text</title>
+<title>Telegram Profile Demo</title>
 <link rel="stylesheet" href="style.css">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -13,21 +13,17 @@
 </head>
 <body>
 
-<!-- Login -->
-<div id="loginPage" class="container center">
-<h1>📖 Shared Text</h1>
-<input type="text" id="loginName" placeholder="Enter username">
-<button id="loginBtn">Login 🚀</button>
+<div class="container center" id="loginPage">
+  <h1>📖 Telegram Login Demo</h1>
+  <button id="tgLoginBtn">Login with Telegram</button>
 </div>
 
-<!-- App Page -->
-<div id="appPage" class="container hidden">
-<h1>📚 Posts</h1>
-<p class="welcome"></p>
-<textarea id="newText" placeholder="စာရေးပါ..."></textarea>
-<button id="addBtn">📤 Post</button>
-<div id="textList"></div>
-<button id="logoutBtn" class="logout">Logout</button>
+<div class="container hidden" id="profilePage">
+  <h1>👤 Profile</h1>
+  <img id="profilePhoto" src="" alt="Profile Photo" style="width:100px; border-radius:50%;">
+  <p><b>Name:</b> <span id="profileName"></span></p>
+  <p><b>Username:</b> <span id="profileUsername"></span></p>
+  <p><b>Chat ID:</b> <span id="profileChatID"></span></p>
 </div>
 
 </body>
