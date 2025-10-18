@@ -3,25 +3,29 @@
 // =======================================================
 let currentScore = 0;
 let isGameRunning = false;
-let ballX = 0; // Ball ၏ အလျားလိုက် (Horizontal) တည်နေရာ (0: ဘယ်၊ 1: ညာ)
-let tileMoveSpeed = 3; // Tiles များ ရွေ့လျားသော အရှိန် (အခက်အခဲ)
+let tileMoveSpeed = 2; // Tiles များ ရွေ့လျားသော အရှိန် (အခက်အခဲ)
 const GAME_AREA = document.getElementById('game-area');
 const CURRENT_SCORE_SPAN = document.getElementById('current-score');
 const USER_INFO_HEADER = document.getElementById('user-info');
 
-// Music နှင့် Beat Map များ (ရိုးရှင်းစေရန် ရောင်စုံအမည်များသာ ထည့်ထားသည်)
-const MUSIC_LIST = [
-    { name: "Blue Groove", speed: 3.0 },
-    { name: "Red Beat", speed: 4.5 },
-    { name: "Green Mix", speed: 6.0 } // ပိုခက်ခဲသော သီချင်း
+const LANE_COUNT = 4;
+const TILE_HEIGHT = 100;
+let tileGenerationInterval; // Tiles တွေ ထုတ်လုပ်ရန် Interval
+
+// Music နှင့် Beat Map များ (ရိုးရှင်းသော Timing)
+const MUSIC_SPEEDS = [
+    { name: "Slow Beat", speed: 2, interval: 1500 }, // လွယ်
+    { name: "Medium Groove", speed: 4, interval: 1000 },
+    { name: "Fast EDM", speed: 6, interval: 700 } // ခက်
 ];
-let currentMusic = MUSIC_LIST[0]; // ကျပန်းရွေးချယ်ရန် နောက်မှ ပြုပြင်ပါမည်။
+let currentMusic = MUSIC_SPEEDS[0]; // အစပိုင်း အလွယ်ဆုံး
 
 // =======================================================
 // TELEGRAM MINI APP INTEGRATION
 // =======================================================
 
 function initTelegram() {
+    // ... (ယခင် code အတိုင်းထားပါ) ...
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
         
@@ -29,11 +33,162 @@ function initTelegram() {
         let username = user ? (user.username || user.first_name) : "Guest Player";
         USER_INFO_HEADER.textContent = `User: ${username}`;
 
-        // Telegram ၏ Close Button နှင့် Feedback
         window.Telegram.WebApp.onEvent('mainButtonClicked', () => {
             alert('Game ကို ပိတ်ပါမည်။');
             window.Telegram.WebApp.close();
         });
+        startGame();
+    } else {
+        USER_INFO_HEADER.textContent = "Guest Mode (Not in Telegram)";
+        startGame();
+    }
+}
+
+
+// =======================================================
+// GAME CORE LOGIC
+// =======================================================
+
+function startGame() {
+    if (isGameRunning) {
+        clearInterval(tileGenerationInterval);
+        GAME_AREA.innerHTML = '';
+    }
+
+    isGameRunning = true;
+    currentScore = 0;
+    
+    // ကျပန်း Music ရွေးချယ်ခြင်း
+    const randomIndex = Math.floor(Math.random() * MUSIC_SPEEDS.length);
+    currentMusic = MUSIC_SPEEDS[randomIndex];
+    tileMoveSpeed = currentMusic.speed; 
+    
+    CURRENT_SCORE_SPAN.textContent = currentScore;
+    
+    // Lanes ၄ ခု ဖန်တီးခြင်း
+    for (let i = 0; i < LANE_COUNT; i++) {
+        const lane = document.createElement('div');
+        lane.classList.add('lane');
+        lane.setAttribute('data-lane', i);
+        lane.addEventListener('mousedown', () => handleLaneClick(i));
+        lane.addEventListener('touchstart', () => handleLaneClick(i));
+        GAME_AREA.appendChild(lane);
+    }
+    
+    // Game Over မျဉ်းနီ ဖန်တီးခြင်း
+    const gameOverLine = document.createElement('div');
+    gameOverLine.id = 'game-over-line';
+    GAME_AREA.appendChild(gameOverLine);
+
+    // Tiles များ စတင်ထုတ်လုပ်ရန်
+    tileGenerationInterval = setInterval(generateTile, currentMusic.interval);
+    
+    // Game Loop စတင်ခြင်း
+    requestAnimationFrame(updateGame);
+}
+
+function updateGame() {
+    if (!isGameRunning) return;
+
+    // Tiles များ ရွှေ့လျားခြင်း
+    const tiles = GAME_AREA.querySelectorAll('.tile');
+    let gameAreaHeight = GAME_AREA.clientHeight;
+
+    tiles.forEach(tile => {
+        let currentTop = parseFloat(tile.style.top);
+        tile.style.top = (currentTop + tileMoveSpeed) + 'px';
+
+        // Tile သည် မျက်နှာပြင်၏ အောက်ဆုံးကို ကျော်လွန်သွားပါက (Missed Tile)
+        if (currentTop > gameAreaHeight && !tile.classList.contains('hit')) {
+            gameOver();
+        }
+    });
+
+    // အခက်အခဲ တိုးမြှင့်ခြင်း (ရမှတ်ပေါ်မူတည်၍)
+    if (currentScore > 10 && currentScore < 30) {
+        tileMoveSpeed = currentMusic.speed * 1.5; // အရှိန် မြှင့်
+    } else if (currentScore > 30) {
+        tileMoveSpeed = currentMusic.speed * 2; // ပိုမြန်အောင် မြှင့်
+    }
+
+    requestAnimationFrame(updateGame);
+}
+
+function generateTile() {
+    // ကျပန်း Lane တစ်ခုကို ရွေးချယ်ခြင်း
+    const laneIndex = Math.floor(Math.random() * LANE_COUNT);
+    const selectedLane = GAME_AREA.querySelector(`.lane[data-lane="${laneIndex}"]`);
+    
+    if (!selectedLane) return;
+
+    const tile = document.createElement('div');
+    tile.classList.add('tile');
+    tile.style.top = `-100px`; 
+    tile.setAttribute('data-status', 'active');
+    tile.setAttribute('data-lane', laneIndex);
+
+    selectedLane.appendChild(tile);
+}
+
+function handleLaneClick(laneIndex) {
+    if (!isGameRunning) {
+        startGame();
+        return;
+    }
+
+    const clickedLane = GAME_AREA.querySelector(`.lane[data-lane="${laneIndex}"]`);
+    
+    // Lane ၏ အောက်ဆုံးနားတွင်ရှိသော Tile ကို ရှာဖွေပါ
+    let hitTile = null;
+    clickedLane.querySelectorAll('.tile').forEach(tile => {
+        const tileTop = parseFloat(tile.style.top);
+        // Tile သည် နှိပ်ရမည့် ဧရိယာ (ဥပမာ- အောက်ဆုံး 150px) အတွင်း ရှိမရှိ စစ်ဆေးခြင်း
+        if (tileTop > GAME_AREA.clientHeight - 150 && tileTop < GAME_AREA.clientHeight) {
+             if (tile.getAttribute('data-status') === 'active') {
+                hitTile = tile;
+             }
+        }
+    });
+
+    if (hitTile) {
+        // Tile ကို နှိပ်မိပါက (SUCCESS)
+        hitTile.classList.add('hit');
+        hitTile.setAttribute('data-status', 'hit');
+        currentScore++;
+        CURRENT_SCORE_SPAN.textContent = currentScore;
+    } else {
+        // Tile မရှိတဲ့ နေရာကို နှိပ်မိပါက (FAIL)
+        gameOver();
+    }
+}
+
+function gameOver() {
+    isGameRunning = false;
+    clearInterval(tileGenerationInterval);
+    
+    alert(`Game Over! Final Score: ${currentScore}`);
+    
+    // ရမှတ်များကို Local Storage တွင် သိမ်းဆည်းခြင်း (Backend မပါသောကြောင့်)
+    saveScore(currentScore);
+    
+    // Leaderboard ကို ပြန်လည်ပြသခြင်း
+    renderLeaderboard();
+
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.showAlert(`Score: ${currentScore} မှတ် ရရှိခဲ့ပါသည်။`);
+    }
+}
+
+// =======================================================
+// LEADERBOARD (Local Storage) - (ယခင် Code အတိုင်းထားပါ)
+// =======================================================
+// ... getScores, saveScore, renderLeaderboard, resetScores functions များကို ယခင်ပေးပို့ခဲ့သော game.js မှ ကူးထည့်ပါ ...
+
+// =======================================================
+// Start Application
+// =======================================================
+initTelegram();
+// renderLeaderboard(); // ဂိမ်းစစချင်းမှာ Leaderboard ကို ချက်ချင်းမပြတော့ဘဲ Game Over မှသာ ပြပါမည်။
 
         // Backend မပါသောကြောင့် User ကို တိုက်ရိုက် ဂိမ်းစတင်ခွင့် ပေးခြင်း
         startGame();
