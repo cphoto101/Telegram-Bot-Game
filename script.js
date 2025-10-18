@@ -1,20 +1,24 @@
+const tg = window.Telegram.WebApp;
+tg.expand(); // fullscreen open in Telegram
+
+const user = tg.initDataUnsafe?.user;
+const username = user?.username || "Guest";
+
+document.querySelector(".welcome").innerText = `👋 Welcome, ${username}`;
 const textList = document.getElementById("textList");
 const addBtn = document.getElementById("addBtn");
-const usernameInput = document.getElementById("username");
 const newText = document.getElementById("newText");
 
-// 🔐 Admin username
-const ADMIN = "admin"; // ဒီနာမည်နဲ့ဝင်ရင်ပဲ ဖျက်ခလုတ်ပေါ်မယ်
+const ADMIN = "admin"; // Change to your Telegram username
 
 // Add new text
 addBtn.addEventListener("click", () => {
-  const user = usernameInput.value.trim();
   const text = newText.value.trim();
-  if (!user || !text) return alert("Username နဲ့ စာလိုအပ်ပါတယ်!");
+  if (!text) return tg.showAlert("စာရေးပါနော်!");
 
   const id = Date.now();
   db.ref("texts/" + id).set({
-    username: user,
+    username: username,
     content: text,
     timestamp: new Date().toISOString()
   });
@@ -29,7 +33,7 @@ db.ref("texts").on("value", (snapshot) => {
   Object.entries(data).reverse().forEach(([id, obj]) => {
     const div = document.createElement("div");
     div.classList.add("text-item");
-    if (usernameInput.value === ADMIN) div.classList.add("admin");
+    if (username === ADMIN) div.classList.add("admin");
 
     div.innerHTML = `
       <p>${obj.content}</p>
@@ -42,6 +46,6 @@ db.ref("texts").on("value", (snapshot) => {
 
 // Delete text (admin only)
 function deleteText(id) {
-  if (usernameInput.value !== ADMIN) return alert("Admin မဟုတ်ပါ!");
+  if (username !== ADMIN) return tg.showAlert("Admin မဟုတ်ပါ!");
   db.ref("texts/" + id).remove();
 }
