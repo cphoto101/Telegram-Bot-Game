@@ -1,79 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
 body {
-  font-family: "Poppins", sans-serif;
-  background: linear-gradient(135deg, #4facfe, #00f2fe);
-  min-height: 100vh;
-  margin: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 40px 10px;
+  font-family: 'Poppins', sans-serif;
+  background-color: #0f111a;
   color: #fff;
+  margin: 0;
+  padding: 0;
 }
 
 .container {
-  width: 90%;
   max-width: 600px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 20px;
+  margin: 40px auto;
+  background: #1b1d2a;
+  border-radius: 16px;
   padding: 20px;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
 }
 
 h1 {
   text-align: center;
+  color: #00e5ff;
+  margin-bottom: 10px;
+}
+
+.welcome {
+  text-align: center;
+  font-size: 0.9em;
+  color: #aaa;
   margin-bottom: 20px;
 }
 
-textarea, input {
+textarea {
   width: 100%;
-  border: none;
-  border-radius: 10px;
+  background: #0f111a;
+  border: 1px solid #2a2d3a;
+  color: white;
+  border-radius: 8px;
   padding: 10px;
   font-size: 1em;
-  margin-bottom: 10px;
+  resize: none;
   outline: none;
 }
 
 button {
+  width: 100%;
   background: #00e676;
-  color: #000;
   border: none;
   padding: 10px;
-  border-radius: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #000;
   cursor: pointer;
-  font-weight: bold;
-  width: 100%;
-  transition: 0.3s;
+  transition: 0.2s;
 }
+
 button:hover {
   background: #00c853;
 }
 
 .text-item {
-  background: rgba(255,255,255,0.15);
-  margin: 10px 0;
-  padding: 15px;
-  border-radius: 12px;
+  background: #242635;
+  border-radius: 10px;
+  padding: 12px 15px;
+  margin-top: 10px;
   position: relative;
 }
 
 .text-item .author {
-  font-size: 0.9em;
-  opacity: 0.8;
+  font-size: 0.85em;
+  color: #888;
   margin-top: 8px;
 }
 
 .delete-btn {
   position: absolute;
-  top: 10px;
+  top: 8px;
   right: 10px;
-  background: red;
-  color: white;
+  background: #ff1744;
   border: none;
+  color: white;
   padding: 5px 8px;
-  border-radius: 5px;
-  cursor: pointer;
+  border-radius: 6px;
+  font-size: 0.8em;
   display: none;
 }
 
