@@ -1,8 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
 body {
-  font-family: 'Poppins', sans-serif;
-  background-color: #0f111a;
+  font-family: Arial, sans-serif;
+  background: #0f111a;
   color: #fff;
   margin: 0;
   padding: 0;
@@ -10,36 +8,24 @@ body {
 
 .container {
   max-width: 600px;
-  margin: 40px auto;
+  margin: 60px auto;
   background: #1b1d2a;
   border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+  padding: 25px;
 }
 
-h1 {
-  text-align: center;
-  color: #00e5ff;
-  margin-bottom: 10px;
-}
+.hidden { display: none; }
 
-.welcome {
-  text-align: center;
-  font-size: 0.9em;
-  color: #aaa;
-  margin-bottom: 20px;
-}
-
-textarea {
+input, textarea {
   width: 100%;
-  background: #0f111a;
-  border: 1px solid #2a2d3a;
-  color: white;
+  border: none;
   border-radius: 8px;
   padding: 10px;
+  margin-bottom: 10px;
+  background: #0f111a;
+  color: white;
+  border: 1px solid #2a2d3a;
   font-size: 1em;
-  resize: none;
-  outline: none;
 }
 
 button {
@@ -54,38 +40,11 @@ button {
   cursor: pointer;
   transition: 0.2s;
 }
-
 button:hover {
   background: #00c853;
 }
 
-.text-item {
-  background: #242635;
-  border-radius: 10px;
-  padding: 12px 15px;
-  margin-top: 10px;
-  position: relative;
-}
-
-.text-item .author {
-  font-size: 0.85em;
-  color: #888;
-  margin-top: 8px;
-}
-
-.delete-btn {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  background: #ff1744;
-  border: none;
+.logout {
+  background: #ff5252;
   color: white;
-  padding: 5px 8px;
-  border-radius: 6px;
-  font-size: 0.8em;
-  display: none;
-}
-
-.text-item.admin .delete-btn {
-  display: block;
 }
