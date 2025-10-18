@@ -1,10 +1,10 @@
 body { font-family: Arial; background:#0f111a; color:#fff; margin:0; padding:0; }
-.container { max-width:600px; margin:60px auto; background:#1b1d2a; border-radius:16px; padding:25px; }
+.container { max-width:600px; margin:40px auto; background:#1b1d2a; border-radius:16px; padding:25px; }
 .hidden { display:none; }
 .center { text-align:center; }
 input,textarea { width:100%; border:none; border-radius:8px; padding:10px; margin-bottom:10px; background:#0f111a; color:white; border:1px solid #2a2d3a; }
 button { width:100%; background:#00e676; border:none; padding:10px; margin-top:10px; border-radius:8px; font-weight:600; color:#000; cursor:pointer; transition:0.2s; }
 button:hover { background:#00c853; }
-.logout { background:#ff5252; color:white; }
+img { display:block; margin:10px auto; }
 .text-item { background:#242635; border-radius:10px; padding:12px 15px; margin-top:10px; position:relative; }
 .text-item .author { font-size:0.85em; color:#888; margin-top:8px; }
