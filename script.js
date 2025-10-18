@@ -1,8 +1,6 @@
 const db = firebase.database();
 
-const loginPage = document.getElementById('loginPage');
 const profilePage = document.getElementById('profilePage');
-const tgLoginBtn = document.getElementById('tgLoginBtn');
 
 const profileName = document.getElementById('profileName');
 const profileUsername = document.getElementById('profileUsername');
@@ -15,39 +13,42 @@ const textList = document.getElementById('textList');
 
 let chatId, username;
 
-tgLoginBtn.addEventListener('click', ()=>{
-  const tg = window.Telegram.WebApp;
-  tg.expand();
+// Auto login with Telegram WebApp
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-  const user = tg.initDataUnsafe?.user;
-  if(!user) return alert("Telegram login failed!");
+const user = tg.initDataUnsafe?.user || {
+  id: 123456,               // Browser testing fallback
+  username: "testuser",
+  first_name: "Test",
+  last_name: "User",
+  photo_url: "https://via.placeholder.com/100"
+};
 
-  chatId = user.id;
-  username = user.username || "";
-  const firstName = user.first_name || "";
-  const lastName = user.last_name || "";
-  const photo = user.photo_url || "";
+chatId = user.id;
+username = user.username || "";
+const firstName = user.first_name || "";
+const lastName = user.last_name || "";
+const photo = user.photo_url || "";
 
-  // Save profile
-  db.ref('users/' + chatId).set({
-    chat_id: chatId,
-    username,
-    first_name: firstName,
-    last_name: lastName,
-    photo_url: photo,
-    timestamp: new Date().toISOString()
-  });
-
-  profileName.innerText = firstName + " " + lastName;
-  profileUsername.innerText = username;
-  profileChatID.innerText = chatId;
-  if(photo) profilePhoto.src = photo;
-
-  loginPage.classList.add('hidden');
-  profilePage.classList.remove('hidden');
-
-  loadPosts();
+// Save profile
+db.ref('users/' + chatId).set({
+  chat_id: chatId,
+  username,
+  first_name: firstName,
+  last_name: lastName,
+  photo_url: photo,
+  timestamp: new Date().toISOString()
 });
+
+// Display profile
+profileName.innerText = firstName + " " + lastName;
+profileUsername.innerText = username;
+profileChatID.innerText = chatId;
+if(photo) profilePhoto.src = photo;
+
+// Load posts
+loadPosts();
 
 // Add post
 addBtn.addEventListener('click', ()=>{
@@ -63,7 +64,6 @@ addBtn.addEventListener('click', ()=>{
   newText.value = "";
 });
 
-// Load posts
 function loadPosts(){
   db.ref('posts').on('value', (snapshot)=>{
     textList.innerHTML = "";
