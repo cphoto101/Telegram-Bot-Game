@@ -1,51 +1,61 @@
-const tg = window.Telegram.WebApp;
-tg.expand(); // fullscreen open in Telegram
+const db = firebase.database();
+let username = "";
 
-const user = tg.initDataUnsafe?.user;
-const username = user?.username || "Guest";
+const loginBtn = document.getElementById('loginBtn');
+const addBtn = document.getElementById('addBtn');
+const logoutBtn = document.getElementById('logoutBtn');
 
-document.querySelector(".welcome").innerText = `👋 Welcome, ${username}`;
-const textList = document.getElementById("textList");
-const addBtn = document.getElementById("addBtn");
-const newText = document.getElementById("newText");
+loginBtn.addEventListener('click', () => {
+  username = document.getElementById('loginName').value.trim();
+  if (!username) return alert("အမည်ထည့်ပါ!");
 
-const ADMIN = "admin"; // Change to your Telegram username
-
-// Add new text
-addBtn.addEventListener("click", () => {
-  const text = newText.value.trim();
-  if (!text) return tg.showAlert("စာရေးပါနော်!");
-
-  const id = Date.now();
-  db.ref("texts/" + id).set({
-    username: username,
-    content: text,
-    timestamp: new Date().toISOString()
+  const logRef = db.ref('logs/logins').push();
+  logRef.set({
+    username,
+    time: new Date().toLocaleString()
   });
-  newText.value = "";
+
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('appPage').classList.remove('hidden');
+  document.querySelector('.welcome').innerText = `👋 Hi ${username}`;
+
+  loadPosts();
 });
 
-// Show all texts (real-time)
-db.ref("texts").on("value", (snapshot) => {
-  const data = snapshot.val();
-  textList.innerHTML = "";
-  if (!data) return;
-  Object.entries(data).reverse().forEach(([id, obj]) => {
-    const div = document.createElement("div");
-    div.classList.add("text-item");
-    if (username === ADMIN) div.classList.add("admin");
+addBtn.addEventListener('click', () => {
+  const text = document.getElementById('newText').value.trim();
+  if (!text) return;
 
-    div.innerHTML = `
-      <p>${obj.content}</p>
-      <div class="author">✍️ ${obj.username}</div>
-      <button class="delete-btn" onclick="deleteText('${id}')">ဖျက်</button>
-    `;
-    textList.appendChild(div);
+  const postRef = db.ref('posts').push();
+  postRef.set({
+    user: username,
+    text,
+    time: new Date().toLocaleString()
   });
+
+  document.getElementById('newText').value = "";
 });
 
-// Delete text (admin only)
-function deleteText(id) {
-  if (username !== ADMIN) return tg.showAlert("Admin မဟုတ်ပါ!");
-  db.ref("texts/" + id).remove();
+logoutBtn.addEventListener('click', () => {
+  username = "";
+  document.getElementById('appPage').classList.add('hidden');
+  document.getElementById('loginPage').classList.remove('hidden');
+});
+
+function loadPosts() {
+  db.ref('posts').on('value', (snapshot) => {
+    const list = document.getElementById('textList');
+    list.innerHTML = "";
+    const data = snapshot.val();
+    for (let id in data) {
+      const p = data[id];
+      const div = document.createElement('div');
+      div.className = "text-item";
+      div.innerHTML = `
+        <p>${p.text}</p>
+        <p class="author">✍ ${p.user} | ${p.time}</p>
+      `;
+      list.appendChild(div);
+    }
+  });
 }
