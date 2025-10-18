@@ -1,20 +1,15 @@
 body {
+  background: linear-gradient(to right, #000428, #004e92);
+  margin: 0;
+  overflow: hidden;
   text-align: center;
-  background-color: #0d1117;
   color: white;
   font-family: sans-serif;
-  margin-top: 100px;
 }
 
-button {
-  padding: 20px 40px;
-  font-size: 20px;
-  border-radius: 12px;
-  border: none;
-  background-color: #ff9800;
-  color: white;
-  cursor: pointer;
-}
-button:hover {
-  background-color: #ffa726;
+canvas {
+  display: block;
+  margin: 0 auto;
+  background: #0d1117;
+  border: 2px solid #fff;
 }
