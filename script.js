@@ -1,43 +1,44 @@
 const db = firebase.database();
-let username = "";
-const loginBtn = document.getElementById('loginBtn');
-const addBtn = document.getElementById('addBtn');
-const logoutBtn = document.getElementById('logoutBtn');
 
-loginBtn.addEventListener('click', ()=>{
-  username = document.getElementById('loginName').value.trim();
-  if(!username) return alert("အမည်ထည့်ပါ!");
-  db.ref('logs/logins').push().set({username,time:new Date().toLocaleString()});
-  document.getElementById('loginPage').classList.add('hidden');
-  document.getElementById('appPage').classList.remove('hidden');
-  document.querySelector('.welcome').innerText = `👋 Hi ${username}`;
-  loadPosts();
-});
+const loginPage = document.getElementById('loginPage');
+const profilePage = document.getElementById('profilePage');
+const tgLoginBtn = document.getElementById('tgLoginBtn');
 
-addBtn.addEventListener('click', ()=>{
-  const text = document.getElementById('newText').value.trim();
-  if(!text) return;
-  db.ref('posts').push().set({user:username,text,time:new Date().toLocaleString()});
-  document.getElementById('newText').value="";
-});
+const profileName = document.getElementById('profileName');
+const profileUsername = document.getElementById('profileUsername');
+const profileChatID = document.getElementById('profileChatID');
+const profilePhoto = document.getElementById('profilePhoto');
 
-logoutBtn.addEventListener('click',()=>{
-  username="";
-  document.getElementById('appPage').classList.add('hidden');
-  document.getElementById('loginPage').classList.remove('hidden');
-});
+tgLoginBtn.addEventListener('click', () => {
+  const tg = window.Telegram.WebApp;
+  tg.expand();
 
-function loadPosts(){
-  db.ref('posts').on('value',(snapshot)=>{
-    const list=document.getElementById('textList');
-    list.innerHTML="";
-    const data=snapshot.val();
-    for(let id in data){
-      const p=data[id];
-      const div=document.createElement('div');
-      div.className="text-item";
-      div.innerHTML=`<p>${p.text}</p><p class="author">✍ ${p.user} | ${p.time}</p>`;
-      list.appendChild(div);
-    }
+  const user = tg.initDataUnsafe?.user;
+  if (!user) return alert("Telegram login failed!");
+
+  // Extract info
+  const chatId = user.id;
+  const username = user.username || "";
+  const firstName = user.first_name || "";
+  const lastName = user.last_name || "";
+  const photo = user.photo_url || "";
+
+  // Save to Firebase
+  db.ref('users/' + chatId).set({
+    chat_id: chatId,
+    username,
+    first_name: firstName,
+    last_name: lastName,
+    photo_url: photo,
+    timestamp: new Date().toISOString()
   });
-}
+
+  // Show profile page
+  profileName.innerText = firstName + " " + lastName;
+  profileUsername.innerText = username;
+  profileChatID.innerText = chatId;
+  if(photo) profilePhoto.src = photo;
+
+  loginPage.classList.add('hidden');
+  profilePage.classList.remove('hidden');
+});
