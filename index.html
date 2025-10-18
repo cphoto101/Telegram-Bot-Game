@@ -1,18 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="my">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tiles Hop Game</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CSS-Only Tiles Hop (Prototype)</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Tiles Hop 🎵</h1>
-  <canvas id="gameCanvas"></canvas>
+  <h1 class="title">Tiles Hop (CSS only)</h1>
 
-  <audio id="music" src="music.mp3"></audio>
+  <!-- Game area: တစ်ချက်ထမ့်ရင် player က ခုန်မယ် -->
+  <div class="game" role="button" aria-label="Tap to jump (hold to stay up)">
+    <div class="ground"></div>
 
-  <script src="script.js"></script>
+    <!-- player (ball) -->
+    <div class="player" aria-hidden="true"></div>
+
+    <!-- obstacles (tiles) - CSS animation နဲ့ဖြစ် -->
+    <div class="obstacle obs1"></div>
+    <div class="obstacle obs2"></div>
+    <div class="obstacle obs3"></div>
+
+    <!-- instructions overlay -->
+    <div class="hint">Tap & hold anywhere to jump. Release to fall.</div>
+  </div>
+
+  <footer class="note">Pure CSS prototype — no score. Want scoring? I can add JS.</footer>
 </body>
 </html>
-<audio id="music" src="music.mp3"></audio>
