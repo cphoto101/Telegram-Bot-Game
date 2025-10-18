@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📚 Shared Text (Telegram)</title>
+  <title>📖 Shared Text App</title>
   <link rel="stylesheet" href="style.css">
 
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Firebase -->
+  <!-- Firebase CDN -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
@@ -17,16 +17,26 @@
   <script defer src="script.js"></script>
 </head>
 <body>
-  <div class="container">
+  <!-- Login Page -->
+  <div id="loginPage" class="container center">
     <h1>📖 Shared Text</h1>
+    <p>Login before reading posts</p>
+    <input type="text" id="loginName" placeholder="Enter your username">
+    <button id="loginBtn">Login 🚀</button>
+  </div>
+
+  <!-- Main App Page -->
+  <div id="appPage" class="container hidden">
+    <h1>📚 Posts</h1>
     <p class="welcome"></p>
 
     <div class="input-panel">
-      <textarea id="newText" placeholder="စာအသစ်ရေးပါ..."></textarea>
-      <button id="addBtn">🚀 စာတင်မည်</button>
+      <textarea id="newText" placeholder="စာရေးပါ..."></textarea>
+      <button id="addBtn">📤 Post</button>
     </div>
 
     <div id="textList"></div>
+    <button id="logoutBtn" class="logout">Logout</button>
   </div>
 </body>
 </html>
