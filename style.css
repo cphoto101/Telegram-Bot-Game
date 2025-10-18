@@ -7,12 +7,12 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    overflow: hidden; /* Telegram Mini App အတွက် */
+    overflow: hidden; 
 }
 
 #app-container {
     width: 100%;
-    max-width: 450px; /* Mobile View အတွက် သတ်မှတ်ထားသည် */
+    max-width: 450px; 
     height: 100vh;
     display: flex;
     flex-direction: column;
@@ -25,15 +25,69 @@ header {
     display: flex;
     justify-content: space-between;
     margin-bottom: 20px;
+    position: relative;
+    z-index: 10;
 }
 
 #game-area {
-    width: 90%;
-    height: 60vh;
+    width: 320px; /* ဂိမ်းကစားဧရိယာ အကျယ် (Tiles 4 ခုအတွက်) */
+    height: 80vh;
     background-color: #0d0d1a;
     position: relative;
     overflow: hidden;
     cursor: pointer;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: space-around; /* Lanes များအတွက် */
+}
+
+/* Lane ၄ ခုကို ကိုယ်စားပြုသည် */
+.lane {
+    width: 25%; 
+    height: 100%;
+    border-right: 1px solid #333;
+    position: relative;
+}
+.lane:last-child {
+    border-right: none;
+}
+
+.tile {
+    position: absolute;
+    width: 100%; /* Lane အပြည့် */
+    height: 100px; /* Tile အရွယ်အစား */
+    background-color: #3f51b5; /* Blue Tile */
+    top: -100px; /* အပေါ်ကနေ စဆင်းရန် */
+    left: 0;
+    box-sizing: border-box;
+    border: 2px solid #1e1e2f;
+    cursor: pointer;
+    /* transition: background-color 0.1s; */ /* Hit animation အတွက် */
+}
+
+.tile.hit {
+    background-color: #00bcd4; /* Hit ပြီးနောက် အရောင်ပြောင်းရန် */
+}
+
+/* Game Over ဧရိယာ */
+#game-over-line {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 10px;
+    background-color: red;
+    z-index: 5;
+}
+
+/* Telegram Mini App အတွက် Game Area ကို နှိပ်လျှင် ကစားသည် */
+.game-area-bottom {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 150px; /* နှိပ်ရမည့် နေရာ */
+    z-index: 10;
+}
     border-radius: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
