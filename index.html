@@ -3,21 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📖 Shared Text Reader</title>
+  <title>📚 Shared Text (Telegram)</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
   <script defer src="firebase-config.js"></script>
   <script defer src="script.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>📚 Shared Text Reader</h1>
+    <h1>📖 Shared Text</h1>
+    <p class="welcome"></p>
 
     <div class="input-panel">
-      <input id="username" type="text" placeholder="Username">
       <textarea id="newText" placeholder="စာအသစ်ရေးပါ..."></textarea>
-      <button id="addBtn">စာတင်မည် 🚀</button>
+      <button id="addBtn">🚀 စာတင်မည်</button>
     </div>
 
     <div id="textList"></div>
