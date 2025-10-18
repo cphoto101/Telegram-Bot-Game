@@ -1,95 +1,88 @@
-/* Reset & base */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html,body { height: 100%; }
 body {
-  background: linear-gradient(180deg,#0b1220,#071026);
-  color: #fff;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 18px;
+    background-color: #1e1e2f;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden; /* Telegram Mini App အတွက် */
 }
 
-/* Title */
-.title {
-  font-size: 18px;
-  letter-spacing: 0.6px;
-  opacity: 0.95;
+#app-container {
+    width: 100%;
+    max-width: 450px; /* Mobile View အတွက် သတ်မှတ်ထားသည် */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
 }
 
-/* Game area */
-.game {
-  width: min(920px, 96vw);
-  height: min(600px, 70vh);
-  background: linear-gradient(180deg,#071026 0%, #0b1b2b 100%);
-  border-radius: 14px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 2px 8px rgba(255,255,255,0.02);
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  cursor: pointer; /* show it's interactive */
-  display: block;
+header {
+    width: 90%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
-/* Ground line */
-.ground {
-  position: absolute;
-  left: 0; right: 0;
-  bottom: 96px;
-  height: 8px;
-  background: linear-gradient(90deg,#1b8cff,#00e5ff);
-  opacity: 0.18;
-  filter: blur(0.6px);
+#game-area {
+    width: 90%;
+    height: 60vh;
+    background-color: #0d0d1a;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
-/* Player (ball) */
-.player {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  position: absolute;
-  left: 12%;
-  bottom: 96px;
-  transform: translateY(0);
-  background: radial-gradient(circle at 30% 30%, #ffd28a 0%, #ff8a00 50%, #e65b00 100%);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.6), 0 0 18px rgba(255,140,0,0.12);
-  transition: transform 0.12s ease-out; /* quick jump */
-  z-index: 3;
+#ball {
+    width: 25px;
+    height: 25px;
+    background-color: #e91e63; /* EDM Pink Color */
+    border-radius: 50%;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: left 0.2s ease-out; /* ခုန်ရာတွင် လှုပ်ရှားမှုကို ပိုကောင်းစေရန် */
 }
 
-/* When the player area is pressed (active) -> jump up */
-/* Note: on mobile tap triggers :active while pressing; release falls back */
-.game:active .player,
-.game:focus .player {
-  transform: translateY(-160px);
-  transition: transform 0.12s ease-out;
+.tile {
+    position: absolute;
+    width: 80px;
+    height: 15px;
+    background-color: #3f51b5; /* Blue Tile */
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* If user taps briefly (not hold) the :active might be short — still gives a quick jump feel */
-
-/* Obstacles (tiles) */
-.obstacle {
-  position: absolute;
-  width: 120px;
-  height: 24px;
-  bottom: 96px;
-  background: linear-gradient(90deg,#4ff1ff,#3a9cff);
-  border-radius: 6px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.45), 0 0 18px rgba(0,200,255,0.06);
-  z-index: 2;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+/* ခက်ခဲလာသောအခါ Tiles များ သေးငယ်သွားစေရန် */
+.hard-tile {
+    width: 60px;
+    background-color: #ff9800; /* Orange Tile */
 }
 
-/* 3 obstacles with different delays/speeds to make it playable */
-.obs1 {
-  right: -160px;
-  animation-name: slide1;
-  animation-duration: 2.2s;
-  animation-delay: 0.6s;
+#leaderboard-section {
+    width: 90%;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #2a2a44;
+    border-radius: 8px;
+}
+
+#leaderboard-list {
+    list-style: none;
+    padding: 0;
+}
+
+#leaderboard-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid #444;
 }
 
 .obs2 {
