@@ -1,15 +1,161 @@
+/* Reset & base */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html,body { height: 100%; }
 body {
-  background: linear-gradient(to right, #000428, #004e92);
-  margin: 0;
-  overflow: hidden;
-  text-align: center;
-  color: white;
-  font-family: sans-serif;
+  background: linear-gradient(180deg,#0b1220,#071026);
+  color: #fff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
 }
 
-canvas {
+/* Title */
+.title {
+  font-size: 18px;
+  letter-spacing: 0.6px;
+  opacity: 0.95;
+}
+
+/* Game area */
+.game {
+  width: min(920px, 96vw);
+  height: min(600px, 70vh);
+  background: linear-gradient(180deg,#071026 0%, #0b1b2b 100%);
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 2px 8px rgba(255,255,255,0.02);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer; /* show it's interactive */
   display: block;
-  margin: 0 auto;
-  background: #0d1117;
-  border: 2px solid #fff;
+}
+
+/* Ground line */
+.ground {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 96px;
+  height: 8px;
+  background: linear-gradient(90deg,#1b8cff,#00e5ff);
+  opacity: 0.18;
+  filter: blur(0.6px);
+}
+
+/* Player (ball) */
+.player {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  position: absolute;
+  left: 12%;
+  bottom: 96px;
+  transform: translateY(0);
+  background: radial-gradient(circle at 30% 30%, #ffd28a 0%, #ff8a00 50%, #e65b00 100%);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6), 0 0 18px rgba(255,140,0,0.12);
+  transition: transform 0.12s ease-out; /* quick jump */
+  z-index: 3;
+}
+
+/* When the player area is pressed (active) -> jump up */
+/* Note: on mobile tap triggers :active while pressing; release falls back */
+.game:active .player,
+.game:focus .player {
+  transform: translateY(-160px);
+  transition: transform 0.12s ease-out;
+}
+
+/* If user taps briefly (not hold) the :active might be short — still gives a quick jump feel */
+
+/* Obstacles (tiles) */
+.obstacle {
+  position: absolute;
+  width: 120px;
+  height: 24px;
+  bottom: 96px;
+  background: linear-gradient(90deg,#4ff1ff,#3a9cff);
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.45), 0 0 18px rgba(0,200,255,0.06);
+  z-index: 2;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* 3 obstacles with different delays/speeds to make it playable */
+.obs1 {
+  right: -160px;
+  animation-name: slide1;
+  animation-duration: 2.2s;
+  animation-delay: 0.6s;
+}
+
+.obs2 {
+  right: -160px;
+  animation-name: slide1;
+  animation-duration: 2.6s;
+  animation-delay: 1.8s;
+  transform-origin: center;
+  width: 90px;
+}
+
+.obs3 {
+  right: -160px;
+  animation-name: slide1;
+  animation-duration: 3.0s;
+  animation-delay: 3.4s;
+  width: 140px;
+  height: 18px;
+}
+
+/* Slide animation: move from right outside to left outside */
+@keyframes slide1 {
+  0%   { right: -160px; opacity: 0; transform: translateY(0) scaleX(1); }
+  6%   { opacity: 1; }
+  40%  { right: 40%; }    /* pass near player */
+  60%  { right: 10%; }    /* slightly left of player */
+  100% { right: 120%; opacity: 0; transform: translateY(0) scaleX(1); }
+}
+
+/* small bouncing effect for obstacles so timing is clearer */
+.obstacle::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -6px;
+  height: 6px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 4px;
+  filter: blur(2px);
+}
+
+/* Hint overlay */
+.hint {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
+  background: rgba(0,0,0,0.28);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  z-index: 5;
+  backdrop-filter: blur(4px);
+}
+
+/* footer note */
+.note {
+  font-size: 12px;
+  color: #bcd;
+  opacity: 0.9;
+  margin-top: 6px;
+}
+
+/* Responsiveness: smaller screens reduce sizes */
+@media (max-width: 520px) {
+  .player { width: 36px; height: 36px; left: 10%; }
+  .obstacle { width: 90px; height: 18px; }
+  .game { height: 62vh; }
+  .hint { font-size: 12px; padding: 6px 10px; }
 }
