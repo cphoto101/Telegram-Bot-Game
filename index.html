@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📖 Text Reader</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📖 Shared Text Reader</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script defer src="firebase-config.js"></script>
+  <script defer src="script.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>📚 Text Reader</h1>
+    <h1>📚 Shared Text Reader</h1>
 
-    <div id="1924452453">
+    <div class="input-panel">
+      <input id="username" type="text" placeholder="Username">
       <textarea id="newText" placeholder="စာအသစ်ရေးပါ..."></textarea>
-      <button id="addTextBtn">စာတင်မည် 🚀</button>
+      <button id="addBtn">စာတင်မည် 🚀</button>
     </div>
 
-    <h2>ဖတ်ရန်စာများ</h2>
     <div id="textList"></div>
   </div>
-
-  <script src="script.js"></script>
 </body>
 </html>
