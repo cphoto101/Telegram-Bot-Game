@@ -1,40 +1,33 @@
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-canvas.width = window.innerWidth * 0.8;
-canvas.height = window.innerHeight * 0.8;
+const addBtn = document.getElementById("addTextBtn");
+const newText = document.getElementById("newText");
+const textList = document.getElementById("textList");
 
-const ball = { x: canvas.width / 2, y: canvas.height - 50, radius: 15, dy: 0, gravity: 0.6, jump: -12 };
-let tiles = [];
-let score = 0;
-let isPlaying = false;
-const music = document.getElementById("music");
+// Load texts from localStorage
+let texts = JSON.parse(localStorage.getItem("texts")) || [];
 
-function createTile() {
-  const width = 100;
-  const x = Math.random() * (canvas.width - width);
-  const y = tiles.length ? tiles[tiles.length - 1].y - 150 : canvas.height - 100;
-  tiles.push({ x, y, width, height: 20 });
+// Display texts
+function renderTexts() {
+  textList.innerHTML = "";
+  texts.forEach((txt, i) => {
+    const div = document.createElement("div");
+    div.className = "text-item";
+    div.textContent = txt;
+    textList.appendChild(div);
+  });
 }
 
-function update() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ball.dy += ball.gravity;
-  ball.y += ball.dy;
+// Add new text
+addBtn.addEventListener("click", () => {
+  const content = newText.value.trim();
+  if (content === "") return alert("စာရေးပါ!");
+  texts.push(content);
+  localStorage.setItem("texts", JSON.stringify(texts));
+  newText.value = "";
+  renderTexts();
+});
 
-  if (ball.y + ball.radius > canvas.height) {
-    gameOver();
-  }
-
-  for (let tile of tiles) {
-    ctx.fillStyle = "#00e5ff";
-    ctx.fillRect(tile.x, tile.y, tile.width, tile.height);
-    tile.y += 3;
-
-    if (
-      ball.x > tile.x &&
-      ball.x < tile.x + tile.width &&
-      ball.y + ball.radius >= tile.y &&
-      ball.y + ball.radius <= tile.y + 10 &&
+// Initial render
+renderTexts();      ball.y + ball.radius <= tile.y + 10 &&
       ball.dy > 0
     ) {
       ball.dy = ball.jump;
