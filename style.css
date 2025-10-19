@@ -1,21 +1,66 @@
-/* Global Reset and Base Styles (Same as before) */
-/* ... */
-
-/* Post Card Styling (Modern Look) */
-.post-card {
-    background-color: #2b2b2b;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+/* Global Reset and Base Styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #000;
+    color: #fff;
+    /* 🚨 FIX 1: Ensure body/html take full viewport height */
+    height: 100vh; 
+    width: 100vw;
+    overflow: hidden;
 }
 
-/* ... (Post Header, Author, Delete Button styles are the same) ... */
+.app-container {
+    max-width: 450px;
+    /* 🚨 FIX 2: Ensure app-container takes full available height */
+    height: 100%; 
+    margin: 0 auto;
+    background-color: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
 
+.content {
+    flex-grow: 1;
+    overflow-y: auto; 
+    padding-bottom: 60px;
+    /* 🚨 FIX 3: Add position relative for screen scrolling */
+    position: relative; 
+}
+
+/* Screen Management */
+.screen {
+    display: none;
+    height: 100%; 
+    overflow-y: auto;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* --- HEADER, FEED, PROFILE STYLES (Same as before) --- */
+/* (Previous styles for header, feed, post, profile are assumed to be here) */
+
+/* Header Styling */
+.main-header, .profile-header {
+    background-color: #1a1a1a;
+    padding: 15px 15px 0 15px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #333;
+}
+/* ... (Rest of Feed/Profile/Nav styles) ... */
+
+/* Post Actions */
 .post-actions button {
     background: none;
     border: none;
-    color: #aaa; /* Default color for actions */
+    color: #aaa; 
     margin-right: 15px;
     cursor: pointer;
     font-size: 14px;
@@ -26,14 +71,91 @@
     margin-right: 5px;
 }
 
-/* 🚨 NEW: Like Button Styles */
 .like-btn.liked {
-    color: #8A2BE2; /* Purple color when liked */
+    color: #8A2BE2; 
 }
 
 .delete-btn {
     color: #f44336 !important;
 }
+/* --- END OF NON-MODAL STYLES --- */
 
-/* --- PROFILE UI & BOTTOM NAV & MODAL STYLES (Same as before) --- */
-/* ... */
+
+/* ===================================== */
+/* --- MUSIC MODAL STYLES (CRITICAL FIXES) --- */
+/* ===================================== */
+
+.modal {
+    display: none; /* Default hidden */
+    /* 🚨 FIX 4: Use fixed position relative to the viewport */
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* 🚨 FIX 5: Ensure Modal covers the app-container width */
+    max-width: 450px; 
+    margin: 0 auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 2000; /* Higher than everything else */
+    justify-content: center;
+    align-items: flex-end; 
+}
+
+.modal-content {
+    background-color: #2b2b2b;
+    width: 100%;
+    /* 🚨 FIX 6: Use max-width relative to its container (450px) */
+    max-width: 450px; 
+    padding: 20px 20px 30px 20px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    animation: slideUp 0.3s ease-out;
+    box-sizing: border-box;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.modal-content h3 {
+    text-align: center;
+    color: #fff;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* Music Option List Style */
+.music-option {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: #313131;
+    color: #fff;
+    border: none;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.music-option i {
+    font-size: 24px;
+    color: #00BFFF;
+    margin-right: 15px;
+}
+/* ... (Rest of Modal styles are the same) ... */
+
+/* URL Input Modal (Nested) Style */
+.nested-modal {
+    align-items: center; /* Center the nested modal vertically */
+}
+.nested-modal .modal-content {
+    align-self: center; 
+    border-radius: 15px;
+    width: 90%;
+    /* Override bottom-slide animation */
+    animation: none; 
+    }
