@@ -1,116 +1,64 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const navItems = document.querySelectorAll('.nav-item');
-    const screens = document.querySelectorAll('.screen');
-    const musicButton = document.getElementById('music-button');
-    const musicModal = document.getElementById('music-modal');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-    const musicOptions = document.querySelectorAll('.music-option');
-    const urlInputModal = document.getElementById('url-input-modal');
-    const playUrlBtn = document.getElementById('play-url-btn');
-    const musicUrlInput = document.getElementById('music-url-input');
-    const currentMusicStatus = document.getElementById('current-music-status');
-    const audioPlayer = document.getElementById('audio-player');
-    const telegramUsernameCard = document.getElementById('telegram-username-card');
-    const telegramUsername = document.getElementById('telegram-username').textContent.replace('@', '');
+    // ---------------------------------------------
+    // 1. Telegram Mini App (TMA) Integration Logic
+    // ---------------------------------------------
 
-    // 1. Bottom Navigation Logic
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            const targetScreenId = item.getAttribute('data-screen');
+    // Telegram WebApp Object ကို ရယူခြင်း
+    if (typeof window.Telegram.WebApp !== 'undefined') {
+        const tg = window.Telegram.WebApp;
 
-            // Deactivate all screens and nav items
-            screens.forEach(screen => screen.classList.remove('active'));
-            navItems.forEach(nav => nav.classList.remove('active'));
+        // WebApp ကို စတင်ခြင်း
+        tg.ready();
 
-            // Activate the target screen and nav item
-            document.getElementById(targetScreenId).classList.add('active');
-            item.classList.add('active');
-        });
-    });
+        // ဝင်လာသူ၏ အချက်အလက်များကို ရယူခြင်း
+        const user = tg.initDataUnsafe.user;
+        const mainButton = document.getElementById('tma-close-btn');
 
-    // 2. Music Player Modal Logic
-    musicButton.addEventListener('click', () => {
-        musicModal.style.display = 'block';
-    });
-
-    closeModalBtn.addEventListener('click', () => {
-        musicModal.style.display = 'none';
-        urlInputModal.style.display = 'none'; // URL modal ပါ ပိတ်ရန်
-    });
-
-    window.addEventListener('click', (event) => {
-        // Modal အပြင်ဘက်ကို နှိပ်ရင် ပိတ်ရန်
-        if (event.target === musicModal) {
-            musicModal.style.display = 'none';
-        }
-    });
-
-    // 3. Music Options Logic
-    musicOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            const type = option.getAttribute('data-music-type');
-
-            switch (type) {
-                case 'default':
-                    musicModal.style.display = 'none';
-                    audioPlayer.pause();
-                    audioPlayer.removeAttribute('src');
-                    currentMusicStatus.textContent = 'Default Music';
-                    // NOTE: Default Music ကို တကယ်ဖွင့်ချင်ရင် audioPlayer.src ကို local asset နဲ့ ချိတ်ရပါမယ်။
-                    // For example: audioPlayer.src = 'assets/default.mp3'; audioPlayer.play();
-                    break;
-                case 'url':
-                    musicModal.style.display = 'none';
-                    urlInputModal.style.display = 'block';
-                    break;
-                case 'upload':
-                    musicModal.style.display = 'none';
-                    // ဖိုင်ရွေးချယ်ရန် input ကို ဖန်တီးပြီး နှိပ်ရန် (JS ဖြင့် file picker ကို ဖွင့်ခြင်း)
-                    const fileInput = document.createElement('input');
-                    fileInput.type = 'file';
-                    fileInput.accept = 'audio/*';
-                    fileInput.id = 'file-upload-input';
-                    
-                    fileInput.onchange = (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                            const fileURL = URL.createObjectURL(file);
-                            audioPlayer.src = fileURL;
-                            audioPlayer.play();
-                            currentMusicStatus.textContent = `Local File: ${file.name}`;
-                        }
-                    };
-                    fileInput.click();
-                    break;
-            }
-        });
-    });
-
-    // URL Input Modal Play Button
-    playUrlBtn.addEventListener('click', () => {
-        const url = musicUrlInput.value.trim();
-        if (url) {
-            audioPlayer.src = url;
-            audioPlayer.play()
-                .then(() => {
-                    currentMusicStatus.textContent = 'Custom URL Music';
-                    urlInputModal.style.display = 'none';
-                })
-                .catch(error => {
-                    alert('Error playing music from URL. Check if the URL is valid and directly links to an audio file.');
-                    console.error('Audio play error:', error);
-                });
-        }
-    });
-
-    // 4. Telegram Profile Link Logic
-    telegramUsernameCard.addEventListener('click', () => {
-        if (telegramUsername) {
-            // Telegram app သို့မဟုတ် web သို့ ဖွင့်ရန်
-            window.open(`https://t.me/${telegramUsername}`, '_system');
+        if (user) {
+            const firstName = user.first_name || '';
+            const lastName = user.last_name || '';
+            const username = user.username ? `@${user.username}` : 'N/A';
+            
+            // Profile Screen ထဲမှာ Telegram အချက်အလက် ဖြည့်သွင်းခြင်း
+            document.getElementById('telegram-name').textContent = `${firstName} ${lastName}`;
+            document.getElementById('telegram-username').textContent = username;
+            
+            // NOTE: Telegram Web App API မှ Profile Photo တိုက်ရိုက်မရနိုင်ပါ။
+            // User photo ကိုရယူရန် Bot API သို့မဟုတ် TMA ၏ getProfilePhotos ကို သုံးရန် လိုအပ်သည်။ 
+            // ဤနေရာတွင်တော့ ပုံသေထားလိုက်ပါမည်။
+            
+            // Logout ခလုတ်ကို TMA App ပိတ်ရန် ပြောင်းလဲခြင်း
+            mainButton.addEventListener('click', () => {
+                tg.close(); // Telegram Mini App ကို ပိတ်သည်
+            });
+            mainButton.textContent = 'Close Mini App';
         } else {
-            alert('Telegram Username not found.');
+            document.getElementById('telegram-name').textContent = 'Guest User (No Telegram Data)';
+            document.getElementById('telegram-username').textContent = 'N/A';
         }
-    });
+
+        // UI Customization: TMA အရောင်များနှင့် လိုက်ဖက်အောင် ပြောင်းလဲနိုင်သည်။
+        tg.setHeaderColor('secondary_bg_color');
+        tg.setBackgroundColor('bg_color');
+        
+    } else {
+        // Telegram App ထဲမှ မဟုတ်လျှင်
+        console.warn("Not running inside Telegram Mini App.");
+        document.getElementById('telegram-name').textContent = 'External Access (Hardcoded)';
+        document.getElementById('telegram-username').textContent = '@user_mini_myid';
+        
+        // Logout ခလုတ်ကို Web Link အဖြစ် ဆက်လက်ထားရှိခြင်း
+        document.getElementById('tma-close-btn').addEventListener('click', () => {
+             alert('Closing app simulation...');
+        });
+    }
+
+    // ---------------------------------------------
+    // 2. Music Player & UI Logic (from script.js)
+    // ---------------------------------------------
+    // NOTE: ဤနေရာတွင် ယခင် script.js မှ Logic အားလုံးကို ထည့်သွင်းရပါမည်။ 
+    // Example: 
+    // const musicButton = document.getElementById('music-button');
+    // musicButton.addEventListener('click', () => { ... });
+    // ...
 });
-                         
