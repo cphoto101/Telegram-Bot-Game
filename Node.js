@@ -1,6 +1,6 @@
 import TelegramBot from 'node-telegram-bot-api';
 import admin from 'firebase-admin';
-const TOKEN='8193181296:AAHopgtWFIhRFSJ6_D3QQBMpNjbQn_UT2Fc';
+const TOKEN='8044461114:AAHSIsiQABR_F0fvdt7Hc5VS_QytZQlyzhE';
 const ADMIN_CHAT_ID=1924452453;
 const bot=new TelegramBot(TOKEN,{polling:true});
 const serviceAccount=require('./serviceAccountKey.json');
