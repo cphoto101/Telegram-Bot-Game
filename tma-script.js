@@ -1,7 +1,21 @@
+// Helper function for random color generation based on user ID
+function stringToColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    let color = '#';
+    for (let i = 0; i < 3; i++) {
+        const value = (hash >> (i * 8)) & 0xFF;
+        color += ('00' + value.toString(16)).substr(-2);
+    }
+    return color;
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     // UI Elements များကို ရယူခြင်း
     const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-    const screens = document.querySelectorAll('.content .screen');
     const musicButton = document.getElementById('music-button');
     const musicModal = document.getElementById('music-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
@@ -12,24 +26,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentMusicStatus = document.getElementById('current-music-status');
     const audioPlayer = document.getElementById('audio-player');
     const telegramUsernameCard = document.getElementById('telegram-username-card');
-    const volumeToggle = document.getElementById('volume-toggle'); // Music Mute/Unmute Button
+    const volumeToggle = document.getElementById('volume-toggle');
     const profileImg = document.getElementById('profile-img');
 
-    let isMusicOn = true; // Music ဖွင့်ထားခြင်း ရှိ/မရှိ စစ်ဆေးရန်
+    let isMusicOn = false; // စစချင်းတွင် Autoplay ကြောင့် ဖွင့်မည်
 
-    // Default Music Link (စမ်းသပ်ရန်အတွက်သာ)
-    // NOTE: တကယ့် Music File ဖြင့် အစားထိုးပေးပါ။
-    audioPlayer.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; 
+    // Default Music Link (SoundHelix ဖြင့် ပြောင်းလဲထားသည်)
+    const DEFAULT_MUSIC_SRC = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; 
+
+    // ---------------------------------------------
+    // 1. TMA Integration & Profile Data Filling Logic
+    // ---------------------------------------------
+    let currentUserId = 'N/A';
     
-    // Auto-play အတွက် ခွင့်ပြုချက် ရရှိရန် နှေးကွေးစွာ စတင်ဖွင့်ခြင်း
-    setTimeout(() => {
-        audioPlayer.volume = 0.5; // အသံပမာဏ အနည်းငယ် လျှော့ထားသည်
-        audioPlayer.play().catch(e => console.log("Audio auto-play blocked:", e));
-    }, 500);
-
-    // ---------------------------------------------
-    // 1. Telegram Mini App (TMA) Integration & Profile Data Filling Logic
-    // ---------------------------------------------
     if (typeof window.Telegram.WebApp !== 'undefined') {
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -39,19 +48,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const firstName = user.first_name || '';
             const lastName = user.last_name || '';
             const username = user.username ? `@${user.username}` : 'N/A (No Username)';
-            const userId = user.id || 'N/A'; // Chat ID / User ID
+            const userId = user.id || 'N/A';
             const fullName = `${firstName} ${lastName}`.trim();
+            currentUserId = userId.toString();
 
             // Profile Screen ထဲမှာ Telegram အချက်အလက် ဖြည့်သွင်းခြင်း
             document.getElementById('telegram-name').textContent = fullName || 'No Name Provided';
             document.getElementById('telegram-username').textContent = username;
-            document.getElementById('telegram-chat-id').textContent = userId.toString();
+            document.getElementById('telegram-chat-id').textContent = currentUserId;
             
-            // Profile Picture Placeholder (User ID ကိုသုံး၍ ကွဲပြားသော ပုံစံများ ရရန်)
-            if (userId !== 'N/A') {
-                // User ID ကို Placeholder URL ထဲ ထည့်သွင်းခြင်း
-                const colorCode = userId % 0xFFFFFF; // ID ပေါ်မူတည်၍ အရောင်ကုဒ် ရယူခြင်း (ရိုးရှင်းသောတွက်နည်း)
-                profileImg.src = `https://via.placeholder.com/120/4682B4/FFFFFF?text=ID%20${userId}`;
+            // Profile Picture Placeholder (User ID ကိုသုံး၍ Dynamic Color ပေးခြင်း)
+            if (currentUserId !== 'N/A') {
+                const userColor = stringToColor(currentUserId);
+                // Placeholder တွင် စာသားနှင့် နောက်ခံအရောင်ကို User ID ပေါ်မူတည်၍ ပြောင်းလဲသည်
+                profileImg.src = `https://via.placeholder.com/120/${userColor.substring(1)}/FFFFFF?text=${fullName.charAt(0) || 'U'}`;
             }
 
             // Close App Button Logic
@@ -66,10 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('telegram-chat-id').textContent = 'N/A';
         }
     } else {
-        // External Access (Telegram App ထဲမှ မဟုတ်ပါက)
-        document.getElementById('telegram-name').textContent = 'External Name (Sample)';
+        // External Access
+        document.getElementById('telegram-name').textContent = 'Sample Name';
         document.getElementById('telegram-username').textContent = '@sample_user';
-        document.getElementById('telegram-chat-id').textContent = '123456789 (Sample)';
+        document.getElementById('telegram-chat-id').textContent = '123456789';
+        // Placeholder အတွက် Sample ID
+        profileImg.src = `https://via.placeholder.com/120/4682B4/FFFFFF?text=S`; 
     }
 
     // ---------------------------------------------
@@ -88,24 +100,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ---------------------------------------------
-    // 3. Music Player & Toggle Logic (FIXED)
+    // 3. Music Auto Play & Toggle Logic (FIXED)
     // ---------------------------------------------
+    
+    // Music Auto Play Logic
+    function initializeAudio() {
+        audioPlayer.src = DEFAULT_MUSIC_SRC;
+        audioPlayer.volume = 0.5;
+        
+        // Autoplay ကို ချက်ချင်းစတင်ရန် ကြိုးစားသည်
+        audioPlayer.play()
+            .then(() => {
+                isMusicOn = true;
+                volumeToggle.classList.replace('fa-volume-off', 'fa-volume-up');
+                currentMusicStatus.textContent = 'Default Music (ON)';
+            })
+            .catch(e => {
+                // Autoplay အဆင်မပြေပါက Silent Mode တွင် စောင့်နေမည်
+                isMusicOn = false;
+                volumeToggle.classList.replace('fa-volume-up', 'fa-volume-off');
+                currentMusicStatus.textContent = 'Default Music (OFF)';
+                console.log("Autoplay failed. User interaction required.");
+            });
+    }
 
-    // Music Mute/Unmute Logic ကို ပြန်လည်ပြင်ဆင်ထားသည်
+    // App စတင်သည်နှင့် Audio ကို ဖွင့်ပါ
+    initializeAudio();
+
+
+    // Music Mute/Unmute Logic
     volumeToggle.addEventListener('click', () => {
         if (isMusicOn) {
             audioPlayer.pause();
             volumeToggle.classList.replace('fa-volume-up', 'fa-volume-off');
-            // Status text ကို '(ON)' ကနေ '(OFF)' အဖြစ် ပြောင်းပါ
             currentMusicStatus.textContent = currentMusicStatus.textContent.replace('(ON)', '(OFF)');
             isMusicOn = false;
         } else {
             audioPlayer.play().catch(e => {
                 console.error("Error playing audio:", e);
-                alert("Music playback failed. Browser restriction or invalid file.");
+                alert("Music playback failed. Please try Custom URL.");
             });
             volumeToggle.classList.replace('fa-volume-off', 'fa-volume-up');
-            // Status text ကို '(OFF)' ကနေ '(ON)' အဖြစ် ပြောင်းပါ
             currentMusicStatus.textContent = currentMusicStatus.textContent.replace('(OFF)', '(ON)');
             isMusicOn = true;
         }
@@ -133,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             switch (type) {
                 case 'default':
-                    audioPlayer.src = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // Default Link
+                    audioPlayer.src = DEFAULT_MUSIC_SRC; 
                     audioPlayer.play();
                     currentMusicStatus.textContent = 'Default Music (ON)';
                     break;
@@ -176,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Telegram Profile Link Logic (Username ကို နှိပ်လျှင် Chat ဖွင့်ရန်)
+    // Telegram Profile Link Logic
     telegramUsernameCard.addEventListener('click', () => {
         const usernameText = document.getElementById('telegram-username').textContent;
         const username = usernameText.replace('@', '').trim();
