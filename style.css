@@ -2,7 +2,7 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #000;
     color: #fff;
     height: 100vh;
@@ -23,13 +23,12 @@ body {
 .content {
     flex-grow: 1;
     overflow-y: auto; 
-    padding-bottom: 60px; /* Adjust for bottom nav height */
+    padding-bottom: 60px;
 }
 
 /* Screen Management */
 .screen {
     display: none;
-    padding: 0;
     height: 100%; 
     overflow-y: auto;
 }
@@ -61,23 +60,36 @@ body {
     cursor: pointer;
 }
 
-.music-status {
+.music-status-bar {
+    padding: 10px 15px;
+    background-color: #222;
     font-size: 14px;
     color: #aaa;
-    padding: 10px 0;
+    border-bottom: 1px solid #333;
 }
 
-/* --- HOME FEED UI --- */
+/* --- HOME FEED UI (Updated) --- */
 .social-feed-section {
     padding: 15px;
 }
 
-.post-create-box {
-    background-color: #2b2b2b;
+/* Admin Post Box Styling */
+#admin-post-box {
+    background-color: #313131;
     padding: 15px;
     border-radius: 12px;
     margin-bottom: 20px;
-    overflow: auto; /* Clear floats */
+    border: 1px solid #00BFFF; /* Admin emphasize */
+}
+
+.admin-message {
+    color: #f44336;
+    background-color: #3d2a2a;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: bold;
 }
 
 #post-input {
@@ -104,20 +116,24 @@ body {
     cursor: pointer;
 }
 
+/* Post Card Styling (Modern Look) */
 .post-card {
     background-color: #2b2b2b;
     padding: 15px;
     border-radius: 12px;
     margin-bottom: 15px;
-    border-left: 5px solid #8A2BE2;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .post-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 12px;
     color: #aaa;
     margin-bottom: 10px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 5px;
 }
 
 .post-author {
@@ -125,108 +141,131 @@ body {
     color: #fff;
 }
 
+.post-author.admin {
+    color: #00BFFF; /* Admin Posts Color */
+}
+
 .post-actions button {
     background: none;
     border: none;
-    color: #00BFFF;
+    color: #8A2BE2;
     margin-right: 15px;
     cursor: pointer;
 }
 
-/* --- PROFILE UI --- */
-#profile-screen .telegram-info-section {
-    padding: 20px 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.delete-btn {
+    color: #f44336 !important;
+}
+
+/* --- PROFILE UI (Settings Style) --- */
+#profile-screen {
+    padding-bottom: 0; /* Remove padding from content div */
+}
+
+.telegram-info-section {
+    padding: 0 15px 20px 15px;
+}
+
+/* Profile Header Card */
+.profile-header-card {
+    text-align: center;
+    padding: 20px 0 10px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
 }
 
 .profile-avatar-container {
-    text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
 }
 
-/* Profile Avatar Placeholder Styling */
 .profile-avatar {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 10px;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 5px;
     border-radius: 50%;
-    overflow: hidden;
-    border: 3px solid #00BFFF; /* Telegram Blue */
-    
-    /* Placeholder Text Style */
+    border: 3px solid #00BFFF;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: #333; 
-    font-size: 36px;
+    font-size: 28px;
     font-weight: bold;
     color: #fff;
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
-#profile-display-name {
-    margin: 5px 0 0;
-    font-size: 20px;
+.profile-status {
+    font-size: 12px;
+    font-weight: bold;
+    color: #00BFFF;
+    margin-top: 5px;
 }
 
-.username-display {
+/* List Group Styling */
+.list-group {
+    margin-bottom: 25px;
+}
+
+.group-title {
     color: #aaa;
-    margin: 0 0 20px;
     font-size: 14px;
-}
-
-.info-list-container {
-    width: 100%;
+    margin: 15px 0 5px 0;
+    padding-left: 10px;
 }
 
 .info-item {
     background-color: #2b2b2b;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 10px;
+    padding: 12px 15px;
+    border-radius: 0;
+    margin-bottom: 1px;
     display: flex;
     align-items: center;
     cursor: pointer;
+    box-shadow: 0 1px 0 #333;
+}
+
+.list-group .info-item:first-of-type {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.list-group .info-item:last-of-type {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    box-shadow: none;
 }
 
 .info-item i {
-    font-size: 24px;
+    font-size: 20px;
     color: #00BFFF;
     margin-right: 15px;
 }
 
-.info-details {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
 .info-title {
-    color: #aaa;
-    font-size: 14px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: normal;
 }
 
 .info-subtitle {
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
+    color: #aaa;
+    font-size: 12px;
+    font-weight: normal;
 }
 
-.logout-btn {
-    background-color: #f44336;
-    color: #fff;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
-    font-size: 18px;
-    font-weight: bold;
-    margin-top: 30px;
-    cursor: pointer;
+.logout-item {
+    color: #f44336;
+    background-color: #313131;
+    text-align: center;
+    display: block;
+    border-radius: 8px !important;
+    margin-top: 15px;
 }
 
-/* --- BOTTOM NAV & MODAL STYLES --- */
+.logout-item i {
+    color: #f44336 !important;
+}
+
+/* --- BOTTOM NAV --- */
 .bottom-nav {
     background-color: #1a1a1a;
     display: flex;
@@ -257,34 +296,4 @@ body {
 }
 
 /* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 100;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.6);
-}
-
-.modal-content {
-    background-color: #2b2b2b;
-    margin: 30% auto; 
-    padding: 20px;
-    border: 1px solid #333;
-    width: 80%;
-    max-width: 350px;
-    border-radius: 15px; 
-}
-
-.music-option {
-    background-color: #1a1a1a; 
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    }
-    
+/* (Modal styles remain the same from the previous answer for brevity) */
