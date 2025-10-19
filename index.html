@@ -14,18 +14,18 @@
     <div class="app-container">
         <div class="content">
             
-            <div id="main-screen" class="screen active">
+            <div id="home-screen" class="screen active">
                 <header class="main-header">
                     <div class="header-content">
                         <h2>MiniMyId</h2>
                         <div class="header-icons">
                             <i class="fas fa-image"></i>
                             <i class="fas fa-music" id="music-button"></i>
-                            <i class="fas fa-volume-up"></i>
+                            <i class="fas fa-volume-up" id="volume-toggle"></i> 
                         </div>
                     </div>
                     <div class="music-status">
-                        Current Music: <span id="current-music-status">Default Music</span>
+                        Current Music: <span id="current-music-status">Default Music (ON)</span>
                     </div>
                 </header>
 
@@ -33,7 +33,7 @@
                     <h1>Game Center</h1>
                     <p>Control panel and game statistics</p>
 
-                    <div class="stat-card">
+                    <div class="stat-card player-stats-card">
                         <span>09684793436</span>
                         <button class="player-stats-btn">Player Stats</button>
                     </div>
@@ -88,8 +88,16 @@
                         <i class="fas fa-chevron-right arrow-icon"></i>
                     </div>
 
+                    <div class="info-card">
+                        <i class="fas fa-id-badge"></i>
+                        <div>
+                            <span class="info-title">Chat ID (User ID)</span>
+                            <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
+                        </div>
+                    </div>
+
                     <button class="logout-btn" id="tma-close-btn">
-                        <i class="fas fa-sign-out-alt"></i> Close App
+                        <i class="fas fa-sign-out-alt"></i> Close Mini App
                     </button>
                 </div>
             </div>
@@ -134,9 +142,9 @@
         </div>
         
         <nav class="bottom-nav">
-            <button class="nav-item active" data-screen="main-screen">
-                <i class="fas fa-gamepad"></i>
-                <span>Play</span>
+            <button class="nav-item active" data-screen="home-screen">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
             </button>
             <button class="nav-item" data-screen="profile-screen">
                 <i class="fas fa-user"></i>
@@ -147,6 +155,6 @@
         <audio id="audio-player" controls style="display: none;"></audio>
     </div>
 
-    <script src="script.js"></script>
-    <script src="tma-integration.js"></script> </body>
+    <script src="tma-script.js"></script>
+</body>
 </html>
