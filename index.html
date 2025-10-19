@@ -1,36 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Music + Profile App</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MiniMyId App UI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-  <header>🎵 My Music App</header>
 
-  <div id="main" class="content active">
-    <h2>🎧 Music List</h2>
-    <div id="musicList"></div>
-  </div>
+    <div class="app-container">
+        <div class="content">
+            <div id="main-screen" class="screen active">
+                <header class="main-header">
+                    <div class="header-content">
+                        <h2>MiniMyId</h2>
+                        <div class="header-icons">
+                            <i class="fas fa-image"></i>
+                            <i class="fas fa-music" id="music-button"></i>
+                            <i class="fas fa-volume-up"></i>
+                        </div>
+                    </div>
+                    <div class="music-status">
+                        Current Music: <span id="current-music-status">Default Music</span>
+                    </div>
+                </header>
 
-  <div id="profile" class="content">
-    <h2>👤 Profile</h2>
-    <div class="profile-container">
-      <img id="profilePic" class="profile-pic" src="" alt="Profile Picture">
-      <div class="profile-info">
-        <p id="name">Name: Loading...</p>
-        <p id="username">Username: Loading...</p>
-        <p id="chatid">Chat ID: Loading...</p>
-      </div>
+                <div class="game-center-section">
+                    <h1>Game Center</h1>
+                    <p>Control panel and game statistics</p>
+
+                    <div class="stat-card">
+                        <span>09684793436</span>
+                        <button class="player-stats-btn">Player Stats</button>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>အသက်</span>
+                        <span class="stat-value pink">7</span>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>အသက်ခ်</span>
+                        <span class="stat-value blue">6</span>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>ကျန်ရှိသော ကစားခွင့်</span>
+                        <span class="stat-value green">6</span>
+                    </div>
+
+                    <div class="stat-card">
+                        <span>ရွှေ</span>
+                        <span class="stat-value yellow">3,590</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="profile-screen" class="screen">
+                <header class="profile-header">
+                    <h2>Profile</h2>
+                </header>
+                <div class="telegram-info-section">
+                    <h1>Telegram Account Info</h1>
+
+                    <div class="profile-avatar">
+                        <img id="profile-img" src="default-profile.jpg" alt="Profile Picture">
+                    </div>
+
+                    <div class="info-card">
+                        <i class="fas fa-user-circle"></i>
+                        <div>
+                            <span class="info-title">Name</span>
+                            <span class="info-subtitle" id="telegram-name">User's Full Name</span>
+                        </div>
+                    </div>
+
+                    <div class="info-card" id="telegram-username-card">
+                        <i class="fas fa-at"></i>
+                        <div>
+                            <span class="info-title">Username</span>
+                            <span class="info-subtitle" id="telegram-username">@user_mini_myid</span>
+                        </div>
+                        <i class="fas fa-chevron-right arrow-icon"></i>
+                    </div>
+
+                    <button class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="music-modal" class="modal">
+            <div class="modal-content">
+                <h3>Custom Music</h3>
+                <div class="music-option" data-music-type="default">
+                    <i class="fas fa-music"></i>
+                    <div>
+                        <h4>Default Music</h4>
+                        <p>Use the original background music</p>
+                    </div>
+                </div>
+                <div class="music-option" data-music-type="url">
+                    <i class="fas fa-link"></i>
+                    <div>
+                        <h4>Custom Music URL</h4>
+                        <p>Enter a direct URL to your music file</p>
+                    </div>
+                </div>
+                <div class="music-option" data-music-type="upload">
+                    <i class="fas fa-upload"></i>
+                    <div>
+                        <h4>Upload Music</h4>
+                        <p>Select a music file from your device</p>
+                    </div>
+                </div>
+                <button id="close-modal-btn">Cancel</button>
+            </div>
+        </div>
+
+        <div id="url-input-modal" class="modal nested-modal">
+            <div class="modal-content">
+                <h3>Enter Music URL</h3>
+                <input type="url" id="music-url-input" placeholder="e.g. https://example.com/song.mp3">
+                <div class="modal-actions">
+                    <button id="play-url-btn">Play</button>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-screen="main-screen">
+                <i class="fas fa-gamepad"></i>
+                <span>Play</span>
+            </button>
+            <button class="nav-item" data-screen="profile-screen">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </button>
+        </nav>
+        
+        <audio id="audio-player" controls style="display: none;"></audio>
     </div>
-  </div>
 
-  <div class="bottom-nav">
-    <button id="tabMain" class="active">Main</button>
-    <button id="tabProfile">Profile</button>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
