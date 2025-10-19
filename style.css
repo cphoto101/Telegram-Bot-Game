@@ -5,9 +5,8 @@ body {
     font-family: Arial, sans-serif;
     background-color: #000;
     color: #fff;
-    /* Mobile-friendly: 100vh ကို အသုံးပြုပြီး content ကို အပြည့်ပြပါမည်။ */
     height: 100vh;
-    overflow: hidden; /* Scroll ကို app-container မှာ ထိန်းချုပ်ရန် */
+    overflow: hidden;
 }
 
 .app-container {
@@ -23,8 +22,8 @@ body {
 
 .content {
     flex-grow: 1;
-    overflow-y: auto; /* Content တွေကို Scroll လုပ်နိုင်ရန် */
-    padding-bottom: 70px; /* Bottom Nav ကို ဖုံးသွားခြင်းမှ ကာကွယ်ရန် */
+    overflow-y: auto; 
+    padding-bottom: 70px; /* Bottom Nav အတွက် နေရာချန်ရန် */
 }
 
 /* Screen Management */
@@ -79,17 +78,19 @@ body {
 .game-center-section h1 {
     font-size: 24px;
     margin-bottom: 5px;
+    text-align: center;
 }
 
 .game-center-section p {
     color: #aaa;
     margin-bottom: 20px;
+    text-align: center;
 }
 
 .stat-card {
     background-color: #2e2e2e;
     padding: 15px;
-    border-radius: 8px;
+    border-radius: 10px; /* ပုံပါအတိုင်း Round ပုံစံ */
     margin-bottom: 15px;
     display: flex;
     justify-content: space-between;
@@ -99,7 +100,7 @@ body {
 }
 
 .player-stats-btn {
-    background-color: #6a1b9a; /* ခရမ်းရောင် */
+    background: linear-gradient(to right, #8a2be2, #ff69b4); /* ခရမ်းရောင် gradient (ပုံပါအတိုင်း) */
     color: #fff;
     border: none;
     padding: 8px 15px;
@@ -113,10 +114,11 @@ body {
     font-weight: bold;
 }
 
-.pink { color: #e91e63; }
-.blue { color: #2196f3; }
+.pink { color: #ff007f; } /* ပုံထဲက နီညိုရောင်နီးပါး */
+.blue { color: #6495ed; } /* ပုံထဲက အပြာနုရောင်နီးပါး */
 .green { color: #4caf50; }
-.yellow { color: #ffeb3b; }
+.yellow { color: #ffcc00; } /* ပုံထဲက ရွှေရောင်နီးပါး */
+
 
 /* Profile Screen Styling */
 .profile-header {
@@ -149,7 +151,7 @@ body {
     background-color: #333;
     overflow: hidden;
     margin-bottom: 20px;
-    border: 3px solid #6a1b9a;
+    border: 3px solid #6a1b9a; /* Telegram အတွက် border effect */
 }
 
 .profile-avatar img {
@@ -245,10 +247,10 @@ body {
 }
 
 .nav-item.active {
-    color: #2196f3; /* Active tab color */
+    color: #6a1b9a; /* Play/Profile Active tab color (ပုံပါအတိုင်း ခရမ်းရောင်နီးပါး) */
 }
 
-/* Modal Styling */
+/* Modal Styling (Custom Music) */
 .modal {
     display: none;
     position: fixed;
@@ -258,31 +260,32 @@ body {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.6); /* ပိုမိုမှောင်သော နောက်ခံ */
 }
 
 .modal-content {
-    background-color: #000;
-    margin: 15% auto; /* မျက်နှာပြင် အလယ်လောက် */
+    background-color: #1c1c1c; /* Modal အတွင်းပိုင်း အရောင် (ပုံပါအတိုင်း) */
+    margin: 20% auto; 
     padding: 20px;
     border: 1px solid #333;
     width: 80%;
     max-width: 350px;
-    border-radius: 10px;
+    border-radius: 15px; /* ပုံပါအတိုင်း Rounded Corner ပုံစံ */
 }
 
 .modal-content h3 {
     margin-top: 0;
-    border-bottom: 1px solid #333;
-    padding-bottom: 10px;
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 20px;
 }
 
 .music-option {
     display: flex;
     align-items: center;
-    background-color: #1c1c1c;
-    padding: 10px;
-    border-radius: 5px;
+    background-color: #2e2e2e; /* Option Card အရောင် */
+    padding: 15px;
+    border-radius: 8px;
     margin-bottom: 10px;
     cursor: pointer;
 }
@@ -307,7 +310,7 @@ body {
 #close-modal-btn {
     width: 100%;
     background-color: transparent;
-    color: #f44336;
+    color: #fff; /* Cancel စာသားအရောင် */
     border: none;
     padding: 10px;
     margin-top: 10px;
@@ -316,7 +319,7 @@ body {
 
 /* URL Input Modal */
 .nested-modal .modal-content {
-    margin: 25% auto; /* ပိုပြီး အပေါ်မှာ ပေါ်စေရန် */
+    margin: 25% auto;
 }
 
 #music-url-input {
@@ -342,9 +345,5 @@ body {
     padding: 8px 15px;
     border-radius: 5px;
     cursor: pointer;
-}
-
-/* For Upload Music (Hidden Input) */
-#file-upload-input {
-    display: none;
-}
+    }
+    
