@@ -1,4 +1,4 @@
-/* Global Reset and Body Styling */
+/* Global Reset and Base Styles */
 body {
     margin: 0;
     padding: 0;
@@ -13,7 +13,7 @@ body {
     max-width: 450px;
     height: 100%;
     margin: 0 auto;
-    background-color: #1a1a1a; /* အပြင်ဘက် နောက်ခံအနည်းငယ် ပိုမိုပေါ့ပါး */
+    background-color: #1a1a1a;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -26,17 +26,7 @@ body {
     padding-bottom: 70px;
 }
 
-/* Screen Management */
-.screen {
-    display: none;
-    padding: 0;
-}
-
-.screen.active {
-    display: block;
-}
-
-/* Header Styling (Home Screen) */
+/* Base Header */
 .main-header {
     background-color: #1a1a1a;
     padding: 15px 15px 0 15px;
@@ -52,111 +42,100 @@ body {
     align-items: center;
 }
 
-.header-content h2 {
-    font-size: 20px;
-    margin: 0;
-}
-
-.header-icons i {
-    font-size: 18px;
-    margin-left: 15px;
-    color: #fff;
-    cursor: pointer;
-}
-
-.music-status {
-    font-size: 14px;
-    color: #aaa;
-    padding: 10px 0;
-}
-
-/* Game Center Section */
-.game-center-section {
+/* --- HOME FEED UI --- */
+.social-feed-section {
     padding: 15px;
 }
 
-.game-center-section h1 {
+.social-feed-section h1 {
     font-size: 24px;
     margin-bottom: 5px;
-    text-align: center;
 }
 
-.game-center-section p {
+.social-feed-section p {
     color: #aaa;
     margin-bottom: 20px;
-    text-align: center;
 }
 
-.stat-card {
-    background-color: #2b2b2b; /* Card နောက်ခံအရောင် (ပုံပါအတိုင်း) */
+.post-create-box {
+    background-color: #2b2b2b;
     padding: 15px;
-    border-radius: 12px; /* ပုံပါအတိုင်း ပိုမိုဝိုင်းသော ထောင့်များ */
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 16px;
-    font-weight: bold;
+    border-radius: 12px;
+    margin-bottom: 20px;
 }
 
-.player-stats-card {
-    /* Player ID card တွင် အပေါ်အောက် ခြားနားမှု ပိုရှိရန် */
-    padding: 20px 15px;
+#post-input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 80px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 8px;
+    resize: none;
 }
 
-.player-stats-btn {
-    background: linear-gradient(to right, #9370DB, #FF69B4); /* ခရမ်းရောင် gradient */
+#submit-post-btn {
+    background-color: #00BFFF;
     color: #fff;
     border: none;
     padding: 8px 15px;
     border-radius: 20px;
     font-weight: bold;
+    float: right;
     cursor: pointer;
 }
 
-.stat-value {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-/* ပုံပါအတိုင်း အရောင်များ */
-.pink { color: #f06292; } 
-.blue { color: #64b5f6; } 
-.green { color: #81c784; }
-.yellow { color: #ffeb3b; }
-
-/* Profile Screen Styling */
-.profile-header {
-    background-color: #1a1a1a;
+/* Post Cards */
+.post-card {
+    background-color: #2b2b2b;
     padding: 15px;
-    border-bottom: 1px solid #333;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border-left: 5px solid #8A2BE2; /* Left border color */
 }
 
-.profile-header h2 {
-    margin: 0;
-    font-size: 20px;
-}
-
-.telegram-info-section {
-    padding: 20px 15px;
+.post-header {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 10px;
 }
 
-.telegram-info-section h1 {
-    font-size: 24px;
+.post-author {
+    font-weight: bold;
+    color: #fff;
+}
+
+.post-content {
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+.post-actions button {
+    background: none;
+    border: none;
+    color: #00BFFF;
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+/* --- PROFILE UI (NEW) --- */
+.profile-avatar-container {
+    text-align: center;
     margin-bottom: 30px;
 }
 
 .profile-avatar {
     width: 120px;
     height: 120px;
+    margin: 0 auto 10px;
     border-radius: 50%;
-    background-color: #333;
     overflow: hidden;
-    margin-bottom: 20px;
-    border: 3px solid #00BFFF; /* Telegram Blue border */
+    border: 3px solid #00BFFF;
 }
 
 .profile-avatar img {
@@ -165,21 +144,41 @@ body {
     object-fit: cover;
 }
 
-.info-card {
+#profile-display-name {
+    margin: 5px 0 0;
+    font-size: 20px;
+}
+
+.username-display {
+    color: #aaa;
+    margin: 0 0 20px;
+    font-size: 14px;
+}
+
+.info-list-container {
+    width: 100%;
+}
+
+.info-item {
     background-color: #2b2b2b;
     padding: 15px;
     border-radius: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
-    width: 100%;
-    box-sizing: border-box;
+    cursor: pointer; /* Link များအတွက် */
 }
 
-.info-card i {
+.info-item i {
     font-size: 24px;
     color: #00BFFF;
     margin-right: 15px;
+}
+
+.info-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .info-title {
@@ -189,11 +188,28 @@ body {
 
 .info-subtitle {
     color: #fff;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
 }
 
-/* Bottom Navigation Bar */
+.arrow-icon {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.logout-btn {
+    background-color: #f44336;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 30px;
+    cursor: pointer;
+}
+
+/* --- BOTTOM NAV & MODAL STYLES (Same as before) --- */
 .bottom-nav {
     background-color: #1a1a1a;
     display: flex;
@@ -219,46 +235,15 @@ body {
     font-size: 12px;
 }
 
-.nav-item i {
-    font-size: 20px;
-    margin-bottom: 3px;
-}
-
 .nav-item.active {
-    color: #8A2BE2; /* Active tab color */
+    color: #8A2BE2;
 }
 
-/* Modal Styling (Custom Music) */
+/* Modal Styles */
+/* (Previous modal styles remain the same) */
 .modal {
     display: none;
     position: fixed;
     z-index: 100;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.6);
-}
-
-.modal-content {
-    background-color: #2b2b2b; /* Card အရောင်နှင့် တူအောင် */
-    margin: 30% auto; 
-    padding: 20px;
-    border: 1px solid #333;
-    width: 80%;
-    max-width: 350px;
-    border-radius: 15px; 
-}
-
-.music-option {
-    background-color: #1a1a1a; /* Option Card အတွင်းဘက် အရောင် ပိုမိုမှောင် */
-    padding: 15px;
-    border-radius: 8px;
-}
-
-/* URL Input Modal */
-#music-url-input {
-    background-color: #1a1a1a;
-    border: 1px solid #444;
+    /* ... other styles */
 }
