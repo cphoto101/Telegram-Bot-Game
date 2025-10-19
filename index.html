@@ -1,46 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZarOC (SarTo) TMA</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <script src="https://telegram.org/js/telegram-web-app.js"></script> 
-</head>
-<body>
-
-    <div class="app-container">
-        <div class="content"> 
+<div class="content"> 
             
             <div id="home-screen" class="screen active">
-                <header class="main-header">
-                    <div class="header-content">
-                        <h2>ZarOC (SarTo) Feed</h2>
-                        <div class="header-icons">
-                            <i class="fas fa-music" id="music-button"></i> 
-                            <i class="fas fa-volume-up" id="volume-toggle"></i> 
-                        </div>
-                    </div>
-                </header>
-                <div class="music-status-bar">
-                    <span id="current-music-status">Loading Music...</span>
-                </div>
-
-                <div class="social-feed-section">
-                    
-                    <div class="post-create-box" id="admin-post-box">
-                        <textarea id="post-input" placeholder="Admin: What's new?"></textarea>
-                        <button id="submit-post-btn"><i class="fas fa-bullhorn"></i> Announce</button>
-                    </div>
-                    <div id="admin-message" class="admin-message">
-                        </div>
-
-                    <div id="posts-container" class="posts-container">
-                        </div>
-                </div>
-            </div> 
+                </div> 
             <div id="profile-screen" class="screen"> 
                 <header class="profile-header">
                     <h2>Settings & Info</h2>
@@ -54,59 +15,39 @@
                             <h3 id="profile-display-name">Loading Name...</h3>
                             <p id="profile-display-username" class="username-display">Loading Username...</p>
                         </div>
-                        <div class="profile-status" id="admin-status">
-                            </div>
+                        <div class="profile-status" id="admin-status"></div>
                     </div>
 
 
                     <div class="list-group">
                         <h4 class="group-title">Account Details</h4>
-                        <div class="info-item">
-                            <i class="fas fa-id-card-alt"></i>
+                        <div class="info-item" id="open-users-screen"> 
+                            <i class="fas fa-users"></i>
                             <div class="info-details">
-                                <span class="info-title">Your Chat ID (TMA)</span>
-                                <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
-                            </div>
-                        </div>
-                        <div class="info-item" id="telegram-username-card-profile">
-                            <i class="fas fa-external-link-alt"></i>
-                            <div class="info-details">
-                                <span class="info-title">View Telegram Profile</span>
-                                <span class="info-subtitle">Tap to open t.me/username</span>
+                                <span class="info-title">Users</span>
+                                <span class="info-subtitle">View Mini App users list</span>
                             </div>
                             <i class="fas fa-chevron-right arrow-icon"></i>
                         </div>
                     </div>
 
                     <div class="list-group">
-                        <h4 class="group-title">App Actions</h4>
-                        <div class="info-item logout-item" id="tma-close-btn">
-                            <i class="fas fa-power-off"></i>
-                            <div class="info-details">
-                                <span class="info-title">Close Mini App</span>
-                            </div>
                         </div>
+                </div>
+            </div>
+            <div id="users-screen" class="screen">
+                <header class="main-header">
+                    <div class="header-content">
+                        <i class="fas fa-arrow-left back-button" data-target-screen="profile-screen"></i>
+                        <h2>Mini App Users</h2>
                     </div>
+                </header>
+                <div class="users-list-section">
+                    <div id="users-list-container">
+                        </div>
                 </div>
             </div>
             </div> 
-        <div id="music-modal" class="modal">...</div>
-        <div id="url-input-modal" class="modal nested-modal">...</div>
-        
-        <nav class="bottom-nav">
-            <button class="nav-item active" data-screen="home-screen">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </button>
-            <button class="nav-item" data-screen="profile-screen">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </button>
-        </nav>
-        
-        <audio id="audio-player" controls style="display: none;"></audio>
-    </div>
-
-    <script src="tma-script.js"></script>
+        <script src="tma-script.js"></script>
 </body>
 </html>
