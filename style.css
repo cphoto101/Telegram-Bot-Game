@@ -23,11 +23,23 @@ body {
 .content {
     flex-grow: 1;
     overflow-y: auto; 
-    padding-bottom: 70px;
+    padding-bottom: 60px; /* Adjust for bottom nav height */
 }
 
-/* Base Header */
-.main-header {
+/* Screen Management */
+.screen {
+    display: none;
+    padding: 0;
+    height: 100%; 
+    overflow-y: auto;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* Header Styling */
+.main-header, .profile-header {
     background-color: #1a1a1a;
     padding: 15px 15px 0 15px;
     position: sticky;
@@ -42,19 +54,22 @@ body {
     align-items: center;
 }
 
+.header-icons i {
+    font-size: 18px;
+    margin-left: 15px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.music-status {
+    font-size: 14px;
+    color: #aaa;
+    padding: 10px 0;
+}
+
 /* --- HOME FEED UI --- */
 .social-feed-section {
     padding: 15px;
-}
-
-.social-feed-section h1 {
-    font-size: 24px;
-    margin-bottom: 5px;
-}
-
-.social-feed-section p {
-    color: #aaa;
-    margin-bottom: 20px;
 }
 
 .post-create-box {
@@ -62,6 +77,7 @@ body {
     padding: 15px;
     border-radius: 12px;
     margin-bottom: 20px;
+    overflow: auto; /* Clear floats */
 }
 
 #post-input {
@@ -88,13 +104,12 @@ body {
     cursor: pointer;
 }
 
-/* Post Cards */
 .post-card {
     background-color: #2b2b2b;
     padding: 15px;
     border-radius: 12px;
     margin-bottom: 15px;
-    border-left: 5px solid #8A2BE2; /* Left border color */
+    border-left: 5px solid #8A2BE2;
 }
 
 .post-header {
@@ -110,11 +125,6 @@ body {
     color: #fff;
 }
 
-.post-content {
-    font-size: 16px;
-    margin-bottom: 15px;
-}
-
 .post-actions button {
     background: none;
     border: none;
@@ -123,25 +133,37 @@ body {
     cursor: pointer;
 }
 
-/* --- PROFILE UI (NEW) --- */
+/* --- PROFILE UI --- */
+#profile-screen .telegram-info-section {
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .profile-avatar-container {
     text-align: center;
     margin-bottom: 30px;
 }
 
+/* Profile Avatar Placeholder Styling */
 .profile-avatar {
     width: 120px;
     height: 120px;
     margin: 0 auto 10px;
     border-radius: 50%;
     overflow: hidden;
-    border: 3px solid #00BFFF;
-}
-
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    border: 3px solid #00BFFF; /* Telegram Blue */
+    
+    /* Placeholder Text Style */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #333; 
+    font-size: 36px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 #profile-display-name {
@@ -166,7 +188,7 @@ body {
     margin-bottom: 10px;
     display: flex;
     align-items: center;
-    cursor: pointer; /* Link များအတွက် */
+    cursor: pointer;
 }
 
 .info-item i {
@@ -192,11 +214,6 @@ body {
     font-weight: bold;
 }
 
-.arrow-icon {
-    font-size: 14px;
-    color: #aaa;
-}
-
 .logout-btn {
     background-color: #f44336;
     color: #fff;
@@ -209,7 +226,7 @@ body {
     cursor: pointer;
 }
 
-/* --- BOTTOM NAV & MODAL STYLES (Same as before) --- */
+/* --- BOTTOM NAV & MODAL STYLES --- */
 .bottom-nav {
     background-color: #1a1a1a;
     display: flex;
@@ -240,45 +257,34 @@ body {
 }
 
 /* Modal Styles */
-/* (Previous modal styles remain the same) */
 .modal {
     display: none;
     position: fixed;
     z-index: 100;
-    /* ... other styles */
-}
-/* ... (ယခင် CSS အဟောင်းများ) ... */
-
-/* --- PROFILE UI (NEW) --- */
-/* ... (profile-avatar-container, profile-header styles) ... */
-
-/* Profile Avatar New Styling (Initial Letter Placeholder) */
-.profile-avatar {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 10px;
-    border-radius: 50%;
-    overflow: hidden;
-    /* ပုံ 1000030277.jpg အရ Telegram Blue Border ကို ပြန်ထည့်သည် */
-    border: 3px solid #00BFFF; 
-    
-    /* Placeholder Text Style */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #333; /* Default dark background for the avatar area */
-    font-size: 36px; /* Initial letter size */
-    font-weight: bold;
-    color: #fff;
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
-.profile-avatar img {
-    /* img tag ကို HTML ကနေ ဖြုတ်လိုက်ပေမယ့် လိုအပ်လို့ ထားချင်ရင် */
+    left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.6);
 }
 
-/* ... (profile-display-name, info-list-container, info-item styles) ... */
+.modal-content {
+    background-color: #2b2b2b;
+    margin: 30% auto; 
+    padding: 20px;
+    border: 1px solid #333;
+    width: 80%;
+    max-width: 350px;
+    border-radius: 15px; 
+}
 
+.music-option {
+    background-color: #1a1a1a; 
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    }
+    
