@@ -17,26 +17,25 @@
             <div id="home-screen" class="screen active">
                 <header class="main-header">
                     <div class="header-content">
-                        <h2>ZarOC (SarTo)</h2>
+                        <h2>ZarOC (SarTo) Feed</h2>
                         <div class="header-icons">
-                            <i class="fas fa-image"></i>
-                            <i class="fas fa-music" id="music-button"></i>
+                            <i class="fas fa-music" id="music-button"></i> 
                             <i class="fas fa-volume-up" id="volume-toggle"></i> 
                         </div>
                     </div>
-                    <div class="music-status">
-                        Current Music: <span id="current-music-status">Loading Music...</span>
-                    </div>
                 </header>
+                <div class="music-status-bar">
+                    <span id="current-music-status">Loading Music...</span>
+                </div>
 
                 <div class="social-feed-section">
-                    <h1>Post Feed</h1>
-                    <p>Share your thoughts with the community.</p>
-
-                    <div class="post-create-box">
-                        <textarea id="post-input" placeholder="What's on your mind?"></textarea>
-                        <button id="submit-post-btn"><i class="fas fa-paper-plane"></i> Post</button>
+                    
+                    <div class="post-create-box" id="admin-post-box">
+                        <textarea id="post-input" placeholder="Admin: What's new?"></textarea>
+                        <button id="submit-post-btn"><i class="fas fa-bullhorn"></i> Announce</button>
                     </div>
+                    <div id="admin-message" class="admin-message">
+                        </div>
 
                     <div id="posts-container" class="posts-container">
                         </div>
@@ -44,28 +43,33 @@
             </div> 
             <div id="profile-screen" class="screen"> 
                 <header class="profile-header">
-                    <h2>Profile</h2>
+                    <h2>Settings & Info</h2>
                 </header>
+                
                 <div class="telegram-info-section">
-                    <h1>Telegram Account Info</h1>
-
-                    <div class="profile-avatar-container">
-                        <div class="profile-avatar" id="profile-avatar-placeholder">
+                    
+                    <div class="profile-header-card">
+                        <div class="profile-avatar-container">
+                            <div class="profile-avatar" id="profile-avatar-placeholder"></div>
+                            <h3 id="profile-display-name">Loading Name...</h3>
+                            <p id="profile-display-username" class="username-display">Loading Username...</p>
+                        </div>
+                        <div class="profile-status" id="admin-status">
                             </div>
-                        <h3 id="profile-display-name">Loading Name...</h3>
-                        <p id="profile-display-username" class="username-display">Loading Username...</p>
                     </div>
 
-                    <div class="info-list-container">
+
+                    <div class="list-group">
+                        <h4 class="group-title">Account Details</h4>
                         <div class="info-item">
-                            <i class="fas fa-id-badge"></i>
+                            <i class="fas fa-id-card-alt"></i>
                             <div class="info-details">
-                                <span class="info-title">Chat ID (User ID)</span>
+                                <span class="info-title">Your Chat ID (TMA)</span>
                                 <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
                             </div>
                         </div>
                         <div class="info-item" id="telegram-username-card-profile">
-                            <i class="fas fa-link"></i>
+                            <i class="fas fa-external-link-alt"></i>
                             <div class="info-details">
                                 <span class="info-title">View Telegram Profile</span>
                                 <span class="info-subtitle">Tap to open t.me/username</span>
@@ -74,48 +78,20 @@
                         </div>
                     </div>
 
-                    <button class="logout-btn" id="tma-close-btn">
-                        <i class="fas fa-sign-out-alt"></i> Close Mini App
-                    </button>
+                    <div class="list-group">
+                        <h4 class="group-title">App Actions</h4>
+                        <div class="info-item logout-item" id="tma-close-btn">
+                            <i class="fas fa-power-off"></i>
+                            <div class="info-details">
+                                <span class="info-title">Close Mini App</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             </div> 
-        <div id="music-modal" class="modal">
-            <div class="modal-content">
-                <h3>Custom Music</h3>
-                <div class="music-option" data-music-type="default">
-                    <i class="fas fa-music"></i>
-                    <div>
-                        <h4>Default Music (SoundHelix)</h4>
-                        <p>Use the background music</p>
-                    </div>
-                </div>
-                <div class="music-option" data-music-type="url">
-                    <i class="fas fa-link"></i>
-                    <div>
-                        <h4>Custom Music URL</h4>
-                        <p>Enter a direct URL to your music file</p>
-                    </div>
-                </div>
-                <div class="music-option" data-music-type="upload">
-                    <i class="fas fa-upload"></i>
-                    <div>
-                        <h4>Upload Music</h4>
-                        <p>Select a music file from your device</p>
-                    </div>
-                </div>
-                <button id="close-modal-btn">Cancel</button>
-            </div>
-        </div>
-        <div id="url-input-modal" class="modal nested-modal">
-            <div class="modal-content">
-                <h3>Enter Music URL</h3>
-                <input type="url" id="music-url-input" placeholder="e.g. https://example.com/song.mp3">
-                <div class="modal-actions">
-                    <button id="play-url-btn">Play</button>
-                </div>
-            </div>
-        </div>
+        <div id="music-modal" class="modal">...</div>
+        <div id="url-input-modal" class="modal nested-modal">...</div>
         
         <nav class="bottom-nav">
             <button class="nav-item active" data-screen="home-screen">
