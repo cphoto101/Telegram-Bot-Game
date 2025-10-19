@@ -59,7 +59,6 @@
                             </div>
                     </div>
 
-
                     <div class="list-group">
                         <h4 class="group-title">Account Details</h4>
                         <div class="info-item">
@@ -91,6 +90,19 @@
                 </div>
             </div>
         </div> 
+        
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-screen="home-screen">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" data-screen="profile-screen">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </button>
+        </nav>
+
+        <audio id="audio-player" controls style="display: none;"></audio>
 
         <div id="music-modal" class="modal">
             <div class="modal-content">
@@ -111,7 +123,7 @@
                             <span>Enter a direct URL to your music file</span>
                         </div>
                     </button>
-                    <label for="music-upload-input" class="music-option" id="upload-music-option">
+                    <label for="music-upload-input" class="music-option">
                         <i class="fas fa-upload"></i>
                         <div class="option-details">
                             <strong>Upload Music (Local Play)</strong>
@@ -135,19 +147,6 @@
                 </div>
             </div>
         </div>
-        
-        <nav class="bottom-nav">
-            <button class="nav-item active" data-screen="home-screen">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </button>
-            <button class="nav-item" data-screen="profile-screen">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </button>
-        </nav>
-        
-        <audio id="audio-player" controls style="display: none;"></audio>
     </div>
 
     <script src="tma-script.js"></script>
