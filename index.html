@@ -67,11 +67,11 @@
                                 <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
                             </div>
                         </div>
-                        <div class="info-item" id="app-users-card" data-screen-target="user-list-screen">
+                        <div class="info-item" style="opacity: 0.6; pointer-events: none;"> 
                             <i class="fas fa-users"></i>
                             <div class="info-details">
-                                <span class="info-title">App Users</span>
-                                <span class="info-subtitle">View active users in this app</span>
+                                <span class="info-title">App Users (Disabled)</span>
+                                <span class="info-subtitle">Feature currently disabled</span>
                             </div>
                             <i class="fas fa-chevron-right arrow-icon"></i>
                         </div>
@@ -89,19 +89,7 @@
                 </div>
             </div>
             
-            <div id="user-list-screen" class="screen">
-                <header class="profile-header">
-                    <div class="header-content">
-                         <i class="fas fa-arrow-left back-button" data-target-screen="profile-screen"></i>
-                         <h2>App Users</h2>
-                         <span></span> </div>
-                </header>
-                <div class="user-list-content">
-                    <div id="users-container">
-                        </div>
-                </div>
-            </div>
-        </div> 
+            </div> 
         
         <nav class="bottom-nav">
             <button class="nav-item active" data-screen="home-screen">
@@ -162,5 +150,4 @@
 
     <script src="tma-script.js"></script>
 </body>
-                        </html>
-    
+</html>
