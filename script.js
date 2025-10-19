@@ -1,80 +1,78 @@
-const db = firebase.database();
+// Tabs
+const mainTab = document.getElementById("mainTab");
+const profileTab = document.getElementById("profileTab");
+const homeBtn = document.getElementById("homeBtn");
+const profileBtn = document.getElementById("profileBtn");
 
-const profilePage = document.getElementById('profilePage');
-
-const profileName = document.getElementById('profileName');
-const profileUsername = document.getElementById('profileUsername');
-const profileChatID = document.getElementById('profileChatID');
-const profilePhoto = document.getElementById('profilePhoto');
-
-const newText = document.getElementById('newText');
-const addBtn = document.getElementById('addBtn');
-const textList = document.getElementById('textList');
-
-let chatId, username;
-
-// Auto login with Telegram WebApp
-const tg = window.Telegram.WebApp;
-tg.expand();
-
-const user = tg.initDataUnsafe?.user || {
-  id: 123456,               // Browser testing fallback
-  username: "testuser",
-  first_name: "Test",
-  last_name: "User",
-  photo_url: "https://via.placeholder.com/100"
+homeBtn.onclick = () => {
+  mainTab.classList.add("active");
+  profileTab.classList.remove("active");
+  homeBtn.classList.add("active");
+  profileBtn.classList.remove("active");
 };
 
-chatId = user.id;
-username = user.username || "";
-const firstName = user.first_name || "";
-const lastName = user.last_name || "";
-const photo = user.photo_url || "";
+profileBtn.onclick = () => {
+  profileTab.classList.add("active");
+  mainTab.classList.remove("active");
+  profileBtn.classList.add("active");
+  homeBtn.classList.remove("active");
+};
 
-// Save profile
-db.ref('users/' + chatId).set({
-  chat_id: chatId,
-  username,
-  first_name: firstName,
-  last_name: lastName,
-  photo_url: photo,
-  timestamp: new Date().toISOString()
-});
-
-// Display profile
-profileName.innerText = firstName + " " + lastName;
-profileUsername.innerText = username;
-profileChatID.innerText = chatId;
-if(photo) profilePhoto.src = photo;
-
-// Load posts
-loadPosts();
-
-// Add post
-addBtn.addEventListener('click', ()=>{
-  const text = newText.value.trim();
-  if(!text) return;
-  const postRef = db.ref('posts').push();
-  postRef.set({
-    user: username,
-    chat_id: chatId,
-    text,
-    time: new Date().toLocaleString()
-  });
-  newText.value = "";
-});
-
-function loadPosts(){
-  db.ref('posts').on('value', (snapshot)=>{
-    textList.innerHTML = "";
-    const data = snapshot.val();
-    if(!data) return;
-    for(let id in data){
-      const p = data[id];
-      const div = document.createElement('div');
-      div.className = "text-item";
-      div.innerHTML = `<p>${p.text}</p><p class="author">✍ ${p.user} | ${p.time}</p>`;
-      textList.appendChild(div);
-    }
-  });
+// Telegram Info
+const tg = window.Telegram?.WebApp;
+if (tg?.initDataUnsafe?.user) {
+  const user = tg.initDataUnsafe.user;
+  document.getElementById("profileName").innerText = user.first_name + " " + (user.last_name || "");
+  document.getElementById("profileUsername").innerText = "@" + (user.username || "unknown");
+  document.getElementById("profilePhoto").src = user.photo_url || "https://via.placeholder.com/100";
+  document.getElementById("profileChatID").innerText = user.id;
+} else {
+  // fallback for browser testing
+  document.getElementById("profileName").innerText = "Test User";
+  document.getElementById("profileUsername").innerText = "@testuser";
+  document.getElementById("profilePhoto").src = "https://via.placeholder.com/100";
+  document.getElementById("profileChatID").innerText = "123456";
 }
+
+// Music Modal
+const modal = document.getElementById("musicModal");
+const musicBtn = document.getElementById("musicBtn");
+const closeModal = document.getElementById("closeModal");
+const musicPlayer = document.getElementById("musicPlayer");
+
+musicBtn.onclick = () => (modal.style.display = "flex");
+closeModal.onclick = () => (modal.style.display = "none");
+
+// Default music
+document.getElementById("defaultMusic").onclick = () => {
+  musicPlayer.src = "https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Scott_Holmes_Music/Happy_Music/Scott_Holmes_Music_-_Upbeat_Party.mp3";
+  musicPlayer.play();
+  modal.style.display = "none";
+};
+
+// Custom URL
+document.getElementById("urlMusic").onclick = () => {
+  const url = prompt("Enter your music file URL:");
+  if (url) {
+    musicPlayer.src = url;
+    musicPlayer.play();
+  }
+  modal.style.display = "none";
+};
+
+// Upload file
+document.getElementById("uploadMusic").onclick = () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "audio/*";
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (file) {
+      const src = URL.createObjectURL(file);
+      musicPlayer.src = src;
+      musicPlayer.play();
+    }
+  };
+  input.click();
+  modal.style.display = "none";
+};
