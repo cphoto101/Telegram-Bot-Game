@@ -247,3 +247,38 @@ body {
     z-index: 100;
     /* ... other styles */
 }
+/* ... (ယခင် CSS အဟောင်းများ) ... */
+
+/* --- PROFILE UI (NEW) --- */
+/* ... (profile-avatar-container, profile-header styles) ... */
+
+/* Profile Avatar New Styling (Initial Letter Placeholder) */
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+    overflow: hidden;
+    /* ပုံ 1000030277.jpg အရ Telegram Blue Border ကို ပြန်ထည့်သည် */
+    border: 3px solid #00BFFF; 
+    
+    /* Placeholder Text Style */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #333; /* Default dark background for the avatar area */
+    font-size: 36px; /* Initial letter size */
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.profile-avatar img {
+    /* img tag ကို HTML ကနေ ဖြုတ်လိုက်ပေမယ့် လိုအပ်လို့ ထားချင်ရင် */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ... (profile-display-name, info-list-container, info-item styles) ... */
+
