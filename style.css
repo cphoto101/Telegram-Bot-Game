@@ -1,10 +1,11 @@
-/* Global Reset and Base Styles (Same as before) */
+/* Global Reset and Base Styles */
 body {
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #000;
     color: #fff;
+    /* Ensure full viewport height for TMA */
     height: 100vh;
     width: 100vw;
     overflow: hidden;
@@ -14,7 +15,7 @@ body {
     max-width: 450px;
     height: 100%; 
     margin: 0 auto;
-    background-color: #121212;
+    background-color: #121212; /* Darker Background */
     display: flex;
     flex-direction: column;
     position: relative;
@@ -24,7 +25,8 @@ body {
 .content {
     flex-grow: 1;
     overflow-y: auto; 
-    padding-bottom: 55px; /* Adjust based on nav height */
+    /* Space for bottom navigation */
+    padding-bottom: 55px; 
     position: relative;
 }
 
@@ -39,7 +41,7 @@ body {
     display: block;
 }
 
-/* Header Styling (Modified for Back Button) */
+/* --- HEADER STYLING --- */
 .main-header, .profile-header {
     background-color: #121212;
     padding: 15px 15px 10px 15px; 
@@ -58,24 +60,287 @@ body {
 .main-header h2, .profile-header h2 {
     font-size: 18px; 
     margin: 0;
+    font-weight: 600;
 }
 
-/* 🚨 FIX: Back button style */
+.header-icons i {
+    font-size: 20px; 
+    margin-left: 20px;
+    color: #00BFFF; /* Accent Color */
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.header-icons i:active {
+    color: #0080FF;
+}
+
+/* Back Button for User List Screen */
 .back-button {
     font-size: 20px;
     color: #00BFFF;
     cursor: pointer;
     padding-right: 15px;
+    transition: color 0.2s;
+}
+.back-button:active {
+    color: #0080FF;
 }
 
-/* ... (Rest of Feed/Profile/Nav styles are the same) ... */
+.music-status-bar {
+    padding: 8px 15px;
+    background-color: #212121;
+    font-size: 13px;
+    color: #aaa;
+    border-bottom: 1px solid #333;
+    text-align: center;
+}
 
-/* --- PROFILE UI --- (App Users Card is modified here) */
-/* ... (profile-header-card, list-group, info-item styles are the same) ... */
+/* --- HOME FEED UI --- */
+.social-feed-section {
+    padding: 15px;
+}
 
-/* ===================================== */
+/* Admin Post Box Styling */
+.post-create-box {
+    background-color: #212121;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #00BFFF; 
+    box-shadow: 0 0 8px rgba(0, 191, 255, 0.2); 
+}
+
+.admin-message {
+    color: #ff5252;
+    background-color: #3d2a2a;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: bold;
+}
+
+#post-input {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 80px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #121212;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 6px;
+    resize: none;
+}
+
+#submit-post-btn {
+    background-color: #00BFFF;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-weight: bold;
+    float: right;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+#submit-post-btn:active {
+    background-color: #0080FF;
+}
+
+/* Post Card Styling */
+.post-card {
+    background-color: #1e1e1e; 
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #aaa;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 5px;
+}
+
+.post-author {
+    font-weight: bold;
+    color: #fff;
+}
+
+.post-author.admin {
+    color: #00BFFF;
+}
+
+.post-content {
+    font-size: 15px;
+    margin: 0 0 10px 0;
+    white-space: pre-wrap; /* For line breaks in posts */
+}
+
+.post-actions button {
+    background: none;
+    border: none;
+    color: #aaa; 
+    margin-right: 15px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 0;
+    transition: color 0.2s;
+}
+.post-actions button:active {
+    color: #ddd;
+}
+
+.post-actions button i {
+    margin-right: 5px;
+}
+
+.like-btn.liked {
+    color: #8A2BE2; /* Purple Accent */
+}
+
+.delete-btn {
+    color: #f44336 !important;
+}
+
+/* --- PROFILE UI --- */
+.telegram-info-section {
+    padding: 0 15px 20px 15px;
+}
+
+/* Profile Header Card */
+.profile-header-card {
+    text-align: center;
+    padding: 20px 0 15px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
+}
+
+.profile-avatar-container {
+    margin-bottom: 10px;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 5px;
+    border-radius: 50%;
+    border: 3px solid #00BFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #333; 
+    font-size: 30px;
+    font-weight: bold;
+    color: #fff;
+    overflow: hidden; 
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-status {
+    font-size: 13px;
+    font-weight: bold;
+    color: #00BFFF;
+    margin-top: 5px;
+}
+
+/* List Group Styling */
+.list-group {
+    margin-bottom: 25px;
+}
+
+.group-title {
+    color: #aaa;
+    font-size: 13px;
+    margin: 15px 0 5px 0;
+    padding-left: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-item {
+    background-color: #1e1e1e;
+    padding: 15px; 
+    border-radius: 0;
+    margin-bottom: 1px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 1px 0 #333;
+    transition: background-color 0.2s;
+}
+
+.info-item:active {
+    background-color: #2a2a2a;
+}
+
+.list-group .info-item:first-of-type {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.list-group .info-item:last-of-type {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    box-shadow: none;
+}
+
+.info-item i {
+    font-size: 20px;
+    color: #00BFFF;
+    margin-right: 15px;
+}
+
+.info-details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.info-title {
+    color: #fff;
+    font-size: 15px;
+    font-weight: normal;
+}
+
+.info-subtitle {
+    color: #aaa;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.arrow-icon {
+    font-size: 14px !important;
+    color: #aaa !important;
+}
+
+.logout-item {
+    color: #f44336;
+    background-color: #212121;
+    text-align: center;
+    display: block;
+    border-radius: 10px !important;
+    margin-top: 15px;
+}
+
+.logout-item i {
+    color: #f44336 !important;
+}
+
 /* --- NEW SCREEN: USER LIST STYLES --- */
-/* ===================================== */
 
 .user-list-content {
     padding: 15px;
@@ -104,7 +369,8 @@ body {
     font-weight: bold;
     color: #fff;
     overflow: hidden;
-    border: 2px solid #00BFFF;
+    border: 2px solid #00BFFF; /* Accent border */
+    flex-shrink: 0;
 }
 
 .user-avatar img {
@@ -116,6 +382,7 @@ body {
 .user-info {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
 }
 
 .user-info strong {
@@ -128,4 +395,193 @@ body {
     color: #aaa;
 }
 
-/* ... (Rest of Modal Styles are the same) ... */
+/* --- BOTTOM NAV --- */
+.bottom-nav {
+    background-color: #1a1a1a;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 55px;
+    border-top: 1px solid #333;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 450px;
+    margin: 0 auto;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    color: #777;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 11px;
+    flex-grow: 1;
+    transition: color 0.2s;
+}
+
+.nav-item i {
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+.nav-item.active {
+    color: #00BFFF; /* Active Color */
+}
+
+
+/* ===================================== */
+/* --- MUSIC MODAL STYLES --- */
+/* ===================================== */
+
+.modal {
+    display: none; 
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 450px; 
+    margin: 0 auto;
+    background-color: rgba(0, 0, 0, 0.85); 
+    z-index: 2000; 
+    justify-content: center;
+    align-items: flex-end; 
+}
+
+.modal-content {
+    background-color: #212121;
+    width: 100%;
+    max-width: 450px; 
+    padding: 20px 20px 30px 20px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    animation: slideUp 0.3s ease-out;
+    box-sizing: border-box;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.modal-content h3 {
+    text-align: center;
+    color: #fff;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.music-option {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: #313131;
+    color: #fff;
+    border: none;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px; 
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.music-option:active {
+    background-color: #444;
+}
+
+.music-option i {
+    font-size: 22px;
+    color: #00BFFF;
+    margin-right: 15px;
+}
+.music-option .option-details {
+    display: flex;
+    flex-direction: column;
+}
+.music-option .option-details strong {
+    font-size: 15px;
+}
+.music-option .option-details span {
+    font-size: 12px;
+    color: #aaa;
+}
+
+
+#cancel-modal-btn {
+    width: 100%;
+    background-color: #444;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+#cancel-modal-btn:active {
+    background-color: #555;
+}
+
+/* URL Input Modal (Nested) Style */
+.nested-modal {
+    align-items: center;
+}
+.nested-modal .modal-content {
+    border-radius: 10px;
+    width: 90%;
+    max-width: 350px;
+    animation: none; 
+}
+
+#music-url-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    background-color: #121212;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.modal-actions button {
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background-color 0.2s;
+}
+
+.secondary-btn {
+    background-color: #444;
+    color: #fff;
+    border: none;
+}
+.secondary-btn:active {
+    background-color: #555;
+}
+
+.primary-btn {
+    background-color: #00BFFF;
+    color: #fff;
+    border: none;
+}
+.primary-btn:active {
+    background-color: #0080FF;
+}
