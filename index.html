@@ -39,18 +39,7 @@
                     </div>
 
                     <div id="posts-container" class="posts-container">
-                        <div class="post-card">
-                            <div class="post-header">
-                                <span class="post-author"><i class="fas fa-user-circle"></i> Sample User</span>
-                                <span class="post-time">1 hour ago</span>
-                            </div>
-                            <p class="post-content">Welcome to the new Home Feed! This is a sample post.</p>
-                            <div class="post-actions">
-                                <button><i class="fas fa-thumbs-up"></i> Like (0)</button>
-                                <button><i class="fas fa-comment"></i> Comment</button>
-                            </div>
                         </div>
-                    </div>
                 </div>
             </div>
 
@@ -94,8 +83,42 @@
             </div>
         </div>
 
-        <div id="music-modal" class="modal">...</div>
-        <div id="url-input-modal" class="modal nested-modal">...</div>
+        <div id="music-modal" class="modal">
+            <div class="modal-content">
+                <h3>Custom Music</h3>
+                <div class="music-option" data-music-type="default">
+                    <i class="fas fa-music"></i>
+                    <div>
+                        <h4>Default Music (SoundHelix)</h4>
+                        <p>Use the background music</p>
+                    </div>
+                </div>
+                <div class="music-option" data-music-type="url">
+                    <i class="fas fa-link"></i>
+                    <div>
+                        <h4>Custom Music URL</h4>
+                        <p>Enter a direct URL to your music file</p>
+                    </div>
+                </div>
+                <div class="music-option" data-music-type="upload">
+                    <i class="fas fa-upload"></i>
+                    <div>
+                        <h4>Upload Music</h4>
+                        <p>Select a music file from your device</p>
+                    </div>
+                </div>
+                <button id="close-modal-btn">Cancel</button>
+            </div>
+        </div>
+        <div id="url-input-modal" class="modal nested-modal">
+            <div class="modal-content">
+                <h3>Enter Music URL</h3>
+                <input type="url" id="music-url-input" placeholder="e.g. https://example.com/song.mp3">
+                <div class="modal-actions">
+                    <button id="play-url-btn">Play</button>
+                </div>
+            </div>
+        </div>
         
         <nav class="bottom-nav">
             <button class="nav-item active" data-screen="home-screen">
@@ -114,3 +137,4 @@
     <script src="tma-script.js"></script>
 </body>
 </html>
+
