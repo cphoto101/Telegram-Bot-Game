@@ -148,7 +148,41 @@
         
         <audio id="audio-player" controls style="display: none;"></audio>
     </div>
+    <div id="music-modal" class="modal">
+            <div class="modal-content">
+                <h3>Custom Music</h3>
+                
+                <div class="music-option-list">
+                    <button class="music-option" data-music-type="default">
+                        <i class="fas fa-music"></i>
+                        <div class="option-details">
+                            <strong>Default Music</strong>
+                            <span>Use the original background music</span>
+                        </div>
+                    </button>
+                    <button class="music-option" data-music-type="url">
+                        <i class="fas fa-link"></i>
+                        <div class="option-details">
+                            <strong>Custom Music URL</strong>
+                            <span>Enter a direct URL to your music file</span>
+                        </div>
+                    </button>
+                    <label for="music-upload-input" class="music-option" id="upload-music-option">
+                        <i class="fas fa-upload"></i>
+                        <div class="option-details">
+                            <strong>Upload Music (Local Play)</strong>
+                            <span>Select a music file from your device</span>
+                        </div>
+                    </label>
+                    <input type="file" id="music-upload-input" accept="audio/*" style="display: none;">
+                </div>
 
+                <button id="cancel-modal-btn">Cancel</button>
+            </div>
+        </div>
+
+    
     <script src="tma-script.js"></script>
 </body>
 </html>
+
