@@ -20,12 +20,12 @@
                         <h2>ZarOC (SarTo) Feed</h2>
                         <div class="header-icons">
                             <i class="fas fa-music" id="music-button"></i> 
-                            <i class="fas fa-volume-up" id="volume-toggle"></i> 
+                            <i class="fas fa-volume-off" id="volume-toggle"></i> 
                         </div>
                     </div>
                 </header>
                 <div class="music-status-bar">
-                    <span id="current-music-status">Loading Music...</span>
+                    <span id="current-music-status">Music Paused (Tap to Start)</span>
                 </div>
 
                 <div class="social-feed-section">
@@ -34,13 +34,14 @@
                         <textarea id="post-input" placeholder="Admin: What's new?"></textarea>
                         <button id="submit-post-btn"><i class="fas fa-bullhorn"></i> Announce</button>
                     </div>
-                    <div id="admin-message" class="admin-message">
-                        </div>
+                    <div id="admin-message" class="admin-message" style="display: none;">
+                    </div>
 
                     <div id="posts-container" class="posts-container">
-                        </div>
+                    </div>
                 </div>
             </div> 
+            
             <div id="profile-screen" class="screen"> 
                 <header class="profile-header">
                     <h2>Settings & Info</h2>
@@ -89,9 +90,50 @@
                     </div>
                 </div>
             </div>
-            </div> 
-        <div id="music-modal" class="modal">...</div>
-        <div id="url-input-modal" class="modal nested-modal">...</div>
+        </div> 
+
+        <div id="music-modal" class="modal">
+            <div class="modal-content">
+                <h3>Custom Music</h3>
+                
+                <div class="music-option-list">
+                    <button class="music-option" data-music-type="default">
+                        <i class="fas fa-music"></i>
+                        <div class="option-details">
+                            <strong>Default Music</strong>
+                            <span>Use the original background music</span>
+                        </div>
+                    </button>
+                    <button class="music-option" data-music-type="url">
+                        <i class="fas fa-link"></i>
+                        <div class="option-details">
+                            <strong>Custom Music URL</strong>
+                            <span>Enter a direct URL to your music file</span>
+                        </div>
+                    </button>
+                    <button class="music-option disabled" data-music-type="upload">
+                        <i class="fas fa-upload"></i>
+                        <div class="option-details">
+                            <strong>Upload Music (Not Available)</strong>
+                            <span>Select a music file from your device (Requires Backend)</span>
+                        </div>
+                    </button>
+                </div>
+
+                <button id="cancel-modal-btn">Cancel</button>
+            </div>
+        </div>
+
+        <div id="url-input-modal" class="modal nested-modal">
+            <div class="modal-content">
+                <h3>Enter Music URL</h3>
+                <input type="url" id="music-url-input" placeholder="e.g., https://example.com/song.mp3">
+                <div class="modal-actions">
+                    <button id="close-url-modal-btn" class="secondary-btn">Cancel</button>
+                    <button id="play-url-btn" class="primary-btn">Play Custom URL</button>
+                </div>
+            </div>
+        </div>
         
         <nav class="bottom-nav">
             <button class="nav-item active" data-screen="home-screen">
