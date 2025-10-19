@@ -34,12 +34,11 @@ function formatTime(timestamp) {
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
     
-    // Otherwise, show date/time
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + ', ' + date.toLocaleDateString('en-US');
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC
+//          POSTS & LIKES LOGIC (No major change needed)
 // ===========================================
 
 function savePosts(posts) {
@@ -56,7 +55,6 @@ function loadPosts(currentUserId) {
         const container = document.getElementById('posts-container');
         if (container) {
             container.innerHTML = ''; 
-            // Sort by latest first
             posts.sort((a, b) => b.timestamp - a.timestamp); 
             posts.forEach(post => {
                 container.appendChild(createPostElement(post, currentUserId));
@@ -65,7 +63,6 @@ function loadPosts(currentUserId) {
         addPostEventListeners(currentUserId);
     } catch (e) {
         console.error("Error loading posts:", e);
-        // Fallback or error message to user
         const container = document.getElementById('posts-container');
         if (container) {
              container.innerHTML = '<p style="text-align: center; color: #ff5252;">Failed to load posts due to an error.</p>';
@@ -139,16 +136,13 @@ function toggleLike(e, currentUserId) {
 
     if (postIndex === -1) return;
 
-    // Initialize like array if null
     likes[postId] = likes[postId] || []; 
     const isLiked = likes[postId].includes(currentUserId);
 
     if (isLiked) {
-        // Unlike: remove user ID
         likes[postId] = likes[postId].filter(id => id !== currentUserId);
         posts[postIndex].likesCount = (posts[postIndex].likesCount || 1) - 1;
     } else {
-        // Like: add user ID
         likes[postId].push(currentUserId);
         posts[postIndex].likesCount = (posts[postIndex].likesCount || 0) + 1;
     }
@@ -156,12 +150,12 @@ function toggleLike(e, currentUserId) {
     saveLikes(likes);
     savePosts(posts);
     
-    // UI Update (Re-render the list or just update the button for efficiency)
-    loadPosts(currentUserId); // Full re-render is easier for complex UIs
+    // Re-render to update the like count/button state immediately
+    loadPosts(currentUserId); 
 }
 
 function deletePost(e, currentUserId) {
-    if (currentUserId !== ADMIN_CHAT_ID) return; // Security check
+    if (currentUserId !== ADMIN_CHAT_ID) return; 
     
     const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
     if (!confirm('Are you sure you want to delete this post?')) return;
@@ -170,7 +164,6 @@ function deletePost(e, currentUserId) {
     const updatedPosts = posts.filter(p => p.id !== postId);
     savePosts(updatedPosts);
 
-    // Also clean up likes
     let likes = getLikes();
     delete likes[postId];
     saveLikes(likes);
@@ -179,10 +172,12 @@ function deletePost(e, currentUserId) {
 }
 
 // ===========================================
-//          USER LIST LOGIC
+//          USER LIST LOGIC (No major change needed)
 // ===========================================
 
 function saveCurrentUser(user) {
+    // Implementation is the same as previous version, saving user data to Local Storage
+    // ... (omitted for brevity)
     try {
         let users = JSON.parse(localStorage.getItem(APP_USERS_STORAGE_KEY) || '[]');
         const existingIndex = users.findIndex(u => u.id === user.id);
@@ -247,11 +242,10 @@ function renderUserList(containerId) {
         container.innerHTML = ''; 
         let allUsers = JSON.parse(localStorage.getItem(APP_USERS_STORAGE_KEY) || '[]');
 
-        // Sort: Admin first, then by lastSeen
         allUsers.sort((a, b) => {
             if (a.isAdmin && !b.isAdmin) return -1;
             if (!a.isAdmin && b.isAdmin) return 1;
-            return b.lastSeen - a.lastSeen; // Newest first
+            return b.lastSeen - a.lastSeen; 
         });
 
         if (allUsers.length === 0) {
@@ -269,7 +263,7 @@ function renderUserList(containerId) {
 
 
 // ===========================================
-//          MUSIC & MODAL LOGIC
+//          MUSIC & MODAL LOGIC (FIXED)
 // ===========================================
 
 const defaultMusicUrl = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3';
@@ -294,29 +288,31 @@ function setupMusicPlayer() {
     audioPlayer.src = currentMusicUrl;
     audioPlayer.loop = true;
 
-    // Attempt to auto-play when user is ready
+    // Use oncanplay to attempt play after a user interaction
     audioPlayer.oncanplay = () => {
         if (isMusicOn) {
             audioPlayer.play().catch(e => {
-                console.warn("Autoplay failed:", e);
+                // This is normal if there's no user interaction yet.
                 updateMusicStatus('Music Paused (Tap to Start)');
             });
         }
     };
     
-    // Update status bar on events
     audioPlayer.onplay = () => {
         updateMusicStatus(`Now Playing: ${currentMusicUrl.split('/').pop().substring(0, 30)}...`);
-        volumeToggleIcon.classList.remove('fa-volume-off');
-        volumeToggleIcon.classList.add('fa-volume-up');
+        if(volumeToggleIcon) {
+            volumeToggleIcon.classList.remove('fa-volume-off');
+            volumeToggleIcon.classList.add('fa-volume-up');
+        }
     };
     audioPlayer.onpause = () => {
         updateMusicStatus('Music Paused (Tap to Start)');
-        volumeToggleIcon.classList.remove('fa-volume-up');
-        volumeToggleIcon.classList.add('fa-volume-off');
+        if(volumeToggleIcon) {
+            volumeToggleIcon.classList.remove('fa-volume-up');
+            volumeToggleIcon.classList.add('fa-volume-off');
+        }
     };
 
-    // Initial status
     audioPlayer.pause();
     updateMusicStatus('Music Paused (Tap to Start)');
 }
@@ -328,6 +324,8 @@ function updateMusicStatus(status) {
 }
 
 function toggleVolume() {
+    if (!audioPlayer) return;
+
     if (audioPlayer.paused) {
         audioPlayer.play();
         isMusicOn = true;
@@ -355,11 +353,13 @@ function setCustomMusic(url) {
     audioPlayer.src = url;
     audioPlayer.load();
     audioPlayer.play().catch(e => console.error("Play failed after setting URL:", e));
+    // Close both modals just in case
     closeModal(musicModal);
     closeModal(urlInputModal);
 }
 
 function addMusicEventListeners() {
+    // FIX: Ensure elements exist before adding listeners
     if (document.getElementById('music-button')) {
         document.getElementById('music-button').onclick = () => openModal(musicModal);
     }
@@ -370,28 +370,32 @@ function addMusicEventListeners() {
         document.getElementById('cancel-modal-btn').onclick = () => closeModal(musicModal);
     }
     
-    // Music Options
-    document.querySelectorAll('.music-option').forEach(option => {
+    // Music Options (Use Event Delegation on the parent if possible, but direct listeners are safer here)
+    document.querySelectorAll('.music-option-list .music-option').forEach(option => {
         option.onclick = (e) => {
             const type = e.currentTarget.getAttribute('data-music-type');
             if (type === 'default') {
                 setCustomMusic(defaultMusicUrl);
             } else if (type === 'url') {
-                openModal(urlInputModal);
+                closeModal(musicModal); // Close main modal first
+                openModal(urlInputModal); // Open nested modal
             }
         };
     });
 
     // URL Modal Buttons
     if (document.getElementById('close-url-modal-btn')) {
-        document.getElementById('close-url-modal-btn').onclick = () => closeModal(urlInputModal);
+        document.getElementById('close-url-modal-btn').onclick = () => {
+            closeModal(urlInputModal);
+            openModal(musicModal); // Go back to main modal
+        };
     }
     if (document.getElementById('play-url-btn')) {
         document.getElementById('play-url-btn').onclick = () => {
             const urlInput = document.getElementById('music-url-input');
             if (urlInput && urlInput.value) {
                 setCustomMusic(urlInput.value);
-                urlInput.value = ''; // Clear input
+                urlInput.value = ''; 
             }
         };
     }
@@ -411,7 +415,7 @@ function addMusicEventListeners() {
 
 
 // ===========================================
-//          NAVIGATION & MAIN ENTRY
+//          NAVIGATION & MAIN ENTRY (FIXED)
 // ===========================================
 
 function switchScreen(targetScreenId) {
@@ -435,7 +439,8 @@ function setupNavigation() {
 
     // Bottom Nav Click Listener
     navItems.forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default link behavior
             const targetScreenId = item.getAttribute('data-screen');
             navItems.forEach(nav => nav.classList.remove('active'));
             item.classList.add('active');
@@ -443,16 +448,18 @@ function setupNavigation() {
         });
     });
 
-    // Profile Screen -> App Users Click (Switch to new screen)
+    // Profile Screen -> App Users Click 
     if (appUsersCard) {
-        appUsersCard.addEventListener('click', () => {
+        appUsersCard.addEventListener('click', (e) => {
+            e.preventDefault(); 
             switchScreen('user-list-screen');
         });
     }
 
     // Back Button Click (User List -> Profile)
     backButtons.forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault(); 
             const targetScreenId = button.getAttribute('data-target-screen');
             switchScreen(targetScreenId);
         });
@@ -463,7 +470,6 @@ function setupNavigation() {
 document.addEventListener('DOMContentLoaded', () => {
     
     let currentUserId = 0; 
-    let currentUserName = 'Guest';
 
     // ---------------------------------------------
     // 1. TMA Integration & Profile Data Filling Logic 
@@ -472,7 +478,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const tg = window.Telegram.WebApp;
         tg.ready();
         
-        // Use try-catch for safer initData parsing
         try {
             const user = tg.initDataUnsafe.user;
             const photoUrl = user.photo_url; 
@@ -484,15 +489,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const username = user.username;
                 const fullName = `${firstName} ${lastName}`.trim();
                 
-                currentUserName = fullName || 'User'; 
+                const currentUserName = fullName || 'User'; 
                 const isAdmin = (currentUserId === ADMIN_CHAT_ID);
 
                 saveCurrentUser(user); 
 
                 // Fill Profile Data
-                document.getElementById('profile-display-name').textContent = fullName || 'No Name Provided';
-                document.getElementById('profile-display-username').textContent = username ? `@${username}` : 'N/A';
-                document.getElementById('telegram-chat-id').textContent = currentUserId.toString();
+                if (document.getElementById('profile-display-name')) document.getElementById('profile-display-name').textContent = fullName || 'No Name Provided';
+                if (document.getElementById('profile-display-username')) document.getElementById('profile-display-username').textContent = username ? `@${username}` : 'N/A';
+                if (document.getElementById('telegram-chat-id')) document.getElementById('telegram-chat-id').textContent = currentUserId.toString();
                 
                 // Admin Status & Post Box Logic
                 const adminStatusEl = document.getElementById('admin-status');
@@ -546,15 +551,4 @@ document.addEventListener('DOMContentLoaded', () => {
                                 id: Date.now(),
                                 authorId: currentUserId,
                                 authorName: currentUserName,
-                                isAdmin: true,
-                                content: content,
-                                timestamp: Date.now(),
-                                likesCount: 0
-                            };
-                            posts.push(newPost);
-                            savePosts(posts);
-                            postInput.value = '';
-                            loadPosts(currentUserId);
-                        }
-                    };
-        
+                   
