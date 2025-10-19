@@ -5,7 +5,6 @@ const ADMIN_CHAT_ID = 1924452453;
 // --- LOCAL STORAGE KEYS ---
 const POSTS_STORAGE_KEY = 'tma_community_posts_v3'; 
 const LIKES_STORAGE_KEY = 'tma_user_likes'; 
-const APP_USERS_STORAGE_KEY = 'tma_app_users'; 
 const CUSTOM_MUSIC_KEY = 'tma_custom_music_url'; 
 
 // ===========================================
@@ -38,7 +37,7 @@ function formatTime(timestamp) {
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC (No major change needed)
+//          POSTS & LIKES LOGIC 
 // ===========================================
 
 function savePosts(posts) {
@@ -117,12 +116,10 @@ function createPostElement(post, currentUserId) {
 }
 
 function addPostEventListeners(currentUserId) {
-    // Likes Listener
     document.querySelectorAll('.like-btn').forEach(button => {
         button.onclick = (e) => toggleLike(e, currentUserId);
     });
 
-    // Delete Listener
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.onclick = (e) => deletePost(e, currentUserId);
     });
@@ -150,7 +147,6 @@ function toggleLike(e, currentUserId) {
     saveLikes(likes);
     savePosts(posts);
     
-    // Re-render to update the like count/button state immediately
     loadPosts(currentUserId); 
 }
 
@@ -172,98 +168,7 @@ function deletePost(e, currentUserId) {
 }
 
 // ===========================================
-//          USER LIST LOGIC (No major change needed)
-// ===========================================
-
-function saveCurrentUser(user) {
-    // Implementation is the same as previous version, saving user data to Local Storage
-    // ... (omitted for brevity)
-    try {
-        let users = JSON.parse(localStorage.getItem(APP_USERS_STORAGE_KEY) || '[]');
-        const existingIndex = users.findIndex(u => u.id === user.id);
-
-        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
-        const isCurrentUserAdmin = (user.id === ADMIN_CHAT_ID);
-
-        const newUserData = {
-            id: user.id,
-            name: fullName || `User ${user.id}`,
-            username: user.username || null,
-            photoUrl: user.photo_url || null, 
-            isAdmin: isCurrentUserAdmin,
-            avatarInitial: (fullName.charAt(0) || (isCurrentUserAdmin ? 'A' : 'U')).toUpperCase(),
-            avatarColor: stringToColor(user.id.toString()),
-            lastSeen: Date.now() 
-        };
-
-        if (existingIndex > -1) {
-            users[existingIndex] = newUserData;
-        } else {
-            users.push(newUserData);
-        }
-
-        localStorage.setItem(APP_USERS_STORAGE_KEY, JSON.stringify(users));
-    } catch (e) {
-        console.error("Error saving current user data:", e);
-    }
-}
-
-function createUserCardElement(user) {
-    const card = document.createElement('div');
-    card.className = 'user-card';
-
-    let avatarHtml;
-    if (user.photoUrl) {
-         avatarHtml = `<div class="user-avatar"><img src="${user.photoUrl}" alt="${user.name}"></div>`;
-    } else {
-        avatarHtml = `<div class="user-avatar" style="background-color: ${user.avatarColor};">${user.avatarInitial}</div>`;
-    }
-    
-    const adminTag = user.isAdmin ? ' (Admin)' : '';
-    const usernameDisplay = user.username ? `@${user.username}` : 'No Username';
-    const lastSeenTime = new Date(user.lastSeen).toLocaleDateString('en-US'); 
-
-    card.innerHTML = `
-        ${avatarHtml}
-        <div class="user-info">
-            <strong>${user.name} ${adminTag}</strong>
-            <span>${usernameDisplay}</span>
-            <span style="font-size: 11px; color: #555;">Last Opened: ${lastSeenTime}</span>
-        </div>
-    `;
-    return card;
-}
-
-function renderUserList(containerId) {
-    try {
-        const container = document.getElementById(containerId);
-        if (!container) return; 
-
-        container.innerHTML = ''; 
-        let allUsers = JSON.parse(localStorage.getItem(APP_USERS_STORAGE_KEY) || '[]');
-
-        allUsers.sort((a, b) => {
-            if (a.isAdmin && !b.isAdmin) return -1;
-            if (!a.isAdmin && b.isAdmin) return 1;
-            return b.lastSeen - a.lastSeen; 
-        });
-
-        if (allUsers.length === 0) {
-            container.innerHTML = '<p style="text-align: center; color: #aaa; padding-top: 20px;">No users found yet. Be the first!</p>';
-            return;
-        }
-
-        allUsers.forEach(user => {
-            container.appendChild(createUserCardElement(user));
-        });
-    } catch (e) {
-        console.error("Error rendering user list:", e);
-    }
-}
-
-
-// ===========================================
-//          MUSIC & MODAL LOGIC (FIXED)
+//          MUSIC & MODAL LOGIC (Stabilized)
 // ===========================================
 
 const defaultMusicUrl = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3';
@@ -292,7 +197,6 @@ function setupMusicPlayer() {
     audioPlayer.oncanplay = () => {
         if (isMusicOn) {
             audioPlayer.play().catch(e => {
-                // This is normal if there's no user interaction yet.
                 updateMusicStatus('Music Paused (Tap to Start)');
             });
         }
@@ -350,16 +254,17 @@ function closeModal(modal) {
 function setCustomMusic(url) {
     currentMusicUrl = url;
     localStorage.setItem(CUSTOM_MUSIC_KEY, url);
-    audioPlayer.src = url;
-    audioPlayer.load();
-    audioPlayer.play().catch(e => console.error("Play failed after setting URL:", e));
-    // Close both modals just in case
+    if(audioPlayer) {
+        audioPlayer.src = url;
+        audioPlayer.load();
+        audioPlayer.play().catch(e => console.error("Play failed after setting URL:", e));
+    }
+    
     closeModal(musicModal);
     closeModal(urlInputModal);
 }
 
 function addMusicEventListeners() {
-    // FIX: Ensure elements exist before adding listeners
     if (document.getElementById('music-button')) {
         document.getElementById('music-button').onclick = () => openModal(musicModal);
     }
@@ -370,15 +275,15 @@ function addMusicEventListeners() {
         document.getElementById('cancel-modal-btn').onclick = () => closeModal(musicModal);
     }
     
-    // Music Options (Use Event Delegation on the parent if possible, but direct listeners are safer here)
+    // Music Options 
     document.querySelectorAll('.music-option-list .music-option').forEach(option => {
         option.onclick = (e) => {
             const type = e.currentTarget.getAttribute('data-music-type');
             if (type === 'default') {
                 setCustomMusic(defaultMusicUrl);
             } else if (type === 'url') {
-                closeModal(musicModal); // Close main modal first
-                openModal(urlInputModal); // Open nested modal
+                closeModal(musicModal); 
+                openModal(urlInputModal); 
             }
         };
     });
@@ -387,7 +292,7 @@ function addMusicEventListeners() {
     if (document.getElementById('close-url-modal-btn')) {
         document.getElementById('close-url-modal-btn').onclick = () => {
             closeModal(urlInputModal);
-            openModal(musicModal); // Go back to main modal
+            openModal(musicModal); 
         };
     }
     if (document.getElementById('play-url-btn')) {
@@ -415,7 +320,7 @@ function addMusicEventListeners() {
 
 
 // ===========================================
-//          NAVIGATION & MAIN ENTRY (FIXED)
+//          NAVIGATION & MAIN ENTRY (FIXED to Home/Profile Only)
 // ===========================================
 
 function switchScreen(targetScreenId) {
@@ -424,23 +329,16 @@ function switchScreen(targetScreenId) {
     const targetScreen = document.getElementById(targetScreenId);
     if (targetScreen) {
         targetScreen.classList.add('active');
-        
-        // Render user list when accessing the screen
-        if (targetScreenId === 'user-list-screen') {
-            renderUserList('users-container');
-        }
     }
 }
 
 function setupNavigation() {
     const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-    const backButtons = document.querySelectorAll('.back-button'); 
-    const appUsersCard = document.getElementById('app-users-card');
 
-    // Bottom Nav Click Listener
+    // Bottom Nav Click Listener (Home/Profile only)
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent default link behavior
+            e.preventDefault(); 
             const targetScreenId = item.getAttribute('data-screen');
             navItems.forEach(nav => nav.classList.remove('active'));
             item.classList.add('active');
@@ -448,28 +346,14 @@ function setupNavigation() {
         });
     });
 
-    // Profile Screen -> App Users Click 
-    if (appUsersCard) {
-        appUsersCard.addEventListener('click', (e) => {
-            e.preventDefault(); 
-            switchScreen('user-list-screen');
-        });
-    }
-
-    // Back Button Click (User List -> Profile)
-    backButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault(); 
-            const targetScreenId = button.getAttribute('data-target-screen');
-            switchScreen(targetScreenId);
-        });
-    });
+    // NOTE: Removed all User List related navigation checks
 }
 
 
 document.addEventListener('DOMContentLoaded', () => {
     
     let currentUserId = 0; 
+    let currentUserName = 'Guest';
 
     // ---------------------------------------------
     // 1. TMA Integration & Profile Data Filling Logic 
@@ -489,12 +373,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const username = user.username;
                 const fullName = `${firstName} ${lastName}`.trim();
                 
-                const currentUserName = fullName || 'User'; 
+                currentUserName = fullName || 'User'; 
                 const isAdmin = (currentUserId === ADMIN_CHAT_ID);
 
-                saveCurrentUser(user); 
-
-                // Fill Profile Data
+                // --- PROFILE DATA FILLING ---
                 if (document.getElementById('profile-display-name')) document.getElementById('profile-display-name').textContent = fullName || 'No Name Provided';
                 if (document.getElementById('profile-display-username')) document.getElementById('profile-display-username').textContent = username ? `@${username}` : 'N/A';
                 if (document.getElementById('telegram-chat-id')) document.getElementById('telegram-chat-id').textContent = currentUserId.toString();
@@ -551,4 +433,34 @@ document.addEventListener('DOMContentLoaded', () => {
                                 id: Date.now(),
                                 authorId: currentUserId,
                                 authorName: currentUserName,
-                   
+                                isAdmin: true,
+                                content: content,
+                                timestamp: Date.now(),
+                                likesCount: 0
+                            };
+                            posts.push(newPost);
+                            savePosts(posts);
+                            postInput.value = '';
+                            loadPosts(currentUserId);
+                        }
+                    };
+                }
+                
+            } 
+        } catch (e) {
+             console.error("TMA Initialization Error:", e);
+        }
+    } else {
+        console.warn("Mini App launched outside Telegram. Using default user ID 0.");
+    }
+
+    // ---------------------------------------------
+    // 2. Setup All Features
+    // ---------------------------------------------
+    
+    loadPosts(currentUserId); 
+    setupNavigation();
+    setupMusicPlayer();
+    addMusicEventListeners();
+});
+                         
