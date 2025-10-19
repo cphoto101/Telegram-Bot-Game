@@ -1,95 +1,350 @@
+/* Global Reset and Body Styling */
 body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background-color: #121212;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: #fff;
+    /* Mobile-friendly: 100vh ကို အသုံးပြုပြီး content ကို အပြည့်ပြပါမည်။ */
+    height: 100vh;
+    overflow: hidden; /* Scroll ကို app-container မှာ ထိန်းချုပ်ရန် */
 }
 
-header {
-  text-align: center;
-  padding: 1rem;
-  background: #1f1f1f;
-  font-size: 1.3rem;
-  letter-spacing: 1px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+.app-container {
+    max-width: 450px; /* Mobile width ကန့်သတ်ချက် */
+    height: 100%;
+    margin: 0 auto;
+    background-color: #000;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .content {
-  flex: 1;
-  padding: 1rem;
-  overflow-y: auto;
-  display: none;
+    flex-grow: 1;
+    overflow-y: auto; /* Content တွေကို Scroll လုပ်နိုင်ရန် */
+    padding-bottom: 70px; /* Bottom Nav ကို ဖုံးသွားခြင်းမှ ကာကွယ်ရန် */
 }
 
-.content.active {
-  display: block;
+/* Screen Management */
+.screen {
+    display: none;
+    padding: 0;
 }
 
-/* Tabs */
+.screen.active {
+    display: block;
+}
+
+/* Header Styling (Main Screen) */
+.main-header {
+    background-color: #000;
+    padding: 15px 15px 0 15px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #1c1c1c;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-content h2 {
+    font-size: 20px;
+    margin: 0;
+}
+
+.header-icons i {
+    font-size: 18px;
+    margin-left: 15px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.music-status {
+    font-size: 14px;
+    color: #aaa;
+    padding: 10px 0;
+}
+
+/* Game Center Section */
+.game-center-section {
+    padding: 15px;
+}
+
+.game-center-section h1 {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.game-center-section p {
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background-color: #2e2e2e;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.player-stats-btn {
+    background-color: #6a1b9a; /* ခရမ်းရောင် */
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.pink { color: #e91e63; }
+.blue { color: #2196f3; }
+.green { color: #4caf50; }
+.yellow { color: #ffeb3b; }
+
+/* Profile Screen Styling */
+.profile-header {
+    background-color: #000;
+    padding: 15px;
+    border-bottom: 1px solid #1c1c1c;
+}
+
+.profile-header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.telegram-info-section {
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.telegram-info-section h1 {
+    font-size: 24px;
+    margin-bottom: 30px;
+}
+
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #333;
+    overflow: hidden;
+    margin-bottom: 20px;
+    border: 3px solid #6a1b9a;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.info-card {
+    background-color: #2e2e2e;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.info-card i {
+    font-size: 24px;
+    color: #2196f3;
+    margin-right: 15px;
+}
+
+.info-card div {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.info-title {
+    color: #aaa;
+    font-size: 14px;
+}
+
+.info-subtitle {
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#telegram-username-card {
+    cursor: pointer;
+}
+
+.arrow-icon {
+    font-size: 14px;
+    color: #fff;
+}
+
+.logout-btn {
+    background-color: #f44336;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 30px;
+    cursor: pointer;
+}
+
+/* Bottom Navigation Bar */
 .bottom-nav {
-  display: flex;
-  background: #1f1f1f;
-  justify-content: space-around;
-  padding: 0.7rem 0;
-  border-top: 1px solid #333;
+    background-color: #1c1c1c;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 60px;
+    border-top: 1px solid #333;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
-.bottom-nav button {
-  background: none;
-  border: none;
-  color: #aaa;
-  font-size: 1rem;
-  cursor: pointer;
+.nav-item {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px 0;
+    font-size: 12px;
 }
 
-.bottom-nav button.active {
-  color: #00bcd4;
-  font-weight: bold;
+.nav-item i {
+    font-size: 20px;
+    margin-bottom: 3px;
 }
 
-/* Music section */
-.song {
-  background: #1c1c1c;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.nav-item.active {
+    color: #2196f3; /* Active tab color */
 }
 
-.song button {
-  background: #00bcd4;
-  border: none;
-  color: white;
-  border-radius: 5px;
-  padding: 5px 10px;
-  cursor: pointer;
+/* Modal Styling */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
-/* Profile section */
-.profile-container {
-  text-align: center;
-  margin-top: 20px;
+.modal-content {
+    background-color: #000;
+    margin: 15% auto; /* မျက်နှာပြင် အလယ်လောက် */
+    padding: 20px;
+    border: 1px solid #333;
+    width: 80%;
+    max-width: 350px;
+    border-radius: 10px;
 }
 
-.profile-pic {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: #333;
-  margin: auto;
-  object-fit: cover;
+.modal-content h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
 }
 
-.profile-info {
-  margin-top: 10px;
+.music-option {
+    display: flex;
+    align-items: center;
+    background-color: #1c1c1c;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    cursor: pointer;
 }
 
-.profile-info p {
-  margin: 5px 0;
-  color: #ccc;
+.music-option i {
+    font-size: 20px;
+    color: #2196f3;
+    margin-right: 15px;
+}
+
+.music-option h4 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.music-option p {
+    margin: 0;
+    color: #aaa;
+    font-size: 12px;
+}
+
+#close-modal-btn {
+    width: 100%;
+    background-color: transparent;
+    color: #f44336;
+    border: none;
+    padding: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+/* URL Input Modal */
+.nested-modal .modal-content {
+    margin: 25% auto; /* ပိုပြီး အပေါ်မှာ ပေါ်စေရန် */
+}
+
+#music-url-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #1c1c1c;
+    border: 1px solid #444;
+    color: #fff;
+    box-sizing: border-box;
+    border-radius: 5px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+#play-url-btn {
+    background-color: #2196f3;
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* For Upload Music (Hidden Input) */
+#file-upload-input {
+    display: none;
 }
