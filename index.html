@@ -29,33 +29,27 @@
                     </div>
                 </header>
 
-                <div class="game-center-section">
-                    <h1>Game Center</h1>
-                    <p>Control panel and game statistics</p>
+                <div class="social-feed-section">
+                    <h1>Post Feed</h1>
+                    <p>Share your thoughts with the community.</p>
 
-                    <div class="stat-card player-stats-card">
-                        <span>09684793436</span>
-                        <button class="player-stats-btn">Player Stats</button>
+                    <div class="post-create-box">
+                        <textarea id="post-input" placeholder="What's on your mind?"></textarea>
+                        <button id="submit-post-btn"><i class="fas fa-paper-plane"></i> Post</button>
                     </div>
 
-                    <div class="stat-card">
-                        <span>အသက်</span>
-                        <span class="stat-value pink">7</span>
-                    </div>
-
-                    <div class="stat-card">
-                        <span>အသက်ခ်</span>
-                        <span class="stat-value blue">6</span>
-                    </div>
-
-                    <div class="stat-card">
-                        <span>ကျန်ရှိသော ကစားခွင့်</span>
-                        <span class="stat-value green">6</span>
-                    </div>
-
-                    <div class="stat-card">
-                        <span>ရွှေ</span>
-                        <span class="stat-value yellow">3,590</span>
+                    <div id="posts-container" class="posts-container">
+                        <div class="post-card">
+                            <div class="post-header">
+                                <span class="post-author"><i class="fas fa-user-circle"></i> Sample User</span>
+                                <span class="post-time">1 hour ago</span>
+                            </div>
+                            <p class="post-content">Welcome to the new Home Feed! This is a sample post.</p>
+                            <div class="post-actions">
+                                <button><i class="fas fa-thumbs-up"></i> Like (0)</button>
+                                <button><i class="fas fa-comment"></i> Comment</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -67,32 +61,29 @@
                 <div class="telegram-info-section">
                     <h1>Telegram Account Info</h1>
 
-                    <div class="profile-avatar">
-                        <img id="profile-img" src="https://via.placeholder.com/120/333333/FFFFFF?text=P" alt="Profile Picture">
-                    </div>
-
-                    <div class="info-card">
-                        <i class="fas fa-user-circle"></i>
-                        <div>
-                            <span class="info-title">Name</span>
-                            <span class="info-subtitle" id="telegram-name">Loading...</span>
+                    <div class="profile-avatar-container">
+                        <div class="profile-avatar">
+                            <img id="profile-img" src="https://via.placeholder.com/120/333333/FFFFFF?text=P" alt="Profile Picture">
                         </div>
+                        <h3 id="profile-display-name">Loading Name...</h3>
+                        <p id="profile-display-username" class="username-display">Loading Username...</p>
                     </div>
 
-                    <div class="info-card" id="telegram-username-card">
-                        <i class="fas fa-at"></i>
-                        <div>
-                            <span class="info-title">Username</span>
-                            <span class="info-subtitle" id="telegram-username">Loading...</span>
+                    <div class="info-list-container">
+                        <div class="info-item">
+                            <i class="fas fa-id-badge"></i>
+                            <div class="info-details">
+                                <span class="info-title">Chat ID (User ID)</span>
+                                <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
+                            </div>
                         </div>
-                        <i class="fas fa-chevron-right arrow-icon"></i>
-                    </div>
-
-                    <div class="info-card">
-                        <i class="fas fa-id-badge"></i>
-                        <div>
-                            <span class="info-title">Chat ID (User ID)</span>
-                            <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
+                        <div class="info-item" id="telegram-username-card-profile">
+                            <i class="fas fa-link"></i>
+                            <div class="info-details">
+                                <span class="info-title">View Telegram Profile</span>
+                                <span class="info-subtitle">Tap to open t.me/username</span>
+                            </div>
+                            <i class="fas fa-chevron-right arrow-icon"></i>
                         </div>
                     </div>
 
@@ -103,43 +94,8 @@
             </div>
         </div>
 
-        <div id="music-modal" class="modal">
-            <div class="modal-content">
-                <h3>Custom Music</h3>
-                <div class="music-option" data-music-type="default">
-                    <i class="fas fa-music"></i>
-                    <div>
-                        <h4>Default Music (SoundHelix)</h4>
-                        <p>Use the background music</p>
-                    </div>
-                </div>
-                <div class="music-option" data-music-type="url">
-                    <i class="fas fa-link"></i>
-                    <div>
-                        <h4>Custom Music URL</h4>
-                        <p>Enter a direct URL to your music file</p>
-                    </div>
-                </div>
-                <div class="music-option" data-music-type="upload">
-                    <i class="fas fa-upload"></i>
-                    <div>
-                        <h4>Upload Music</h4>
-                        <p>Select a music file from your device</p>
-                    </div>
-                </div>
-                <button id="close-modal-btn">Cancel</button>
-            </div>
-        </div>
-
-        <div id="url-input-modal" class="modal nested-modal">
-            <div class="modal-content">
-                <h3>Enter Music URL</h3>
-                <input type="url" id="music-url-input" placeholder="e.g. https://example.com/song.mp3">
-                <div class="modal-actions">
-                    <button id="play-url-btn">Play</button>
-                </div>
-            </div>
-        </div>
+        <div id="music-modal" class="modal">...</div>
+        <div id="url-input-modal" class="modal nested-modal">...</div>
         
         <nav class="bottom-nav">
             <button class="nav-item active" data-screen="home-screen">
