@@ -1,7 +1,10 @@
 // ********** SET YOUR ADMIN CHAT ID HERE **********
-// ဤနံပါတ်ကို သင့်ရဲ့ Telegram ID ဖြင့် မဖြစ်မနေ အစားထိုးပါ။
-const ADMIN_CHAT_ID = 1924452453; 
+const ADMIN_CHAT_ID = 123456789; 
 // *************************************************
+
+// --- LOCAL STORAGE KEYS ---
+const POSTS_STORAGE_KEY = 'tma_community_posts_v3'; // Increased version for like logic
+const LIKES_STORAGE_KEY = 'tma_user_likes'; 
 
 // Helper function for dynamic color generation based on user ID
 function stringToColor(str) {
@@ -28,12 +31,16 @@ function formatTime(timestamp) {
     return "Just now";
 }
 
-// Helper function to create a new post element (Same as before)
-function createPostElement(post, currentUserId) {
+// Helper function to create a new post element
+function createPostElement(post, currentUserId, userLikes) {
     const isAdminPost = (post.authorId === ADMIN_CHAT_ID);
     const postCard = document.createElement('div');
     postCard.className = 'post-card';
     postCard.setAttribute('data-post-id', post.id);
+
+    // Check if the current user has liked this post
+    const isLiked = userLikes.includes(post.id);
+    const likeClass = isLiked ? 'like-btn liked' : 'like-btn';
 
     const authorClass = isAdminPost ? 'post-author admin' : 'post-author';
     const authorIcon = isAdminPost ? 'fas fa-crown' : 'fas fa-user-circle';
@@ -50,36 +57,36 @@ function createPostElement(post, currentUserId) {
         </div>
         <p class="post-content">${post.content}</p>
         <div class="post-actions">
-            <button><i class="fas fa-thumbs-up"></i> Like (0)</button>
+            <button class="${likeClass}" data-post-id="${post.id}">
+                <i class="fas fa-thumbs-up"></i> 
+                Like (<span class="like-count">${post.likes || 0}</span>)
+            </button>
             ${deleteButton}
         </div>
     `;
     return postCard;
 }
 
-// --- LOCAL STORAGE POSTS MANAGEMENT (Same as before) ---
-const POSTS_STORAGE_KEY = 'tma_community_posts_v2'; 
+// --- LOCAL STORAGE POSTS MANAGEMENT ---
 
 function loadPosts(currentUserId) {
     const postsContainer = document.getElementById('posts-container');
     const posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
+    const userLikes = JSON.parse(localStorage.getItem(LIKES_STORAGE_KEY) || '[]');
     
     postsContainer.innerHTML = ''; 
     posts.slice().reverse().forEach(post => {
-        postsContainer.appendChild(createPostElement(post, currentUserId));
+        postsContainer.appendChild(createPostElement(post, currentUserId, userLikes));
     });
     
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const postId = e.currentTarget.getAttribute('data-post-id');
-            deletePost(postId, currentUserId);
-        });
-    });
+    // Add event listeners for new elements
+    addPostEventListeners(currentUserId);
 }
 
 function savePost(post) {
     const posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
     post.id = Date.now().toString(); 
+    post.likes = 0; // Initialize likes count
     posts.push(post);
     localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts));
 }
@@ -97,17 +104,72 @@ function deletePost(postId, currentUserId) {
     let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
     posts = posts.filter(post => post.id !== postId);
     localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts));
+    
+    // Also remove from user likes
+    let userLikes = JSON.parse(localStorage.getItem(LIKES_STORAGE_KEY) || '[]');
+    userLikes = userLikes.filter(id => id !== postId);
+    localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(userLikes));
+    
     loadPosts(currentUserId); 
 }
 
-// --- MUSIC PLAYER & MODAL LOGIC (Modified for Upload) ---
+// --- LIKE LOGIC (NEW) ---
+function toggleLike(postId, button, currentUserId) {
+    if (currentUserId === 0) {
+        alert("You must be logged in via Telegram Mini App to like posts.");
+        return;
+    }
+    
+    let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
+    let userLikes = JSON.parse(localStorage.getItem(LIKES_STORAGE_KEY) || '[]');
+    const postIndex = posts.findIndex(p => p.id === postId);
+
+    if (postIndex === -1) return; 
+
+    const isLiked = userLikes.includes(postId);
+    
+    if (isLiked) {
+        // Unlike the post
+        posts[postIndex].likes = Math.max(0, posts[postIndex].likes - 1); // Decrease like count
+        userLikes = userLikes.filter(id => id !== postId); // Remove from user's liked list
+        button.classList.remove('liked');
+        button.querySelector('.like-count').textContent = posts[postIndex].likes;
+    } else {
+        // Like the post
+        posts[postIndex].likes = (posts[postIndex].likes || 0) + 1; // Increase like count
+        userLikes.push(postId); // Add to user's liked list
+        button.classList.add('liked');
+        button.querySelector('.like-count').textContent = posts[postIndex].likes;
+    }
+    
+    // Save changes back to Local Storage
+    localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts));
+    localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(userLikes));
+}
+
+function addPostEventListeners(currentUserId) {
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const postId = e.currentTarget.getAttribute('data-post-id');
+            deletePost(postId, currentUserId);
+        });
+    });
+    
+    document.querySelectorAll('.like-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const postId = e.currentTarget.getAttribute('data-post-id');
+            toggleLike(postId, e.currentTarget, currentUserId);
+        });
+    });
+}
+
+
+// --- MUSIC PLAYER & MODAL LOGIC (Same as previous version) ---
 let isMusicOn = false;
 const DEFAULT_MUSIC_SRC = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; 
 
-// Function to safely start/stop music with a new URL
 function toggleMusic(audioPlayer, volumeToggle, currentMusicStatus, src = DEFAULT_MUSIC_SRC, songName = 'Default Music') {
     if (isMusicOn && audioPlayer.src === src) {
-        // Stop current if playing the same source
         audioPlayer.pause();
         isMusicOn = false;
         volumeToggle.classList.replace('fa-volume-up', 'fa-volume-off');
@@ -132,7 +194,6 @@ function toggleMusic(audioPlayer, volumeToggle, currentMusicStatus, src = DEFAUL
             volumeToggle.classList.replace('fa-volume-up', 'fa-volume-off');
             currentMusicStatus.textContent = 'Playback Failed. Tap volume icon to retry.';
             
-            // Store the source for retry button
             audioPlayer.setAttribute('data-last-src', src);
             audioPlayer.setAttribute('data-last-name', songName);
         });
@@ -141,39 +202,41 @@ function toggleMusic(audioPlayer, volumeToggle, currentMusicStatus, src = DEFAUL
 
 document.addEventListener('DOMContentLoaded', () => {
     // UI Elements
-    const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-    const screens = document.querySelectorAll('.content .screen');
     const volumeToggle = document.getElementById('volume-toggle');
     const musicButton = document.getElementById('music-button');
     const currentMusicStatus = document.getElementById('current-music-status');
     const audioPlayer = document.getElementById('audio-player');
     const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
-    // ... (other post/admin elements)
-    const profileUsernameCard = document.getElementById('telegram-username-card-profile');
+    const adminPostBox = document.getElementById('admin-post-box');
+    const adminMessage = document.getElementById('admin-message');
+    const adminStatusDiv = document.getElementById('admin-status');
+    
+    // Post Elements
+    const submitPostBtn = document.getElementById('submit-post-btn');
+    const postInput = document.getElementById('post-input');
     
     // Modal Elements
     const musicModal = document.getElementById('music-modal');
     const cancelModalBtn = document.getElementById('cancel-modal-btn');
     const urlInputModal = document.getElementById('url-input-modal');
-    const closeUrlModalBtn = document.getElementById('close-url-modal-btn');
     const playUrlBtn = document.getElementById('play-url-btn');
     const musicUrlInput = document.getElementById('music-url-input');
-    const uploadMusicInput = document.getElementById('music-upload-input'); // New
-    const musicOptions = document.querySelectorAll('.music-option');
-
-
+    const uploadMusicInput = document.getElementById('music-upload-input'); 
+    
     let currentUserId = 0; 
     let currentUserName = 'Guest';
     let currentUsernameLink = '';
     
     // ---------------------------------------------
-    // 1. TMA Integration & Profile Data Filling Logic (Admin Check & Photo Logic)
+    // 1. TMA Integration & Profile Data Filling Logic (Photo Logic Included)
     // ---------------------------------------------
     if (typeof window.Telegram.WebApp !== 'undefined') {
         const tg = window.Telegram.WebApp;
         tg.ready();
         const user = tg.initDataUnsafe.user;
-        const photoUrl = user.photo_url; // TMA initData မှာ photo_url ပါလာနိုင်သည်
+        
+        // Telegram initDataUnsafe မှာ photo_url ပါလာနိုင်ပေမယ့် တရားဝင်အမြဲတမ်းမဟုတ်ပါ
+        const photoUrl = user.photo_url; 
 
         if (user) {
             currentUserId = user.id || 0;
@@ -186,21 +249,28 @@ document.addEventListener('DOMContentLoaded', () => {
             currentUsernameLink = user.username;
             const isAdmin = (currentUserId === ADMIN_CHAT_ID);
 
-            // Profile Data Filling & Admin Check (Same as before)
+            // Profile Data Filling & Admin Check
             document.getElementById('profile-display-name').textContent = fullName || 'No Name Provided';
             document.getElementById('profile-display-username').textContent = username;
             document.getElementById('telegram-chat-id').textContent = currentUserId.toString();
             
-            // ... (Admin Status Logic) ...
+            // Admin Status Logic
+            if (isAdmin) {
+                adminStatusDiv.textContent = 'Administrator';
+                adminPostBox.style.display = 'block';
+            } else {
+                adminStatusDiv.textContent = 'Regular User';
+                adminPostBox.style.display = 'none';
+                adminMessage.textContent = 'Only the Admin can post announcements.';
+                adminMessage.style.display = 'block';
+            }
 
-            // 🚨 Profile Photo Logic (FIXED)
+            // 🚨 Profile Photo Logic (CSS style ကို တိုက်ရိုက်ပြောင်း)
             if (photoUrl) {
-                // If photo_url is available in initDataUnsafe (rarely available)
                 profileAvatarPlaceholder.innerHTML = `<img src="${photoUrl}" style="width: 100%; height: 100%; border-radius: 50%;">`;
                 profileAvatarPlaceholder.style.backgroundColor = 'transparent';
                 profileAvatarPlaceholder.textContent = '';
             } else {
-                // Use initials and generated color if no photo_url (Normal TMA behavior)
                 const userIdStr = currentUserId.toString();
                 const userColor = stringToColor(userIdStr);
                 const initial = (fullName.charAt(0) || 'U').toUpperCase();
@@ -214,55 +284,80 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } 
     } else {
-        // ... (External Access Logic - Same as before) ...
+        // External Access / Sample Data
+        adminPostBox.style.display = 'none';
+        adminMessage.textContent = 'Running outside TMA. Posts are read-only.';
+        adminMessage.style.display = 'block';
     }
 
     // ---------------------------------------------
-    // 2. Initial Load and Logic Execution (Same as before)
+    // 2. Initial Load and Logic Execution
     // ---------------------------------------------
     loadPosts(currentUserId); 
 
     // ---------------------------------------------
-    // 3. Post Submission Logic (Same as before)
+    // 3. Post Submission Logic (Admin Only)
     // ---------------------------------------------
-    // ... (submitPostBtn event listener) ...
+    submitPostBtn.addEventListener('click', () => {
+        if (currentUserId !== ADMIN_CHAT_ID) {
+            alert("Permission denied. Only the Admin can submit posts.");
+            return;
+        }
+
+        const postContent = postInput.value.trim();
+        if (postContent.length > 0) {
+            const newPostData = {
+                author: currentUserName,
+                authorId: currentUserId, 
+                content: postContent,
+                timestamp: new Date().toISOString()
+            };
+            
+            savePost(newPostData); 
+            loadPosts(currentUserId); 
+            postInput.value = '';
+            
+            if (window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+                window.Telegram.WebApp.showAlert('Announcement posted successfully!');
+            } else {
+                alert('Announcement posted successfully!');
+            }
+        } else {
+            alert('Post content cannot be empty.');
+        }
+    });
 
     // ---------------------------------------------
-    // 4. Navigation & Music Modal Logic FIX
+    // 4. Navigation & Music Modal Logic 
     // ---------------------------------------------
-    // ... (Navigation logic - Same as before) ...
+    document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const targetScreenId = item.getAttribute('data-screen');
+
+            document.querySelectorAll('.content .screen').forEach(screen => screen.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav .nav-item').forEach(nav => nav.classList.remove('active'));
+
+            document.getElementById(targetScreenId).classList.add('active');
+            item.classList.add('active');
+        });
+    });
 
     // --- Music Modal Control ---
-    musicButton.addEventListener('click', () => {
-        musicModal.style.display = 'flex';
-    });
-
-    cancelModalBtn.addEventListener('click', () => {
-        musicModal.style.display = 'none';
-    });
-
-    closeUrlModalBtn.addEventListener('click', () => {
-        urlInputModal.style.display = 'none';
-    });
+    musicButton.addEventListener('click', () => { musicModal.style.display = 'flex'; });
+    cancelModalBtn.addEventListener('click', () => { musicModal.style.display = 'none'; });
+    document.getElementById('close-url-modal-btn').addEventListener('click', () => { urlInputModal.style.display = 'none'; });
     
-    // Close Modals when clicking outside the content area
     musicModal.addEventListener('click', (e) => {
-        if (e.target.id === 'music-modal') {
-            musicModal.style.display = 'none';
-        }
+        if (e.target.id === 'music-modal') { musicModal.style.display = 'none'; }
     });
     urlInputModal.addEventListener('click', (e) => {
-        if (e.target.id === 'url-input-modal') {
-            urlInputModal.style.display = 'none';
-        }
+        if (e.target.id === 'url-input-modal') { urlInputModal.style.display = 'none'; }
     });
 
     // --- Music Option Select Logic ---
-    musicOptions.forEach(option => {
-        // Default and URL options are handled by JS, Upload is handled by <label>
+    document.querySelectorAll('.music-option').forEach(option => {
         option.addEventListener('click', (e) => {
             const type = e.currentTarget.getAttribute('data-music-type');
-            
             if (type === 'default') {
                 musicModal.style.display = 'none'; 
                 toggleMusic(audioPlayer, volumeToggle, currentMusicStatus, DEFAULT_MUSIC_SRC, 'Default Music');
@@ -285,19 +380,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- 🚨 Upload Music File Handler (NEW) ---
+    // --- Upload Music File Handler ---
     uploadMusicInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        musicModal.style.display = 'none'; // Close modal
+        musicModal.style.display = 'none'; 
         
         if (file && file.type.startsWith('audio/')) {
-            // Create a temporary URL for the file in the browser's memory
             const localUrl = URL.createObjectURL(file);
             const songName = `Uploaded: ${file.name}`;
             
             toggleMusic(audioPlayer, volumeToggle, currentMusicStatus, localUrl, songName);
             
-            // Clean up the URL when audio finishes to save memory
             audioPlayer.addEventListener('ended', () => {
                 URL.revokeObjectURL(localUrl);
             }, { once: true });
@@ -305,24 +398,20 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (file) {
              alert("Please select an audio file.");
         }
-        // Clear input value to allow selecting the same file again
         e.target.value = null; 
     });
 
 
     // --- Volume Toggle (Primary Play/Pause/Retry Button) ---
     volumeToggle.addEventListener('click', () => {
-        if (isMusicOn) {
-            toggleMusic(audioPlayer, volumeToggle, currentMusicStatus, audioPlayer.src, currentMusicStatus.textContent.replace(' (ON)', ''));
-        } else {
-            const lastSrc = audioPlayer.getAttribute('data-last-src') || DEFAULT_MUSIC_SRC;
-            const lastName = audioPlayer.getAttribute('data-last-name') || 'Default Music';
-            toggleMusic(audioPlayer, volumeToggle, currentMusicStatus, lastSrc, lastName);
-        }
+        const lastSrc = audioPlayer.getAttribute('data-last-src') || DEFAULT_MUSIC_SRC;
+        const lastName = audioPlayer.getAttribute('data-last-name') || 'Default Music';
+        
+        toggleMusic(audioPlayer, volumeToggle, currentMusicStatus, isMusicOn ? audioPlayer.src : lastSrc, isMusicOn ? currentMusicStatus.textContent.replace(' (ON)', '') : lastName);
     });
 
-    // --- Telegram Profile Link (Same as before) ---
-    profileUsernameCard.addEventListener('click', () => {
+    // --- Telegram Profile Link ---
+    document.getElementById('telegram-username-card-profile').addEventListener('click', () => {
         if (currentUsernameLink) {
             window.open(`https://t.me/${currentUsernameLink}`, '_blank');
         } else {
@@ -330,4 +419,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-                          
+        
