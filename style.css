@@ -1,6 +1,6 @@
-/* Telegram Web App Theme Variables (Optional but good practice) */
+/* --- Root Variables & Base Setup --- */
 :root {
-    /* These values are placeholders and will be overwritten by Telegram WebApp SDK themeParams */
+    /* Fallback Telegram Theme Variables */
     --tg-theme-bg-color: #f4f4f4;
     --tg-theme-text-color: #1a1a1a;
     --tg-theme-link-color: #007aff;
@@ -8,317 +8,382 @@
     --tg-theme-button-color: #007aff;
     --tg-theme-button-text-color: #ffffff;
     --tg-theme-secondary-bg-color: #ffffff;
+    --tg-theme-destructive-text-color: #ff3b30;
+    --tg-theme-accent: #ff8a00; /* Custom Accent Color for Admin/Highlights */
 }
 
-/* Adjust colors based on actual TMA theme if available */
 body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
     background-color: var(--tg-theme-bg-color);
     color: var(--tg-theme-text-color);
-    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: background-color 0.3s;
 }
 
-/* Scrollbar Hide (iOS/Android smooth scrolling) */
-.content::-webkit-scrollbar {
+.app-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative; /* For toast */
+}
+
+/* --- Content & Screen Management --- */
+.fixed-header-area {
+    width: 100%;
+    background-color: var(--tg-theme-bg-color);
+    padding-top: 5px; 
+    box-shadow: 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0 15px; 
+    /* Header (120px) + Bottom Nav (60px) နေရာချန်ရန် */
+    padding-bottom: 70px; 
+    -webkit-overflow-scrolling: touch;
+    padding-top: 130px; /* Header space */
+    transition: padding-top 0.3s;
+}
+
+#profile-screen {
+    padding-top: 10px; /* Profile screen doesn't need header space */
+}
+.screen {
     display: none;
 }
-.content {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+.screen.active {
+    display: block;
 }
 
-/* ==================================== */
-/* NEW: FIXED HEADER AREA STYLES */
-/* ==================================== */
-
-/* Fixed Container: Always stays at the top */
-.fixed-header-area {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 0 15px; /* Horizontal padding for alignment */
-    background-color: var(--tg-theme-bg-color); /* Background for fixed header */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    z-index: 1010; /* Above content, below modals */
-    /* Ensure the background color covers the entire area even on scroll */
-    padding-bottom: 10px; /* Spacing at the bottom of the fixed area */
-    box-sizing: border-box; /* Include padding in the element's total width and height */
-}
-
-/* Compensate the content for the fixed header height */
-/* The value 155px is kept as it compensates for the header (40px) + music status (40px) + filter tabs (40px) + margins/paddings (~35px) */
-.app-container > .content {
-    padding-top: 155px; 
-}
-
-/* ==================================== */
-/* 1. Header and Navigation */
-/* ==================================== */
-
+/* --- Header Styles --- */
 .main-header {
-    margin-bottom: 10px; /* Reduced margin since we have music bar below */
-    padding-top: 15px; /* Top padding to match old screen start */
+    padding: 5px 15px 0 15px;
 }
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-
-/* NEW: Cool App Name Font Styling */
 .app-title-fixed {
-    font-size: 1.6rem; /* Slightly larger */
-    font-weight: 900; /* Extra Bold */
-    margin: 0;
-    color: var(--tg-theme-text-color, #1a1a1a); 
-    text-shadow: 
-        1px 1px 0 var(--tg-theme-secondary-bg-color),
-        2px 2px 5px rgba(0, 0, 0, 0.1); 
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--tg-theme-text-color);
 }
-
-
 .header-icons i {
-    font-size: 1.3rem;
-    margin-left: 15px;
+    font-size: 1.1rem;
     cursor: pointer;
+    margin-left: 15px;
+    color: var(--tg-theme-link-color);
+    transition: color 0.2s;
+}
+
+/* --- Music Status Bar --- */
+.music-status-bar {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 4px 15px;
     color: var(--tg-theme-hint-color);
-    transition: color 0.2s, transform 0.2s;
+    background-color: var(--tg-theme-secondary-bg-color);
+    cursor: pointer;
+    margin: 5px 15px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
 }
-.header-icons i:active {
-    transform: scale(0.9);
+
+/* --- Filter Tabs --- */
+.post-filter-tabs {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    background-color: var(--tg-theme-bg-color);
 }
-/* Active volume icon color */
-.header-icons .fa-volume-up {
+.filter-tab {
+    background: transparent;
+    border: none;
+    color: var(--tg-theme-hint-color);
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+}
+.filter-tab.active {
     color: var(--tg-theme-link-color);
 }
+.filter-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 10%;
+    width: 80%;
+    height: 3px;
+    background-color: var(--tg-theme-link-color);
+    border-radius: 2px;
+}
 
+/* --- Post Card Styles --- */
+.posts-container {
+    padding-top: 10px;
+}
+.post-card {
+    background-color: var(--tg-theme-secondary-bg-color);
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+.post-content {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+}
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(153, 153, 153, 0.1);
+    padding-top: 8px;
+    margin-top: 5px;
+}
+.like-btn, .delete-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
+}
+.like-btn {
+    color: var(--tg-theme-hint-color);
+}
+.like-btn i {
+    margin-right: 5px;
+}
+.like-btn:hover {
+    background-color: rgba(0, 122, 255, 0.1);
+}
+.like-btn.liked {
+    color: var(--tg-theme-destructive-text-color); /* Red for liked */
+}
+.delete-btn {
+    color: var(--tg-theme-destructive-text-color);
+}
+
+/* --- Bottom Navigation --- */
 .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 60px;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    background-color: var(--tg-theme-secondary-bg-color, #fff);
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
-    z-index: 1000;
-    border-top: 1px solid var(--tg-theme-hint-color);
+    height: 60px;
+    background-color: var(--tg-theme-secondary-bg-color);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    z-index: 20;
+    box-shadow: 0 -2px 6px -4px rgba(0, 0, 0, 0.1);
 }
-
 .nav-item {
-    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 5px 0;
-    background: none;
+    flex: 1;
+    background: transparent;
     border: none;
-    cursor: pointer;
     color: var(--tg-theme-hint-color);
+    font-size: 0.7rem;
+    padding: 5px 0;
     transition: color 0.2s;
-    outline: none;
-}
-.nav-item.active {
-    color: var(--tg-theme-button-color);
 }
 .nav-item i {
     font-size: 1.2rem;
     margin-bottom: 3px;
 }
-.nav-item span {
-    font-size: 0.7rem;
-    font-weight: 600;
+.nav-item.active {
+    color: var(--tg-theme-link-color);
 }
 
-/* Music Status Bar (Rocker, no filename) */
-.music-status-bar {
-    background-color: var(--tg-theme-secondary-bg-color);
-    padding: 10px 15px;
-    margin: 0 15px 10px 15px; /* Adjust horizontal margin to align with fixed area padding */
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+/* --- Profile Screen Styles --- */
+.profile-header {
+    padding: 10px 0 15px 0;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
+    font-weight: 700;
     color: var(--tg-theme-text-color);
-    font-weight: 600;
-    cursor: pointer; 
-}
-.music-status-bar:active {
-    opacity: 0.8;
 }
 
-/* ==================================== */
-/* 1.5. Post Filter Tabs */
-/* ==================================== */
-
-.post-filter-tabs {
-    display: flex;
-    justify-content: space-around;
-    gap: 10px;
-    margin: 0 15px 0 15px; /* Adjust horizontal margin to align with fixed area padding */
-    padding: 5px;
+.profile-header-card {
     background-color: var(--tg-theme-secondary-bg-color);
+    padding: 20px;
+    margin-bottom: 20px;
     border-radius: 12px;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
-}
-.filter-tab {
-    flex: 1;
-    padding: 8px 10px;
-    border: none;
-    border-radius: 8px;
-    background-color: transparent;
-    color: var(--tg-theme-hint-color);
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-    outline: none;
-}
-.filter-tab.active {
-    background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* ==================================== */
-/* 2. Post Card Styles (Modern & Clean) */
-/* ==================================== */
-
-.posts-container {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-}
-
-.post-card {
-    background-color: var(--tg-theme-secondary-bg-color);
-    padding: 15px;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.post-card:active {
-    transform: translateY(1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Post Content Styling */
-.post-content {
-    font-size: 1rem;
-    line-height: 1.5;
-    margin: 10px 0 15px 0;
-    white-space: pre-wrap; /* For line breaks in posts */
-}
-
-/* Post Actions (Like/Delete) */
-.post-actions {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    border-top: 1px solid var(--tg-theme-hint-color, #f0f0f0);
-    padding-top: 10px;
-    margin-top: 10px;
+    text-align: center;
 }
 
-/* ==================================== */
-/* 3. Button Styles (Primary/Secondary) */
-/* ==================================== */
-
-.primary-btn, .secondary-btn, .like-btn, .delete-btn {
-    padding: 8px 15px;
-    border-radius: 10px;
-    cursor: pointer;
+.profile-avatar-container {
+    margin-bottom: 10px;
+}
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
     font-weight: 600;
-    font-size: 0.9rem;
-    transition: background-color 0.2s, opacity 0.2s, transform 0.1s;
-    border: none;
-    outline: none;
+    color: #fff;
+    overflow: hidden;
+    margin: 0 auto 10px auto;
 }
-.primary-btn:active, .secondary-btn:active, .like-btn:active, .delete-btn:active {
-    transform: scale(0.98);
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
-
-.primary-btn {
-    background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-}
-.secondary-btn {
-    background-color: var(--tg-theme-bg-color, #eee);
-    color: var(--tg-theme-text-color);
-    border: 1px solid var(--tg-theme-hint-color, #ccc);
-}
-
-/* Like Button Specific */
-.like-btn {
-    background: none;
+.username-display {
     color: var(--tg-theme-hint-color);
-    font-weight: 500;
+    font-size: 0.9rem;
 }
-.like-btn i {
-    margin-right: 5px;
-}
-.like-btn.liked {
-    color: #ff3b30; /* iOS Red */
+.profile-status {
+    background-color: var(--tg-theme-link-color);
+    color: var(--tg-theme-button-text-color);
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.75rem;
     font-weight: 600;
+    margin-top: 5px;
 }
 
-/* Delete Button Specific (Admin only) */
-.delete-btn {
-    background: none;
-    color: #ff3b30;
+/* List Group (Settings/Info Items) */
+.list-group {
+    margin-bottom: 20px;
+}
+.group-title {
+    color: var(--tg-theme-hint-color);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin: 0 0 10px 5px;
     font-weight: 500;
 }
+.info-item {
+    display: flex;
+    align-items: center;
+    background-color: var(--tg-theme-secondary-bg-color);
+    padding: 12px 15px;
+    margin-bottom: 1px;
+    border-radius: 8px; /* Items should be rounded */
+    transition: background-color 0.1s;
+}
+.info-item:first-of-type {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+.info-item:last-of-type {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
 
-/* ==================================== */
-/* 4. Modal Styles */
-/* ==================================== */
+.info-item i {
+    font-size: 1.2rem;
+    margin-right: 15px;
+    color: var(--tg-theme-link-color);
+}
 
+.info-details {
+    flex-grow: 1;
+}
+.info-title {
+    display: block;
+    font-size: 1rem;
+    font-weight: 500;
+}
+.info-subtitle {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--tg-theme-hint-color);
+}
+.copy-item {
+    cursor: pointer;
+}
+.copy-item:active {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+.copy-icon {
+    font-size: 1rem !important;
+    color: var(--tg-theme-hint-color) !important;
+}
+
+/* --- Modal Styles --- */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.4); /* Dark overlay */
-    display: none; /* Hide by default */
+    background-color: rgba(0, 0, 0, 0.4);
+    display: none;
     justify-content: center;
-    align-items: center;
-    z-index: 2000;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
+    align-items: flex-end; /* Mobile friendly: slides up from bottom */
+    z-index: 50;
 }
 .modal.active {
-    opacity: 1;
-    display: flex; /* Ensure display is flex when active */
+    display: flex;
 }
 .modal-content {
     background-color: var(--tg-theme-secondary-bg-color);
+    width: 100%;
+    max-width: 500px;
     padding: 20px;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 400px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    transform: translateY(20px);
-    transition: transform 0.3s ease-in-out;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
 }
 .modal.active .modal-content {
     transform: translateY(0);
 }
 
-.post-modal-content textarea {
+.modal h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+/* Modal Inputs & Buttons */
+#post-input, #music-url-input {
     width: 100%;
     min-height: 100px;
     padding: 10px;
-    margin: 15px 0;
-    border-radius: 8px;
     border: 1px solid var(--tg-theme-hint-color);
+    border-radius: 8px;
+    box-sizing: border-box;
+    margin-bottom: 15px;
     background-color: var(--tg-theme-bg-color);
     color: var(--tg-theme-text-color);
+    font-size: 1rem;
     resize: vertical;
-    outline: none;
 }
 .modal-actions {
     display: flex;
@@ -326,204 +391,94 @@ body {
     gap: 10px;
 }
 
+.primary-btn, .secondary-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.primary-btn {
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
+}
+.primary-btn:active {
+    opacity: 0.8;
+}
+
+.secondary-btn {
+    background-color: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-hint-color);
+    border: 1px solid var(--tg-theme-hint-color);
+}
+.secondary-btn:active {
+    background-color: var(--tg-theme-bg-color);
+}
+
 /* Music Modal Specific */
 .music-option-list {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin: 15px 0 20px;
+    margin-bottom: 20px;
 }
 .music-option {
     display: flex;
     align-items: center;
+    width: 100%;
     padding: 10px;
     border: 1px solid var(--tg-theme-hint-color);
-    border-radius: 10px;
+    border-radius: 8px;
     background-color: var(--tg-theme-bg-color);
-    cursor: pointer;
+    color: var(--tg-theme-text-color);
     text-align: left;
     transition: background-color 0.2s;
-}
-.music-option:active {
-    background-color: var(--tg-theme-hint-color, #eee);
 }
 .music-option i {
     font-size: 1.2rem;
     margin-right: 15px;
     color: var(--tg-theme-link-color);
 }
-.option-details {
-    display: flex;
-    flex-direction: column;
+.music-option:active {
+    background-color: var(--tg-theme-secondary-bg-color);
 }
 .option-details strong {
+    display: block;
     font-size: 1rem;
     color: var(--tg-theme-text-color);
 }
 .option-details span {
-    font-size: 0.8rem;
-    color: var(--tg-theme-hint-color);
-    word-break: break-all;
-}
-
-#music-url-input {
-    width: 100%;
-    padding: 10px;
-    margin: 15px 0;
-    border-radius: 8px;
-    border: 1px solid var(--tg-theme-hint-color);
-    background-color: var(--tg-theme-bg-color);
-    color: var(--tg-theme-text-color);
-    box-sizing: border-box;
-}
-
-/* ==================================== */
-/* 5. Profile Screen Styles (REVISED) */
-/* ==================================== */
-
-/* Note: Profile screen header is *not* part of fixed area, 
-   so we keep the original padding-top for its h2 */
-.profile-header h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-    padding-top: 15px; /* To start below the fixed header area */
-}
-
-.profile-header-card {
-    background-color: var(--tg-theme-secondary-bg-color);
-    padding: 20px;
-    border-radius: 16px;
-    text-align: center;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-.profile-avatar-container {
-    margin-bottom: 15px;
-}
-.profile-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin: 0 auto 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #ffffff;
-    overflow: hidden;
-    /* Fallback background color using stringToColor logic from JS */
-    background-color: #555555; 
-}
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.profile-header-card h3 {
-    margin: 5px 0;
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-.username-display {
-    color: var(--tg-theme-hint-color);
-    font-size: 0.9rem;
-}
-.profile-status {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 8px;
+    display: block;
     font-size: 0.75rem;
-    font-weight: 700;
-    background-color: var(--tg-theme-link-color);
-    color: #ffffff;
-}
-
-.list-group {
-    background-color: var(--tg-theme-secondary-bg-color);
-    border-radius: 16px;
-    margin-bottom: 20px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-.group-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--tg-theme-text-color);
-    padding: 15px 15px 5px;
-    margin: 0;
-}
-
-.info-item {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    border-top: 1px solid var(--tg-theme-bg-color);
-    cursor: default;
-}
-.list-group .info-item:first-of-type {
-    border-top: none;
-}
-.info-item i {
-    font-size: 1.2rem;
-    margin-right: 15px;
-    color: var(--tg-theme-link-color);
-}
-.info-details {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-.info-title {
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--tg-theme-text-color);
-}
-.info-subtitle {
-    font-size: 0.8rem;
     color: var(--tg-theme-hint-color);
-    word-break: break-all;
-}
-.close-item {
-    color: #ff3b30;
-    cursor: pointer;
-}
-.close-item i {
-    color: #ff3b30;
 }
 
-/* NEW: Chat ID Copy Section Styling */
-.copy-item {
-    cursor: pointer;
-    transition: background-color 0.1s;
-}
-.copy-item:active {
-    background-color: var(--tg-theme-bg-color);
-}
-.copy-icon {
-    margin-left: auto;
-    color: var(--tg-theme-link-color) !important;
-    font-size: 1rem !important;
-}
-
-/* NEW: Custom Toast Notification */
+/* --- Custom Toast Notification --- */
 .custom-toast {
     position: fixed;
-    bottom: 80px; /* Bottom Nav အပေါ်တွင် ပြသရန် */
+    bottom: 80px; /* Above bottom nav */
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.75);
+    background-color: rgba(0, 0, 0, 0.7);
     color: white;
     padding: 10px 20px;
-    border-radius: 10px;
+    border-radius: 20px;
+    text-align: center;
     font-size: 0.9rem;
-    z-index: 3000;
     opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    z-index: 100;
 }
 .custom-toast.show {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
-        }
+    visibility: visible;
+}
+.loading-text {
+    text-align: center; 
+    color: var(--tg-theme-hint-color); 
+    padding: 20px;
+    }
