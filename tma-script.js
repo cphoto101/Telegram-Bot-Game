@@ -1,11 +1,12 @@
 // ********** SET YOUR ADMIN CHAT ID HERE **********
+// Set your Telegram Chat ID for administrative privileges
 const ADMIN_CHAT_ID = 1924452453; 
 // *************************************************
 
 // --- LOCAL STORAGE KEYS ---
-const POSTS_STORAGE_KEY = 'tma_community_posts_v4'; 
-const LIKES_STORAGE_KEY = 'tma_user_likes_v4'; 
-const TEMP_MUSIC_KEY = 'tma_temp_music_url_v4'; 
+const POSTS_STORAGE_KEY = 'tma_community_posts_v5'; // Bumped version for new post format
+const LIKES_STORAGE_KEY = 'tma_user_likes_v5'; 
+const TEMP_MUSIC_KEY = 'tma_temp_music_url_v5'; 
 
 // --- Global Variables ---
 const INITIAL_DEFAULT_URL = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3'; 
@@ -15,10 +16,11 @@ let musicStatusSpan;
 let volumeToggleIcon;
 let currentUserId = 0; 
 let currentUserName = 'Guest';
+let currentUserUsername = 'anonymous'; // Added username variable
 let is_admin = false; 
 let currentPostFilter = 'new-posts'; 
 const NEW_POSTS_LIMIT = 50; 
-let isMusicMuted = false; // NEW Mute/Unmute state
+let isMusicMuted = false; 
 
 // Telegram Web App Global Reference
 let tg = null;
@@ -40,7 +42,6 @@ function stringToColor(str) {
     let color = '#';
     for (let i = 0; i < 3; i++) {
         const value = (hash >> (i * 8)) & 0xFF;
-        // Adjusted for better pastel-like colors
         const brightened = Math.floor(value * 0.7 + 0x55); 
         color += ('00' + brightened.toString(16)).substr(-2);
     }
@@ -69,8 +70,9 @@ function showToast(message) {
 /**
  * Copies a string to the clipboard.
  * @param {string} text 
+ * @param {string} successMsg 
  */
-function copyToClipboard(text, successMsg = 'ကူးယူပြီးပါပြီ။') {
+function copyToClipboard(text, successMsg = 'Copied successfully.') {
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
             showToast(successMsg);
@@ -99,12 +101,12 @@ function performLegacyCopy(text) {
     try {
         const success = document.execCommand('copy');
         if (success) {
-            showToast('ကူးယူပြီးပါပြီ။');
+            showToast('Copied successfully.');
         } else {
-            showToast('ကူးယူမရပါ၊ စာသားကို ကိုယ်တိုင်ရွေးချယ်ကူးယူပေးပါ။');
+            showToast('Copy failed, please select and copy manually.');
         }
     } catch (err) {
-        showToast('ကူးယူမရပါ၊ စာသားကို ကိုယ်တိုင်ရွေးချယ်ကူးယူပေးပါ။');
+        showToast('Copy failed, please select and copy manually.');
     }
     
     document.body.removeChild(tempInput);
@@ -117,7 +119,7 @@ function performLegacyCopy(text) {
 function getPosts() {
     try {
         const posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
-        // Ensure posts are valid array objects
+        // Ensure posts is an array and each post has required fields (id, content)
         return Array.isArray(posts) ? posts.filter(p => p && p.id && p.content) : []; 
     } catch (e) {
         console.error("Error loading posts:", e);
@@ -137,6 +139,7 @@ function savePosts(posts) {
 function getLikes() {
     try {
         const likes = JSON.parse(localStorage.getItem(LIKES_STORAGE_KEY) || '{}');
+        // Ensure likes is a non-null object
         return typeof likes === 'object' && likes !== null ? likes : {}; 
     } catch (e) {
         console.error("Error loading likes:", e);
@@ -153,7 +156,7 @@ function saveLikes(likes) {
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC (Refactored)
+//          POSTS & LIKES LOGIC (Fixed Username Bug)
 // ===========================================
 
 /**
@@ -175,8 +178,10 @@ function createPostElement(post, userId) {
     postElement.setAttribute('data-post-id', post.id);
 
     const displayLikesCount = postLikesArray.length; 
-
-    // Date formatting (Myanmar style, simpler)
+    
+    // **FIXED: Ensure author name is displayed, defaulting to 'Anonymous User'**
+    const authorName = post.authorName || 'Anonymous User';
+    
     const date = new Date(post.timestamp);
     const dateString = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     const timeString = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -186,14 +191,18 @@ function createPostElement(post, userId) {
         : '';
 
     postElement.innerHTML = `
+        <div class="post-header">
+            <span class="post-author-name">${authorName}</span>
+            ${post.isAdmin ? '<span style="font-size: 0.8rem; font-weight: 600; color: var(--tg-theme-accent);"><i class="fas fa-crown"></i> Admin</span>' : ''}
+        </div>
         <p class="post-content">${post.content}</p>
         <div class="post-actions">
             <button class="like-btn ${isLiked ? 'liked' : ''}" data-post-id="${post.id}" aria-label="${isLiked ? 'Unlike' : 'Like'} Post">
                 <i class="fas fa-heart"></i> 
                 ${displayLikesCount}
             </button>
-            <span class="post-timestamp" style="font-size: 0.75rem; color: var(--tg-theme-hint-color); margin-left: auto;">
-                ${dateString} ${timeString}
+            <span class="post-timestamp">
+                ${dateString} at ${timeString}
             </span>
             ${deleteButton}
         </div>
@@ -212,8 +221,7 @@ function loadPosts(userId) {
     
     if (!container) return;
 
-    // Show initial loading text/spinner (if re-loading)
-    container.innerHTML = '<p class="initial-loading-text">Post များအား ဖတ်နေပါသည်။...</p>'; 
+    container.innerHTML = '<p class="initial-loading-text">Fetching posts...</p>'; 
 
     // Apply sorting based on filter
     if (currentPostFilter === 'new-posts') {
@@ -223,11 +231,10 @@ function loadPosts(userId) {
         posts.sort((a, b) => a.timestamp - b.timestamp); 
     }
     
-    // Clear the container before re-rendering
     container.innerHTML = ''; 
 
     if (posts.length === 0) {
-         container.innerHTML = '<p class="initial-loading-text">ဤနေရာတွင် Post မရှိသေးပါ။ Admin က တင်ပေးပါလိမ့်မည်။</p>';
+         container.innerHTML = '<p class="initial-loading-text">No posts found yet. Be the first to post!</p>';
     } else {
         posts.forEach(post => {
             container.appendChild(createPostElement(post, userId));
@@ -243,7 +250,7 @@ function loadPosts(userId) {
  */
 function performDeletePost(postId, userId) {
     if (userId !== ADMIN_CHAT_ID) { 
-        showToast("Admin သာ ဖျက်ခွင့်ရှိပါသည်။");
+        showToast("Only Admin can delete posts.");
         return;
     }
     
@@ -255,7 +262,7 @@ function performDeletePost(postId, userId) {
     delete likes[postId];
     saveLikes(likes);
     
-    showToast(`Post (ID: ${postId}) ကို ဖျက်လိုက်ပါပြီ။`);
+    showToast(`Post deleted successfully.`);
     loadPosts(userId); 
 }
 
@@ -265,30 +272,26 @@ function performDeletePost(postId, userId) {
  * @param {number} userId 
  */
 function toggleLike(e, userId) {
-    // Ensure postId is a Number from the attribute
     const postId = parseInt(e.currentTarget.getAttribute('data-post-id')); 
     const userIdStr = userId.toString();
     
     let likes = getLikes();
     
-    // Initialize post likes array if it doesn't exist
     likes[postId] = Array.isArray(likes[postId]) ? likes[postId].map(String) : []; 
     
     const isLiked = likes[postId].includes(userIdStr);
 
     if (isLiked) {
-        // Unlike: remove userIdStr
         likes[postId] = likes[postId].filter(id => id !== userIdStr);
-        showToast("Like ဖျက်လိုက်ပါပြီ။");
+        showToast("Unliked.");
     } else {
-        // Like: add userIdStr
         likes[postId].push(userIdStr);
-        showToast("Like ပေးလိုက်ပါပြီ။");
+        showToast("Liked!");
     }
     
     saveLikes(likes);
     
-    // Efficiently re-render posts without a full page refresh
+    // Re-render only the posts that are currently visible
     loadPosts(currentUserId); 
 }
 
@@ -305,13 +308,12 @@ function addPostEventListeners(userId) {
         button.onclick = (e) => {
             const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
             
-            // Use TMA confirmation dialog
             if (tg && tg.showConfirm) {
-                tg.showConfirm('ဤ Post ကို ဖျက်ရန် သေချာပါသလား?', (ok) => {
+                tg.showConfirm('Are you sure you want to delete this post?', (ok) => {
                     if (ok) performDeletePost(postId, userId);
                 });
             } else {
-                if (window.confirm('ဤ Post ကို ဖျက်ရန် သေချာပါသလား?')) {
+                if (window.confirm('Are you sure you want to delete this post?')) {
                      performDeletePost(postId, userId);
                 }
             }
@@ -347,7 +349,7 @@ function setupPostFilters() {
 }
 
 // ===========================================
-//          MODAL & MUSIC LOGIC (Refactored & Fixed)
+//          MODAL & MUSIC LOGIC 
 // ===========================================
 
 function openModal(modalId) {
@@ -356,7 +358,6 @@ function openModal(modalId) {
     modal.style.display = 'flex';
     requestAnimationFrame(() => modal.classList.add('active')); 
     
-    // Hide FAB when modal opens
     const fab = document.getElementById('post-add-button');
     if (fab) fab.style.display = 'none';
 }
@@ -368,7 +369,6 @@ function closeModal(modalId) {
     setTimeout(() => {
         modal.style.display = 'none';
         
-        // Show FAB back if we're on home screen and admin
         const homeScreen = document.getElementById('home-screen');
         if (homeScreen && homeScreen.classList.contains('active') && is_admin) {
             const fab = document.getElementById('post-add-button');
@@ -384,47 +384,48 @@ function closeModal(modalId) {
 function updateMusicStatus(isPlaying) {
     if (!musicStatusSpan || !volumeToggleIcon) return;
 
-    let statusText = isPlaying ? '🎶 Music Playing 🎶' : 'Music Paused (Tap Volume Icon to Start)';
+    let statusText = isPlaying ? `🎶 Music Playing ${isMusicMuted ? '(Muted)' : ''} 🎶` : 'Music Paused (Tap Icon to Play)';
     musicStatusSpan.textContent = statusText;
     
-    // Always show the correct volume icon based on mute state
     if (isPlaying) {
+        // Show volume-up if playing AND NOT muted, volume-off otherwise
         volumeToggleIcon.classList.toggle('fa-volume-up', !isMusicMuted);
         volumeToggleIcon.classList.toggle('fa-volume-off', isMusicMuted);
+        volumeToggleIcon.title = isMusicMuted ? "Unmute Music" : "Mute Music";
     } else {
-        // If paused, always show volume-off icon (or just music icon, but off is clearer)
+        // If paused, always show volume-off icon (or just music icon)
         volumeToggleIcon.classList.remove('fa-volume-up');
         volumeToggleIcon.classList.add('fa-volume-off');
+        volumeToggleIcon.title = "Start Playing Music";
     }
 }
 
 /**
- * Handles playing and muting logic.
+ * Toggles playing and muting logic.
  */
 function toggleVolume() {
     if (!audioPlayer) return;
 
     if (audioPlayer.paused) {
-        // Try to play
-        audioPlayer.volume = isMusicMuted ? 0 : 1; // Apply mute state before playing
+        // Play logic
+        audioPlayer.volume = isMusicMuted ? 0 : 1; 
         audioPlayer.play().then(() => {
-             showToast(isMusicMuted ? "Music Muted ဖြင့် စတင်ဖွင့်ပါသည်။" : "Music စတင်ဖွင့်ပါသည်။");
+             showToast(isMusicMuted ? "Music started (Muted)." : "Music started playing.");
         }).catch(e => {
             console.error("Failed to play on user click:", e);
-            musicStatusSpan.textContent = 'Error: Tap to Play blocked.';
-            showToast('Media Playback Error: Please tap the screen first to allow playback.');
+            showToast('Playback Error: Tap the screen first to allow playback.');
         });
     } else {
-        // Toggle mute state (only affects volume, not play/pause state)
+        // Toggle mute state
         isMusicMuted = !isMusicMuted;
         audioPlayer.volume = isMusicMuted ? 0 : 1;
 
         if (isMusicMuted) {
-            showToast("Music Muted.");
+            showToast("Music muted.");
         } else {
-            showToast("Music Unmuted.");
+            showToast("Music unmuted.");
         }
-        updateMusicStatus(true); // Still playing, but mute state changed
+        updateMusicStatus(true);
     }
 }
 
@@ -441,21 +442,17 @@ function setupMusicPlayer() {
     audioPlayer.loop = true;
     audioPlayer.volume = isMusicMuted ? 0 : 1; 
     
-    // Only volumeToggleIcon will handle click (Cleaner logic)
     if(volumeToggleIcon) volumeToggleIcon.onclick = toggleVolume; 
     
-    // Music status bar is for display, not primary control
     const musicStatusBar = document.querySelector('.music-status-bar');
-    if (musicStatusBar) musicStatusBar.onclick = () => showToast("Volume Icon တွင် နှိပ်ပြီး Music ကို ထိန်းချုပ်ပါ။");
+    if (musicStatusBar) musicStatusBar.onclick = () => showToast("Use the Volume Icon to control music playback.");
 
-    // Events
     audioPlayer.onplay = () => updateMusicStatus(true);
     audioPlayer.onpause = () => updateMusicStatus(false);
     audioPlayer.onerror = (e) => {
         console.error("Audio error:", e);
         audioPlayer.pause();
         updateMusicStatus(false);
-        musicStatusSpan.textContent = 'Error: Failed to load music.';
         showToast("Music Load Error. Playing stopped.");
     };
 
@@ -466,7 +463,7 @@ function setMusicUrl(url, sourceName) {
     if (!url || !audioPlayer) return;
     
     if (!url.match(/^https?:\/\/.+\..+$/) && url !== INITIAL_DEFAULT_URL && !url.startsWith('blob:')) {
-        showToast("URL format မမှန်ပါ၊ http/https လိုအပ်ပါသည်။");
+        showToast("Invalid URL format. http/https required.");
         return;
     }
 
@@ -479,7 +476,7 @@ function setMusicUrl(url, sourceName) {
     
     closeModal('music-modal');
     closeModal('url-input-modal');
-    showToast(`${sourceName} အသစ် သတ်မှတ်ပြီးပါပြီ။ Volume Icon ကို နှိပ်ပြီး ဖွင့်ပါ။`);
+    showToast(`${sourceName} set. Tap the Volume Icon to play.`);
 }
 
 function addMusicEventListeners() {
@@ -511,7 +508,7 @@ function addMusicEventListeners() {
         if (url) {
             setMusicUrl(url, "Custom URL"); 
         } else {
-            showToast("Music URL လင့်ခ် ထည့်ပါ။");
+            showToast("Please enter a valid Music URL.");
         }
     };
     
@@ -527,7 +524,7 @@ function addMusicEventListeners() {
 }
 
 // ===========================================
-//          ADMIN POST LOGIC (Fixed)
+//          ADMIN POST LOGIC 
 // ===========================================
 
 function setupAdminPostLogic(isAdmin) {
@@ -537,7 +534,6 @@ function setupAdminPostLogic(isAdmin) {
     const postInput = document.getElementById('post-input');
 
     if (isAdmin) {
-        // Show FAB only if it's an admin
         if (postAddButton) postAddButton.style.display = 'flex'; 
 
         if (postAddButton) postAddButton.onclick = () => openModal('post-modal');
@@ -546,13 +542,12 @@ function setupAdminPostLogic(isAdmin) {
         if (submitPostBtn && postInput) {
             submitPostBtn.onclick = () => {
                 const content = postInput.value.trim();
-                if (content.length > 5 && content.length <= 500) { 
+                if (content.length >= 5 && content.length <= 500) { 
                     let posts = getPosts();
                     const newPost = {
-                        // Use Date.now() for unique ID and timestamp
                         id: Date.now(), 
                         authorId: currentUserId,
-                        authorName: currentUserName, 
+                        authorName: currentUserName, // Store current user name
                         isAdmin: true,
                         content: content,
                         timestamp: Date.now(), 
@@ -561,7 +556,6 @@ function setupAdminPostLogic(isAdmin) {
                     savePosts(posts);
                     postInput.value = ''; 
                     
-                    // Switch to New Posts tab if a new post is made
                     const newPostsTab = document.getElementById('new-posts-tab');
                     if (currentPostFilter !== 'new-posts' && newPostsTab) {
                         newPostsTab.click(); 
@@ -569,9 +563,9 @@ function setupAdminPostLogic(isAdmin) {
                         loadPosts(currentUserId);
                     }
                     closeModal('post-modal'); 
-                    showToast("Post တင်ပြီးပါပြီ။");
+                    showToast("Announcement posted successfully!");
                 } else {
-                    showToast("Post content သည် စာလုံး ၅ လုံး မှ ၅၀၀ အထိသာ ရှိရပါမည်။");
+                    showToast("Post must be between 5 and 500 characters.");
                 }
             };
         }
@@ -582,21 +576,22 @@ function setupAdminPostLogic(isAdmin) {
 
 
 // ===========================================
-//          PROFILE LOGIC 
+//          PROFILE LOGIC (Fixed Username)
 // ===========================================
 
-function updateProfileDisplay(userId, fullName, is_admin) {
-    const tgUser = tg ? tg.initDataUnsafe.user : null;
-    const username = tgUser ? tgUser.username : null;
+function updateProfileDisplay(userId, fullName, username, is_admin) {
+    // FIX: Use the actual provided username or a placeholder
+    const displayUsername = username ? `@${username}` : 'N/A';
     
     document.getElementById('profile-display-name').textContent = fullName || 'User';
-    document.getElementById('profile-display-username').textContent = username ? `@${username}` : 'N/A';
+    document.getElementById('profile-display-username').textContent = displayUsername;
     document.getElementById('telegram-chat-id').textContent = userId.toString();
     
     const adminStatusEl = document.getElementById('admin-status');
     adminStatusEl.textContent = is_admin ? 'Administrator' : 'Regular User';
     adminStatusEl.style.backgroundColor = is_admin ? 'var(--tg-theme-accent)' : 'var(--tg-theme-link-color)'; 
     
+    const tgUser = tg ? tg.initDataUnsafe.user : null;
     const tgPhotoUrl = tgUser ? tgUser.photo_url : null;
     const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
 
@@ -620,7 +615,7 @@ function setupProfileListeners() {
     // 1. Chat ID Copy Button
     const copyBtn = document.getElementById('chat-id-copy-btn');
     if (copyBtn) {
-        copyBtn.onclick = () => copyToClipboard(currentUserId.toString(), 'Chat ID ကူးယူပြီးပါပြီ။');
+        copyBtn.onclick = () => copyToClipboard(currentUserId.toString(), 'User ID copied.');
     }
     
     // 2. TMA Close Button
@@ -630,19 +625,20 @@ function setupProfileListeners() {
             if (tg && tg.close) {
                 tg.close();
             } else {
-                showToast("Mini App Close API Not Available.");
+                showToast("Mini App Close API Not Available (Local Mock).");
             }
         };
     }
     
-    // 3. Invite Friends Logic 
+    // 3. Invite Friends Logic (FIXED: Ensure correct API usage)
     const inviteBtn = document.getElementById('invite-friends-btn');
     if (inviteBtn) {
         inviteBtn.addEventListener('click', () => {
             if (tg && tg.showInvitePopup) {
                 tg.showInvitePopup(); 
+                showToast("Invite link prepared for sharing.");
             } else {
-                showToast("Telegram Invite Feature ကို အသုံးပြုနိုင်ရန် TMA တွင် ဖွင့်ပါ။");
+                showToast("Invite Feature not available in this TMA environment.");
             }
         });
     }
@@ -650,7 +646,7 @@ function setupProfileListeners() {
 
 
 // ===========================================
-//          NAVIGATION & MAIN ENTRY (Fixed)
+//          NAVIGATION & MAIN ENTRY 
 // ===========================================
 
 function switchScreen(targetScreenId) {
@@ -671,19 +667,22 @@ function switchScreen(targetScreenId) {
         }
     });
 
-    // Header Visibility & FAB Logic (FIXED: Handles FAB visibility based on screen)
+    // Header Visibility & FAB Logic
     const fixedHeaderArea = document.querySelector('.fixed-header-area');
     const fab = document.getElementById('post-add-button');
     const contentArea = document.querySelector('.content');
 
+    // Calculate fixed header height dynamically
+    const headerHeight = fixedHeaderArea.offsetHeight;
+
     if (targetScreenId === 'profile-screen') {
         if (fixedHeaderArea) fixedHeaderArea.style.display = 'none';
-        if (contentArea) contentArea.style.paddingTop = '20px'; // Adjusted padding for profile screen
+        if (contentArea) contentArea.style.paddingTop = '20px'; 
         if (fab) fab.style.display = 'none';
     } else { // home-screen
         if (fixedHeaderArea) fixedHeaderArea.style.display = 'block';
-        if (contentArea) contentArea.style.paddingTop = '145px'; // Space for the fixed header height
-        if (fab && is_admin) fab.style.display = 'flex'; // Show FAB for admin on home
+        if (contentArea) contentArea.style.paddingTop = `${headerHeight + 20}px`; // Add extra padding below the fixed header
+        if (fab && is_admin) fab.style.display = 'flex'; 
     }
 }
 
@@ -699,11 +698,12 @@ function addNavigationListeners() {
 }
 
 function main() {
-    // 1. Determine User Info and Admin Status (Ensure ID is an integer)
+    // 1. Determine User Info and Admin Status
     const user = tg.initDataUnsafe.user;
     if (user && user.id) {
         currentUserId = parseInt(user.id); 
-        currentUserName = user.first_name || 'User'; 
+        currentUserName = user.first_name || (user.last_name ? user.last_name : 'Anonymous User'); // FIX: Better name fallback
+        currentUserUsername = user.username || null;
         is_admin = currentUserId === ADMIN_CHAT_ID;
     }
     
@@ -716,7 +716,7 @@ function main() {
     setupAdminPostLogic(is_admin);
     
     // 3. Load Data & Update UI
-    updateProfileDisplay(currentUserId, currentUserName, is_admin);
+    updateProfileDisplay(currentUserId, currentUserName, currentUserUsername, is_admin);
     loadPosts(currentUserId); 
     
     // 4. Set Initial Screen Padding (Home Screen is default active)
@@ -728,13 +728,12 @@ function main() {
 }
 
 /**
- * Telegram Web App SDK ကို စနစ်တကျ စတင်ခြင်း (Theme Fix ပါဝင်သည်)
+ * Initializes Telegram Web App SDK and Theme
  */
 function setupTMA() {
     if (window.Telegram && window.Telegram.WebApp) {
         tg = window.Telegram.WebApp;
 
-        // Apply TMA theme colors for a native feel (Ensured all colors are set)
         const themeParams = tg.themeParams;
         if (themeParams) {
             const root = document.documentElement;
@@ -753,11 +752,9 @@ function setupTMA() {
                 if (value) root.style.setProperty(prop, value);
             }
             
-            // Apply background color directly to body for immediate effect
             document.body.style.backgroundColor = themeParams.bg_color || 'var(--tg-theme-bg-color)';
         }
 
-        // Initialize Main App Logic
         main();
         
     } else {
@@ -767,11 +764,11 @@ function setupTMA() {
         const mockUserId = ADMIN_CHAT_ID + 100; 
         
         tg = {
-            initDataUnsafe: { user: { id: mockUserId, first_name: "Local", username: "local_tester", photo_url: null } },
+            initDataUnsafe: { user: { id: mockUserId, first_name: "Local", last_name: "Tester", username: "local_tester", photo_url: null } },
             themeParams: {},
             ready: () => console.log('TMA Mock Ready'),
             close: () => console.log('TMA Mock Close'),
-            showInvitePopup: () => showToast("Invite Popup (Mock): TMA Environment တွင်သာ အလုပ်လုပ်ပါမည်။"),
+            showInvitePopup: () => showToast("Invite Popup (Mock): Not available outside TMA."),
             showConfirm: (msg, callback) => callback(window.confirm(msg)),
             HapticFeedback: { impactOccurred: () => console.log('Haptic: Light') },
             MainButton: { hide: () => console.log('MainButton: Hide') }
