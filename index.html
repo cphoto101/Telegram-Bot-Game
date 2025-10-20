@@ -1,1 +1,278 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zebec Zaro TMA</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome 6 for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script> 
+    
+    <!-- CRITICAL INLINE CSS FOR LOADING SCREEN AND SCREEN SWITCHING FIX -->
+    <style>
+        /* Base Styles for Mobile/TMA compatibility */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--tg-theme-bg-color, #f4f4f4);
+            color: var(--tg-theme-text-color, #333);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* --- LOADING OVERLAY FIX --- */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999; /* မျက်နှာပြင်ပေါ်မှာ အမြဲရှိနေစေဖို့ */
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+        }
+        #loading-overlay.active {
+            display: flex;
+            pointer-events: auto; /* ဖန်သားပြင်ကို ထိန်းချုပ်ထားရန် */
+        }
+        #loading-overlay:not(.active) {
+            pointer-events: none; /* အောက်က content ကို နှိပ်လို့ရအောင် */
+        }
+        
+        .spinner {
+            border: 4px solid var(--tg-theme-button-color, #007aff);
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* --- END LOADING OVERLAY FIX --- */
+
+        .app-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 60px; /* Bottom nav အတွက် နေရာချန်ရန် */
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Screen switching logic */
+        .screen {
+            display: none;
+            padding: 15px;
+        }
+        .screen.active {
+            display: block;
+        }
+
+        /* Basic Nav Styling (Assumed from style.css but needed for visibility) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: var(--tg-theme-secondary-bg-color, #fff);
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 0. Loading Overlay (အက်ပ်စတင်ချိန်တွင် ပြသမည်) -->
+    <div id="loading-overlay" class="active">
+        <div class="spinner"></div>
+        <p>Loading Zebec Zaro...</p>
+    </div>
+
+    <div class="app-container">
+        <!-- Main Content Area: Scrollable area -->
+        <div class="content"> 
+            
+            <!-- 1. Home Screen (Default Active) -->
+            <div id="home-screen" class="screen active">
+                <header class="main-header">
+                    <div class="header-content">
+                        <!-- နာမည်ကို Zebec Zaro သို့ ပြောင်းလဲခြင်း -->
+                        <h2>Zebec Zaro Feed</h2> 
+                        <div class="header-icons">
+                            <!-- Admin Only Post Button -->
+                            <i class="fas fa-plus post-add-btn" id="post-add-button" style="display: none;"></i> 
+                            
+                            <!-- Music Button -->
+                            <i class="fas fa-music" id="music-button"></i> 
+                            <i class="fas fa-volume-off" id="volume-toggle"></i> 
+                        </div>
+                    </div>
+                </header>
+                
+                <div class="music-status-bar">
+                    <span id="current-music-status">Music Paused (Tap to Start)</span>
+                </div>
+
+                <div class="social-feed-section">
+                    
+                    <div id="admin-message" class="admin-message" style="display: none;">
+                        <i class="fas fa-info-circle"></i> 
+                        <span>Only the Admin can post announcements.</span>
+                    </div>
+
+                    <div id="posts-container" class="posts-container">
+                        <!-- Posts will be injected here -->
+                    </div>
+                </div>
+            </div> 
+            
+            <!-- 2. Profile Screen (Settings & Info) -->
+            <div id="profile-screen" class="screen"> 
+                <header class="profile-header">
+                    <h2>Profile & Settings</h2>
+                </header>
+                
+                <div class="telegram-info-section">
+                    
+                    <!-- Profile Card -->
+                    <div class="profile-header-card">
+                        <div class="profile-avatar-container">
+                            <div class="profile-avatar" id="profile-avatar-placeholder"></div>
+                            <h3 id="profile-display-name">Name Not Available</h3>
+                            <p id="profile-display-username" class="username-display">Username Not Available</p>
+                        </div>
+                        <div class="profile-status" id="admin-status">User</div>
+                    </div>
+
+                    <!-- Account Details -->
+                    <div class="list-group">
+                        <h4 class="group-title">Account Information</h4>
+                        <div class="info-item">
+                            <i class="fas fa-id-card-alt"></i>
+                            <div class="info-details">
+                                <span class="info-title">Chat ID (Important)</span>
+                                <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- App Actions -->
+                    <div class="list-group">
+                        <h4 class="group-title">App Actions</h4>
+                        <div class="info-item close-item" id="tma-close-btn">
+                            <i class="fas fa-power-off"></i>
+                            <div class="info-details">
+                                <span class="info-title">Close Mini App</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div> 
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-screen="home-screen">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" data-screen="profile-screen">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </button>
+        </nav>
+
+        <!-- Audio Player (Hidden) -->
+        <audio id="audio-player" controls style="display: none;"></audio>
+
+        <!-- 3. Admin Post Modal -->
+        <div id="post-modal" class="modal">
+            <div class="modal-content post-modal-content">
+                <h3>New Admin Post</h3>
+                <textarea id="post-input" placeholder="Announce something new..."></textarea>
+                <div class="modal-actions">
+                    <button id="cancel-post-btn" class="secondary-btn">Cancel</button>
+                    <button id="submit-post-btn" class="primary-btn"><i class="fas fa-bullhorn"></i> Post</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Custom Music Modal -->
+        <div id="music-modal" class="modal">
+            <div class="modal-content">
+                <h3>Select Background Music</h3>
+                <div class="music-option-list">
+                    <button class="music-option" data-music-type="default">
+                        <i class="fas fa-music"></i>
+                        <div class="option-details">
+                            <strong>Default Track</strong>
+                            <span>Use the app's default music.</span>
+                        </div>
+                    </button>
+                    <button class="music-option" data-music-type="url">
+                        <i class="fas fa-link"></i>
+                        <div class="option-details">
+                            <strong>Custom URL</strong>
+                            <span>Insert a direct link to an audio file.</span>
+                        </div>
+                    </button>
+                    <label for="music-upload-input" class="music-option">
+                        <i class="fas fa-upload"></i>
+                        <div class="option-details">
+                            <strong>Upload File (Local)</strong>
+                            <span>Upload an audio file from your device.</span>
+                        </div>
+                    </label>
+                    <input type="file" id="music-upload-input" accept="audio/*" style="display: none;">
+                </div>
+
+                <button id="cancel-music-modal-btn" class="secondary-btn">Cancel</button>
+            </div>
+        </div>
+
+        <!-- 5. URL Input Nested Modal -->
+        <div id="url-input-modal" class="modal nested-modal">
+            <div class="modal-content">
+                <h3>Enter Music URL</h3>
+                <input type="url" id="music-url-input" placeholder="e.g.: https://example.com/song.mp3">
+                <div class="modal-actions">
+                    <button id="close-url-modal-btn" class="secondary-btn">Cancel</button>
+                    <button id="play-url-btn" class="primary-btn">Start Playing</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script MUST be loaded last -->
+    <script src="tma-script.js"></script>
+</body>
+</html>
+
+  
