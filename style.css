@@ -1,53 +1,61 @@
-/* Global Reset and Base Styles */
+:root {
+    --primary-color: #1ed760; /* Vibrant accent color (e.g., Spotify Green) */
+    --secondary-color: #0e0e0e; /* Darkest background */
+    --card-color: #181818; /* Slightly lighter card background */
+    --text-color: #ffffff;
+    --text-muted: #b3b3b3;
+    --border-radius: 12px;
+    --padding-base: 16px;
+    --button-bg: #282828;
+}
+
+/* Base Styles */
 body {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #000;
-    color: #fff;
     height: 100vh;
-    width: 100vw;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent horizontal scroll */
 }
 
 .app-container {
-    max-width: 450px;
-    height: 100%; 
-    margin: 0 auto;
-    background-color: #121212; 
     display: flex;
     flex-direction: column;
-    position: relative;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+    height: 100%;
+    width: 100%;
+    max-width: 500px; /* Max width for central alignment on desktop */
+    margin: 0 auto;
 }
 
+/* Content Area (Scrollable) */
 .content {
     flex-grow: 1;
-    overflow-y: auto; 
-    /* Space for bottom navigation */
-    padding-bottom: 55px; 
-    position: relative;
+    overflow-y: auto;
+    padding-bottom: 80px; /* Space for fixed bottom nav */
 }
 
-/* Screen Management */
 .screen {
+    padding: var(--padding-base);
     display: none;
-    height: 100%; 
-    overflow-y: auto;
+    min-height: calc(100vh - 80px); /* Fill space when active */
 }
 
 .screen.active {
     display: block;
 }
 
-/* --- HEADER STYLING --- */
+/* Header & Status Bar */
 .main-header, .profile-header {
-    background-color: #121212;
-    padding: 15px 15px 10px 15px; 
     position: sticky;
     top: 0;
-    z-index: 10; 
-    border-bottom: 1px solid #333;
+    background-color: var(--secondary-color);
+    padding: 10px 0;
+    border-bottom: 1px solid #282828;
+    z-index: 10;
 }
 
 .header-content {
@@ -56,476 +64,413 @@ body {
     align-items: center;
 }
 
-.main-header h2, .profile-header h2 {
-    font-size: 18px; 
+h2 {
+    font-size: 1.5rem;
+    color: var(--text-color);
     margin: 0;
-    font-weight: 600;
+}
+
+.header-icons {
+    display: flex;
+    gap: 12px;
 }
 
 .header-icons i {
-    font-size: 20px; 
-    margin-left: 20px;
-    color: #00BFFF; 
+    font-size: 1.3rem;
     cursor: pointer;
-    transition: color 0.2s;
-}
-.header-icons i:active {
-    color: #0080FF;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
 }
 
-/* Back Button is no longer needed but kept for safety */
-.back-button {
-    font-size: 20px;
-    color: #00BFFF;
-    cursor: pointer;
-    padding-right: 15px;
-    transition: color 0.2s;
+.header-icons i:hover {
+    color: var(--primary-color);
 }
 
 .music-status-bar {
-    padding: 8px 15px;
-    background-color: #212121;
-    font-size: 13px;
-    color: #aaa;
-    border-bottom: 1px solid #333;
+    padding: 8px var(--padding-base);
+    background-color: #282828;
+    color: #fff;
+    font-size: 0.85rem;
+    border-radius: var(--border-radius);
+    margin-bottom: var(--padding-base);
     text-align: center;
 }
 
-/* --- HOME FEED UI --- */
+/* Social Feed Section */
 .social-feed-section {
-    padding: 15px;
+    padding: 0 var(--padding-base);
 }
 
-/* Admin Post Box Styling */
-.post-create-box {
-    background-color: #212121;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #00BFFF; 
-    box-shadow: 0 0 8px rgba(0, 191, 255, 0.2); 
+.posts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.admin-message {
-    color: #ff5252;
-    background-color: #3d2a2a;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    text-align: center;
-    font-weight: bold;
-}
-
-#post-input {
-    width: 100%;
-    box-sizing: border-box;
-    min-height: 80px;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #121212;
-    border: 1px solid #444;
-    color: #fff;
-    border-radius: 6px;
-    resize: none;
-}
-
-#submit-post-btn {
-    background-color: #00BFFF;
-    color: #fff;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 6px;
-    font-weight: bold;
-    float: right;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s;
-}
-#submit-post-btn:active {
-    background-color: #0080FF;
-}
-
-/* Post Card Styling */
 .post-card {
-    background-color: #1e1e1e; 
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    background-color: var(--card-color);
+    padding: var(--padding-base);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .post-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    color: #aaa;
     margin-bottom: 10px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 5px;
+    font-size: 0.9rem;
 }
 
 .post-author {
-    font-weight: bold;
-    color: #fff;
+    font-weight: 600;
+    color: var(--text-color);
 }
 
 .post-author.admin {
-    color: #00BFFF;
+    color: var(--primary-color);
+}
+
+.post-timestamp {
+    color: var(--text-muted);
 }
 
 .post-content {
-    font-size: 15px;
-    margin: 0 0 10px 0;
-    white-space: pre-wrap; 
+    margin: 0 0 15px 0;
+    line-height: 1.5;
+    white-space: pre-wrap; /* Preserve formatting */
 }
 
-.post-actions button {
-    background: none;
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #282828;
+    padding-top: 10px;
+}
+
+.like-btn, .delete-btn, .primary-btn, .secondary-btn {
+    padding: 8px 15px;
     border: none;
-    color: #aaa; 
-    margin-right: 15px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: bold;
-    padding: 5px 0;
-    transition: color 0.2s;
-}
-.post-actions button:active {
-    color: #ddd;
+    font-weight: 600;
+    transition: background-color 0.2s ease, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
-.post-actions button i {
-    margin-right: 5px;
+.like-btn {
+    background-color: var(--button-bg);
+    color: var(--text-muted);
 }
 
 .like-btn.liked {
-    color: #8A2BE2; 
+    background-color: #cf3c3c; /* Red color for liked state */
+    color: var(--text-color);
+}
+
+.like-btn:active, .delete-btn:active, .primary-btn:active, .secondary-btn:active {
+    transform: scale(0.98);
 }
 
 .delete-btn {
-    color: #f44336 !important;
+    background-color: #444;
+    color: #ff4545; /* Error red */
 }
 
-/* --- PROFILE UI --- */
+.primary-btn {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.secondary-btn {
+    background-color: #333;
+    color: var(--text-color);
+}
+
+
+/* Profile Screen Styles */
 .telegram-info-section {
-    padding: 0 15px 20px 15px;
+    padding: 0 var(--padding-base);
 }
 
-/* Profile Header Card */
 .profile-header-card {
+    background-color: var(--card-color);
+    padding: 20px;
+    border-radius: var(--border-radius);
     text-align: center;
-    padding: 20px 0 15px 0;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #333;
+    margin-bottom: var(--padding-base);
 }
 
 .profile-avatar-container {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .profile-avatar {
     width: 80px;
     height: 80px;
-    margin: 0 auto 5px;
     border-radius: 50%;
-    border: 3px solid #00BFFF;
+    margin: 0 auto 10px;
+    background-color: #444; /* Fallback color */
+    color: var(--text-color);
+    font-size: 2rem;
+    line-height: 80px;
+    font-weight: bold;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #333; 
-    font-size: 30px;
-    font-weight: bold;
-    color: #fff;
-    overflow: hidden; 
 }
 
 .profile-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border: none;
+}
+
+h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.username-display {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 4px;
 }
 
 .profile-status {
-    font-size: 13px;
-    font-weight: bold;
-    color: #00BFFF;
-    margin-top: 5px;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 5px;
+    background-color: #333;
+    color: var(--primary-color);
+    font-size: 0.8rem;
+    font-weight: 600;
 }
 
-/* List Group Styling */
 .list-group {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .group-title {
-    color: #aaa;
-    font-size: 13px;
-    margin: 15px 0 5px 0;
-    padding-left: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    padding: 0 0 8px 0;
+    margin: 0;
 }
 
 .info-item {
-    background-color: #1e1e1e;
-    padding: 15px; 
-    border-radius: 0;
-    margin-bottom: 1px;
+    background-color: var(--card-color);
     display: flex;
     align-items: center;
-    cursor: pointer;
-    box-shadow: 0 1px 0 #333;
-    transition: background-color 0.2s;
-}
-
-.info-item:active {
-    background-color: #2a2a2a;
-}
-
-.list-group .info-item:first-of-type {
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-}
-
-.list-group .info-item:last-of-type {
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    box-shadow: none;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin-bottom: 5px;
 }
 
 .info-item i {
-    font-size: 20px;
-    color: #00BFFF;
+    font-size: 1.2rem;
+    color: var(--primary-color);
     margin-right: 15px;
 }
 
 .info-details {
     flex-grow: 1;
-    display: flex;
-    flex-direction: column;
+    text-align: left;
 }
 
 .info-title {
-    color: #fff;
-    font-size: 15px;
-    font-weight: normal;
+    display: block;
+    font-weight: 500;
 }
 
 .info-subtitle {
-    color: #aaa;
-    font-size: 12px;
-    font-weight: normal;
-}
-
-.arrow-icon {
-    font-size: 14px !important;
-    color: #aaa !important;
-}
-
-.logout-item {
-    color: #f44336;
-    background-color: #212121;
-    text-align: center;
     display: block;
-    border-radius: 10px !important;
-    margin-top: 15px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    word-break: break-all;
 }
 
-.logout-item i {
-    color: #f44336 !important;
+.close-item {
+    cursor: pointer;
+    color: #ff4545;
 }
 
-/* --- BOTTOM NAV --- */
+.close-item i {
+    color: #ff4545;
+}
+
+/* Bottom Navigation */
 .bottom-nav {
-    background-color: #1a1a1a;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 500px;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    height: 55px;
-    border-top: 1px solid #333;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-width: 450px;
-    margin: 0 auto;
-    z-index: 100; 
+    background-color: #121212;
+    padding: 10px 0;
+    border-top: 1px solid #282828;
+    z-index: 20;
 }
 
 .nav-item {
     background: none;
     border: none;
-    color: #777;
-    cursor: pointer;
+    color: var(--text-muted);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 5px 0;
-    font-size: 11px;
-    flex-grow: 1;
-    transition: color 0.2s;
+    padding: 5px 15px;
+    cursor: pointer;
+    transition: color 0.2s ease;
 }
 
 .nav-item i {
-    font-size: 20px;
-    margin-bottom: 2px;
+    font-size: 1.2rem;
+    margin-bottom: 3px;
+}
+
+.nav-item span {
+    font-size: 0.7rem;
 }
 
 .nav-item.active {
-    color: #00BFFF; 
+    color: var(--primary-color);
 }
 
 
-/* ===================================== */
-/* --- MUSIC MODAL STYLES (Z-INDEX FIX) --- */
-/* ===================================== */
-
+/* Modal Styles */
 .modal {
-    display: none; 
-    position: fixed; 
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    max-width: 450px; 
-    margin: 0 auto;
-    background-color: rgba(0, 0, 0, 0.85); 
-    z-index: 2000; 
+    background-color: rgba(0, 0, 0, 0.7);
+    display: none; /* Hidden by default */
     justify-content: center;
-    align-items: flex-end; 
+    align-items: center;
+    z-index: 100;
+    padding: var(--padding-base);
+}
+
+.modal.active {
+    display: flex;
 }
 
 .modal-content {
-    background-color: #212121;
+    background-color: var(--card-color);
+    padding: 20px;
+    border-radius: var(--border-radius);
     width: 100%;
-    max-width: 450px; 
-    padding: 20px 20px 30px 20px;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-    animation: slideUp 0.3s ease-out;
-    box-sizing: border-box;
-    z-index: 2001; 
+    max-width: 350px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
 }
 
-@keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+.modal.active .modal-content {
+    transform: translateY(0);
+    opacity: 1;
 }
 
-.modal-content h3 {
-    text-align: center;
-    color: #fff;
+.modal h3 {
     margin-top: 0;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #282828;
     padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+/* Specific Music Modal Styles */
+.music-option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
 .music-option {
     display: flex;
     align-items: center;
-    width: 100%;
-    background-color: #313131;
-    color: #fff;
+    padding: 12px;
+    background-color: #282828;
     border: none;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px; 
+    border-radius: 8px;
     text-align: left;
+    color: var(--text-color);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s ease;
 }
 
-.music-option:active {
-    background-color: #444;
+.music-option:hover {
+    background-color: #333;
 }
 
 .music-option i {
-    font-size: 22px;
-    color: #00BFFF;
+    font-size: 1.5rem;
     margin-right: 15px;
-}
-.music-option .option-details {
-    display: flex;
-    flex-direction: column;
-}
-.music-option .option-details strong {
-    font-size: 15px;
-}
-.music-option .option-details span {
-    font-size: 12px;
-    color: #aaa;
+    color: var(--primary-color);
 }
 
+.option-details {
+    flex-grow: 1;
+}
 
-#cancel-modal-btn {
+.option-details strong {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.option-details span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Form Elements in Modals */
+.modal input[type="url"], .modal textarea {
     width: 100%;
-    background-color: #444;
-    color: #fff;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    margin-top: 15px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-#cancel-modal-btn:active {
-    background-color: #555;
-}
-
-/* URL Input Modal (Nested) Style */
-.nested-modal {
-    align-items: center;
-}
-.nested-modal .modal-content {
-    border-radius: 10px;
-    width: 90%;
-    max-width: 350px;
-    animation: none; 
-}
-
-#music-url-input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px;
-    background-color: #121212;
-    border: 1px solid #444;
-    color: #fff;
-    border-radius: 6px;
+    padding: 10px;
     margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background-color: #282828;
+    color: var(--text-color);
+    box-sizing: border-box;
+    font-size: 1rem;
+    resize: none;
+}
+
+.modal textarea {
+    height: 120px;
 }
 
 .modal-actions {
     display: flex;
     justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
 }
 
-.modal-actions button {
-    padding: 10px 15px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-left: 10px;
-    transition: background-color 0.2s;
+/* Admin Post Message */
+.admin-message {
+    background-color: #333;
+    color: #ff9800; /* Amber for warning/info */
+    padding: 10px;
+    border-radius: var(--border-radius);
+    margin-bottom: var(--padding-base);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.secondary-btn {
-    background-color: #444;
-    color: #fff;
-    border: none;
-}
-.secondary-btn:active {
-    background-color: #555;
-}
-
-.primary-btn {
-    background-color: #00BFFF;
-    color: #fff;
-    border: none;
-}
-.primary-btn:active {
-    background-color: #0080FF;
+.admin-message i {
+    color: #ff9800;
     }
-    
