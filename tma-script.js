@@ -7,7 +7,6 @@ const ADMIN_CHAT_ID = 1924452453;
 const POSTS_STORAGE_KEY = 'tma_community_posts_v4'; 
 const LIKES_STORAGE_KEY = 'tma_user_likes_v4'; 
 const CUSTOM_MUSIC_KEY = 'tma_custom_music_url_v4'; 
-// Profile image key has been removed as per user request.
 
 // --- Global Variables ---
 const defaultMusicUrl = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3';
@@ -23,21 +22,10 @@ let is_admin = false;
 let tg = null;
 
 // ===========================================
-//          LOADING SCREEN LOGIC
+//          LOADING SCREEN LOGIC (REMOVED)
 // ===========================================
-
-function hideLoadingScreen() {
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) {
-        // 0.3s transition is defined in CSS (now embedded in index.html)
-        overlay.style.opacity = '0'; 
-        // Remove 'active' after transition to ensure pointer-events: none works
-        setTimeout(() => {
-            overlay.classList.remove('active');
-            overlay.style.display = 'none';
-        }, 300);
-    }
-}
+// The loading screen logic has been removed as requested. 
+// The app will load its contents immediately on DOMContentLoaded.
 
 // ===========================================
 //          HELPER FUNCTIONS
@@ -97,6 +85,9 @@ function saveLikes(likes) {
     }
 }
 
+/**
+ * Creates the post element without author name and timestamp.
+ */
 function createPostElement(post, currentUserId) {
     const likes = getLikes();
     // Use toString() for user ID comparison consistency
@@ -107,14 +98,14 @@ function createPostElement(post, currentUserId) {
     postElement.className = 'post-card';
     postElement.setAttribute('data-post-id', post.id);
 
+    // Only show delete button to Admin
     const deleteButton = isAdmin 
         ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
 
     postElement.innerHTML = `
         <div class="post-header">
-            <span class="post-author ${post.isAdmin ? 'admin' : ''}">${post.authorName}</span>
-            <span class="post-timestamp">${formatTime(post.timestamp)}</span>
+            <!-- Name and Time removed as requested by user -->
         </div>
         <p class="post-content">${post.content}</p>
         <div class="post-actions">
@@ -175,14 +166,13 @@ function addPostEventListeners(userId) {
         button.onclick = (e) => {
             const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
             
-            // CRITICAL FIX: Use the global 'tg' reference for safe access
+            // Use TMA native confirmation
             if (tg && tg.showConfirm) {
-                // Use TMA native confirmation
                 tg.showConfirm('Are you sure you want to delete this post?', (ok) => {
                     if (ok) performDeletePost(postId, userId);
                 });
             } else {
-                // Fallback to standard browser confirmation
+                // Fallback 
                 if (window.confirm('Are you sure you want to delete this post?')) {
                      performDeletePost(postId, userId);
                 }
@@ -389,11 +379,12 @@ function setupAdminPostLogic(isAdmin) {
     const submitPostBtn = document.getElementById('submit-post-btn');
     const cancelPostBtn = document.getElementById('cancel-post-btn');
     const postInput = document.getElementById('post-input');
-    const adminMessageEl = document.getElementById('admin-message');
+    // const adminMessageEl = document.getElementById('admin-message'); // REMOVED from HTML
 
     if (isAdmin) {
+        // Only Admin sees the button
         if (postAddButton) postAddButton.style.display = 'block';
-        if (adminMessageEl) adminMessageEl.style.display = 'none'; 
+        // if (adminMessageEl) adminMessageEl.style.display = 'none'; // REMOVED
 
         if (postAddButton) postAddButton.onclick = () => openModal('post-modal');
         if (cancelPostBtn) cancelPostBtn.onclick = () => closeModal('post-modal');
@@ -423,8 +414,9 @@ function setupAdminPostLogic(isAdmin) {
             };
         }
     } else {
+         // Hide the button completely from non-admins and provide no message
          if (postAddButton) postAddButton.style.display = 'none';
-         if (adminMessageEl) adminMessageEl.style.display = 'flex'; 
+         // if (adminMessageEl) adminMessageEl.style.display = 'flex'; // REMOVED
     }
 }
 
@@ -434,7 +426,6 @@ function setupAdminPostLogic(isAdmin) {
 
 /**
  * Updates the profile display using only Telegram's photo or user initials.
- * Custom photo logic has been completely removed.
  */
 function updateProfileDisplay(userId, fullName, is_admin) {
     // Safely retrieve user data from the global tg reference
@@ -451,8 +442,6 @@ function updateProfileDisplay(userId, fullName, is_admin) {
 
     const tgPhotoUrl = tgUser ? tgUser.photo_url : null;
     const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
-
-    // No custom photo logic needed here.
 
     if (profileAvatarPlaceholder) {
         if (tgPhotoUrl) {
@@ -503,17 +492,12 @@ function setupNavigation() {
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Record start time for the minimum loading delay
-    const startTime = Date.now();
+    // Loading delay logic removed. App initializes immediately.
     
     // ---------------------------------------------
     // 1. TMA Integration & Profile Data Initialization
     // ---------------------------------------------
     
-    const loadingOverlay = document.getElementById('loading-overlay');
-    // The 'active' class is now handled by inline CSS for better reliability
-    if (loadingOverlay) loadingOverlay.classList.add('active'); 
-
     // Use robust check for window.Telegram.WebApp existence
     if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
         tg = window.Telegram.WebApp; // Assign to global reference
@@ -544,7 +528,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     } else {
         console.warn("Mini App launched outside Telegram. Using default user ID 0.");
-        // If outside Telegram, the global tg remains null, and the logic proceeds safely.
     }
 
     // ---------------------------------------------
@@ -554,4 +537,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update display (now only uses Telegram photo/initials)
     updateProfileDisplay(currentUserId, currentUserName, is_admin); 
     loadPosts(currentUserId); 
-    setupNavig
+    setupNavigation();
+    
+    setupMusicPlayer(true); 
+    addMusicEventListeners();
+
+    setupAdminPostLogic(is_admin);
+
+    // ---------------------------------------------
+    // 3. Finalization (No delay needed)
+    // ---------------------------------------------
+    console.log("App loaded successfully without a visible loading screen.");
+});
