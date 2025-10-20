@@ -31,7 +31,7 @@ body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden; /* Controlled by JS when modal is open */
+    overflow: hidden; 
     -webkit-user-select: none;
     user-select: none;
     transition: background-color 0.3s;
@@ -58,7 +58,7 @@ body {
     flex-grow: 1;
     overflow-y: auto;
     padding: 0 var(--spacing-md); 
-    padding-bottom: 70px; /* Space for bottom nav */
+    padding-bottom: 70px; 
     -webkit-overflow-scrolling: touch;
 }
 
@@ -69,7 +69,7 @@ body {
     display: block;
 }
 
-/* --- Header Styles --- */
+/* --- Header Styles (UNCHANGED) --- */
 .main-header {
     padding: var(--spacing-xs) var(--spacing-md) 0 var(--spacing-md);
 }
@@ -92,7 +92,7 @@ body {
     transition: opacity 0.2s;
 }
 
-/* --- Music Status Bar (Compact Status) --- */
+/* --- Music Status Bar (UNCHANGED) --- */
 .music-status-bar {
     text-align: center;
     font-size: 0.8rem;
@@ -105,7 +105,7 @@ body {
     border-radius: 8px;
 }
 
-/* --- Filter Tabs (Clean Navigation) --- */
+/* --- Filter Tabs (UNCHANGED) --- */
 .post-filter-tabs {
     display: flex;
     justify-content: flex-start;
@@ -137,9 +137,10 @@ body {
     background-color: var(--tg-theme-link-color);
 }
 
-/* --- Post Card Styles (Modern Card Look) --- */
+/* --- Post Card Styles (FIXED ALIGNMENT) --- */
 .posts-container {
     padding-top: var(--spacing-md);
+    /* **FIX: Remove text-align if present** - Ensure the container itself doesn't force center alignment */
 }
 .post-card {
     background-color: var(--tg-theme-secondary-bg-color);
@@ -151,18 +152,23 @@ body {
     white-space: pre-wrap;
     display: flex;
     flex-direction: column;
+    /* **FIX: Ensure text is left-aligned** */
+    text-align: left; 
 }
+
+/* Adjust post-header display for better look when name/time is removed */
 .post-header {
     display: flex;
     align-items: center;
+    justify-content: flex-start; /* Ensure elements start from the left */
     margin-bottom: var(--spacing-sm);
 }
+
+/* NOTE: post-author-name and post-timestamp styles are effectively unused now due to JS changes */
 .post-author-name {
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-right: var(--spacing-sm);
-    color: var(--tg-theme-text-color);
+    display: none; /* Already removed in JS, but good to ensure */
 }
+
 .post-content {
     font-size: 1rem;
     line-height: 1.5;
@@ -174,13 +180,14 @@ body {
     justify-content: space-between; 
     align-items: center;
     padding-top: var(--spacing-sm);
-    border-top: 1px solid rgba(0, 0, 0, 0.05); /* Subtle separator */
+    border-top: 1px solid rgba(0, 0, 0, 0.05); 
     margin-top: var(--spacing-xs);
 }
+
 .post-timestamp {
-    font-size: 0.75rem; 
-    color: var(--tg-theme-hint-color); 
+    display: none; /* Already removed in JS, but good to ensure */
 }
+
 .like-btn, .delete-btn {
     background: none;
     border: none;
@@ -196,7 +203,7 @@ body {
     color: var(--tg-theme-destructive-text-color); 
 }
 
-/* --- Bottom Navigation --- */
+/* --- Bottom Navigation (UNCHANGED) --- */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -233,7 +240,7 @@ body {
     font-weight: 500;
 }
 
-/* --- Floating Action Button (FAB) --- */
+/* --- Floating Action Button (FAB) (UNCHANGED) --- */
 .fab {
     position: fixed;
     right: var(--spacing-md);
@@ -250,7 +257,7 @@ body {
     z-index: 90;
 }
 
-/* --- Profile Screen & List Styles (Telegram Native Look) --- */
+/* --- Profile Screen & List Styles (UNCHANGED) --- */
 .profile-header {
     font-size: 1.6rem;
     font-weight: 700;
@@ -348,7 +355,7 @@ body {
     width: 20px !important;
 }
 
-/* --- Modal Styles (Slide-up effect) --- */
+/* --- Modal Styles (UNCHANGED) --- */
 .modal {
     position: fixed; 
     z-index: 1000; 
@@ -410,7 +417,7 @@ textarea {
     gap: var(--spacing-sm);
 }
 
-/* Music Modal Specifics */
+/* Music Modal Specifics (UNCHANGED) */
 .music-option-list {
     display: flex;
     flex-direction: column;
@@ -447,7 +454,7 @@ textarea {
     color: var(--tg-theme-hint-color);
 }
 
-/* Button Styles */
+/* Button Styles (UNCHANGED) */
 .primary-btn, .secondary-btn {
     padding: 10px 20px;
     border-radius: 8px;
@@ -467,8 +474,7 @@ textarea {
     border: 1px solid var(--tg-theme-hint-color);
 }
 
-
-/* --- Custom Toast Notification --- */
+/* --- Custom Toast Notification (UNCHANGED) --- */
 .custom-toast {
     visibility: hidden;
     min-width: 200px;
@@ -482,7 +488,7 @@ textarea {
     z-index: 1001; 
     left: 50%;
     transform: translate(-50%, 0);
-    bottom: 80px; /* Positioned above the nav bar */
+    bottom: 80px; 
     font-size: 14px;
     opacity: 0;
     transition: opacity 0.5s, bottom 0.5s;
