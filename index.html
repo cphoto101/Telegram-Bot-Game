@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zebec Zaro Community App</title>
+    <title>Zebec Zaro Community Feed</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script> 
     
@@ -16,21 +16,21 @@
         <div class="fixed-header-area">
             <header class="main-header">
                 <div class="header-content">
-                    <h2 class="app-title-fixed">Zebec Zaro Feed</h2> 
+                    <h2 class="app-title-fixed">Community Feed</h2> 
                     <div class="header-icons">
-                        <i class="fas fa-music header-icon" id="music-button" title="Select Music"></i> 
-                        <i class="fas fa-volume-off header-icon" id="volume-toggle" title="Toggle Volume"></i> 
+                        <i class="fas fa-music header-icon" id="music-button" title="Select Background Music"></i> 
+                        <i class="fas fa-volume-off header-icon" id="volume-toggle" title="Toggle Music Playback"></i> 
                     </div>
                 </div>
             </header>
             
             <div class="music-status-bar" role="button" aria-controls="audio-player" tabindex="0">
-                <span id="current-music-status">Music Paused (Tap Volume Icon to Start)</span>
+                <span id="current-music-status">Music Paused (Tap Icon to Play)</span>
             </div>
             
             <nav class="post-filter-tabs" role="tablist">
-                <button class="filter-tab active" data-filter="new-posts" id="new-posts-tab" role="tab" aria-selected="true">New Posts</button>
-                <button class="filter-tab" data-filter="old-posts" id="old-posts-tab" role="tab" aria-selected="false">Old Posts</button>
+                <button class="filter-tab active" data-filter="new-posts" id="new-posts-tab" role="tab" aria-selected="true">Newest</button>
+                <button class="filter-tab" data-filter="old-posts" id="old-posts-tab" role="tab" aria-selected="false">Oldest</button>
             </nav>
         </div>
         
@@ -67,7 +67,7 @@
                             <div class="info-item copy-item" id="chat-id-copy-btn" role="button" tabindex="0">
                                 <i class="fas fa-id-card-alt"></i>
                                 <div class="info-details">
-                                    <span class="info-title">Chat ID (ကူးယူရန် နှိပ်ပါ)</span>
+                                    <span class="info-title">Telegram User ID (Tap to Copy)</span>
                                     <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
                                 </div>
                                 <i class="fas fa-copy copy-icon"></i>
@@ -82,8 +82,8 @@
                             <div class="info-item copy-item" id="invite-friends-btn" role="button" tabindex="0">
                                 <i class="fas fa-user-plus"></i>
                                 <div class="info-details">
-                                    <span class="info-title">သူငယ်ချင်းများကို ဖိတ်ခေါ်မည်</span>
-                                    <span class="info-subtitle">Telegram Contacts များသို့ App Link ပေးပို့ပါ။</span>
+                                    <span class="info-title">Invite Friends</span>
+                                    <span class="info-subtitle">Share the Mini App link with contacts.</span>
                                 </div>
                                 <i class="fas fa-share copy-icon"></i>
                             </div>
@@ -91,7 +91,7 @@
                             <div class="info-item close-item" id="tma-close-btn" role="button" tabindex="0">
                                 <i class="fas fa-power-off"></i>
                                 <div class="info-details">
-                                    <span class="info-title">Mini App ကို ပိတ်မည်</span>
+                                    <span class="info-title">Close Mini App</span>
                                 </div>
                             </div>
                         </div>
@@ -101,18 +101,15 @@
             
         </div> 
         
-        <button class="fab" id="post-add-button" title="New Post" style="display: none;">
-            <i class="fas fa-plus"></i>
-        </button>
+        <button class="fab" id="post-add-button" title="New Admin Post" style="display: none;">
+            <i class="fas fa-bullhorn"></i> </button>
 
         <nav class="bottom-nav" role="navigation">
             <button class="nav-item active" data-screen="home-screen" aria-label="Home">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
+                <i class="fas fa-house-chimney"></i> <span>Home</span>
             </button>
             <button class="nav-item" data-screen="profile-screen" aria-label="Profile">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
+                <i class="fas fa-user-gear"></i> <span>Profile</span>
             </button>
         </nav>
 
@@ -120,53 +117,53 @@
 
         <div id="post-modal" class="modal" role="dialog" aria-modal="true">
             <div class="modal-content post-modal-content">
-                <h3>New Admin Post</h3>
-                <textarea id="post-input" placeholder="Announce something new..."></textarea>
+                <h3>New Admin Announcement</h3>
+                <textarea id="post-input" placeholder="Enter your announcement here (max 500 chars)..."></textarea>
                 <div class="modal-actions">
                     <button id="cancel-post-btn" class="secondary-btn">Cancel</button>
-                    <button id="submit-post-btn" class="primary-btn"><i class="fas fa-bullhorn"></i> Post</button>
+                    <button id="submit-post-btn" class="primary-btn"><i class="fas fa-paper-plane"></i> Post</button>
                 </div>
             </div>
         </div>
 
         <div id="music-modal" class="modal" role="dialog" aria-modal="true">
             <div class="modal-content">
-                <h3>Select Background Music</h3>
+                <h3>Select Background Music Source</h3>
                 <div class="music-option-list">
                     
                     <button class="music-option" data-music-type="default">
                         <i class="fas fa-play"></i>
                         <div class="option-details">
-                            <strong>Default Track ဖွင့်မည်</strong>
-                            <span>App အတွက် သတ်မှတ်ထားသော Music ကို ဖွင့်ပါ။</span>
+                            <strong>Default Track</strong>
+                            <span>Play the app's predefined background music.</span>
                         </div>
                     </button>
                     
                     <button class="music-option" data-music-type="url">
                         <i class="fas fa-link"></i>
                         <div class="option-details">
-                            <strong>တစ်ခါသုံး Music Link</strong>
-                            <span>အင်တာနက်ပေါ်မှ လင့်ခ်ကို ထည့်သွင်းပါ။</span>
+                            <strong>Temporary Music Link (URL)</strong>
+                            <span>Use a direct audio link from the internet.</span>
                         </div>
                     </button>
                     
                     <label for="music-upload-input" class="music-option" role="button" tabindex="0">
-                        <i class="fas fa-upload"></i>
+                        <i class="fas fa-cloud-upload-alt"></i>
                         <div class="option-details">
-                            <strong>ဖိုင် တင်မည် (Local)</strong>
-                            <span>Device ထဲမှ Audio File တင်ပါ။</span>
+                            <strong>Upload Local File</strong>
+                            <span>Select an audio file from your device.</span>
                         </div>
                     </label>
                     <input type="file" id="music-upload-input" accept="audio/*" style="display: none;">
                 </div>
 
-                <button id="cancel-music-modal-btn" class="secondary-btn">Cancel</button>
+                <button id="cancel-music-modal-btn" class="secondary-btn">Close</button>
             </div>
         </div>
 
         <div id="url-input-modal" class="modal nested-modal" role="dialog" aria-modal="true">
             <div class="modal-content">
-                <h3>Enter Temporary Music URL</h3>
+                <h3>Enter Music URL</h3>
                 <input type="url" id="music-url-input" placeholder="e.g.: https://example.com/song.mp3">
                 <div class="modal-actions">
                     <button id="close-url-modal-btn" class="secondary-btn">Cancel</button>
@@ -181,4 +178,5 @@
 
     <script src="tma-script.js"></script>
 </body>
-</html>
+    </html>
+    
