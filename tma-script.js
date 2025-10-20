@@ -23,6 +23,23 @@ let is_admin = false;
 let tg = null;
 
 // ===========================================
+//          LOADING SCREEN LOGIC
+// ===========================================
+
+function hideLoadingScreen() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        // 0.3s transition is defined in CSS
+        overlay.style.opacity = '0'; 
+        // Remove 'active' after transition to ensure pointer-events: none works
+        setTimeout(() => {
+            overlay.classList.remove('active');
+            overlay.style.display = 'none';
+        }, 300);
+    }
+}
+
+// ===========================================
 //          HELPER FUNCTIONS
 // ===========================================
 
@@ -200,7 +217,7 @@ function toggleLike(e, userId) {
     saveLikes(likes);
     savePosts(posts);
     
-    loadPosts(userId); 
+    loadPosts(currentUserId); // Reload UI
 }
 
 
@@ -415,12 +432,33 @@ function setupAdminPostLogic(isAdmin) {
 //          PROFILE PHOTO LOGIC
 // ===========================================
 
+// New function to remove custom photo
+function removeProfilePhoto() {
+    // 1. Clear the custom image from localStorage
+    localStorage.removeItem(PROFILE_IMAGE_KEY);
+    
+    // 2. Update the UI to reflect the change
+    updateProfileDisplay(currentUserId, currentUserName, is_admin);
+
+    // 3. Inform the user (optional, but good practice)
+    if (tg && tg.showAlert) {
+        tg.showAlert('Custom profile photo has been removed.');
+    } else {
+        console.log('Custom profile photo removed.');
+    }
+}
+
 function setupCustomPhotoLogic() {
     const fileInput = document.getElementById('custom-photo-upload-input');
     const uploadBtn = document.getElementById('upload-photo-btn');
+    const removeBtn = document.getElementById('remove-custom-photo-btn');
 
     if (uploadBtn && fileInput) {
         uploadBtn.addEventListener('click', () => fileInput.click());
+    }
+    
+    if (removeBtn) {
+        removeBtn.addEventListener('click', removeProfilePhoto);
     }
     
     if (fileInput) {
@@ -444,6 +482,7 @@ function updateProfileDisplay(userId, fullName, is_admin) {
     const tgUser = tg ? tg.initDataUnsafe.user : null;
     const username = tgUser ? tgUser.username : null;
     
+    // UI elements update
     if (document.getElementById('profile-display-name')) document.getElementById('profile-display-name').textContent = fullName || 'Name Not Available';
     if (document.getElementById('profile-display-username')) document.getElementById('profile-display-username').textContent = username ? `@${username}` : 'N/A';
     if (document.getElementById('telegram-chat-id')) document.getElementById('telegram-chat-id').textContent = userId.toString();
@@ -454,6 +493,12 @@ function updateProfileDisplay(userId, fullName, is_admin) {
     const customPhotoUrl = localStorage.getItem(PROFILE_IMAGE_KEY);
     const tgPhotoUrl = tgUser ? tgUser.photo_url : null;
     const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
+    const removePhotoBtn = document.getElementById('remove-custom-photo-btn');
+
+    // Show/Hide Remove Photo Button
+    if (removePhotoBtn) {
+        removePhotoBtn.style.display = customPhotoUrl ? 'flex' : 'none';
+    }
     
     if (profileAvatarPlaceholder) {
         const imageUrl = customPhotoUrl || tgPhotoUrl;
@@ -507,56 +552,12 @@ function setupNavigation() {
 document.addEventListener('DOMContentLoaded', () => {
     
     // ---------------------------------------------
-    // 1. TMA Integration & Profile Data Initialization (CRITICAL FIX HERE)
+    // 1. TMA Integration & Profile Data Initialization
     // ---------------------------------------------
     
+    const loadingOverlay = document.getElementById('loading-overlay');
+    if (loadingOverlay) loadingOverlay.classList.add('active'); // Ensure loading is visible immediately
+
     // Use robust check for window.Telegram.WebApp existence
     if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
-        tg = window.Telegram.WebApp; // Assign to global reference
-        
-        try {
-            tg.ready();
-            tg.expand(); 
-            
-            const user = tg.initDataUnsafe.user;
-            
-            if (user) {
-                currentUserId = user.id || 0;
-                const firstName = user.first_name || '';
-                const lastName = user.last_name || '';
-                const fullName = `${firstName} ${lastName}`.trim();
-                
-                currentUserName = fullName || 'User'; 
-                is_admin = (currentUserId === ADMIN_CHAT_ID);
-
-                // Close App Button: only attach if tg is available
-                const closeBtn = document.getElementById('tma-close-btn');
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', () => tg.close());
-                }
-            } 
-        } catch (e) {
-             console.error("TMA Initialization Error, likely no user data in initDataUnsafe:", e);
-        }
-    } else {
-        console.warn("Mini App launched outside Telegram. Using default user ID 0.");
-        // If outside Telegram, the global tg remains null, and the logic proceeds safely.
-    }
-
-    // Update Profile Display with resolved data (even if guest)
-    updateProfileDisplay(currentUserId, currentUserName, is_admin);
-
-    // ---------------------------------------------
-    // 2. Setup All Features
-    // ---------------------------------------------
-    
-    loadPosts(currentUserId); 
-    setupNavigation();
-    
-    setupMusicPlayer(true); 
-    addMusicEventListeners();
-
-    setupAdminPostLogic(is_admin);
-
-    setupCustomPhotoLogic();
-});
+        tg = window.Telegram.WebApp; // A
