@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zebec Zaro Community Feed</title>
+    <title>Zebec Community Feed</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script> 
     
     <link rel="stylesheet" href="style.css"> 
-    
-    </head>
+</head>
 <body>
 
     <div class="app-container">
@@ -38,10 +37,8 @@
         <div class="content"> 
             
             <section id="home-screen" class="screen active" role="main">
-                <div class="social-feed-section">
-                    <div id="posts-container" class="posts-container">
-                        <p class="initial-loading-text">Loading posts...</p>
-                    </div>
+                <div id="posts-container" class="posts-container">
+                    <p class="initial-loading-text">Loading posts...</p>
                 </div>
             </section> 
             
@@ -50,50 +47,45 @@
                     <h2>Profile & Settings</h2>
                 </header>
                 
-                <div class="telegram-info-section">
-                    
-                    <div class="profile-header-card elevated-card">
-                        <div class="profile-avatar-container">
-                            <div class="profile-avatar" id="profile-avatar-placeholder" aria-label="User Profile Picture"></div>
-                            <h3 id="profile-display-name">Name Not Available</h3>
-                            <p id="profile-display-username" class="username-display">Username Not Available</p>
-                        </div>
-                        <div class="profile-status" id="admin-status">User</div>
+                <div class="profile-header-card elevated-card">
+                    <div class="profile-avatar-container">
+                        <div class="profile-avatar" id="profile-avatar-placeholder" aria-label="User Profile Picture"></div>
+                        <h3 id="profile-display-name">Name Not Available</h3>
+                        <p id="profile-display-username" class="username-display">Username Not Available</p>
                     </div>
+                    <div class="profile-status" id="admin-status">User</div>
+                </div>
 
-                    <div class="list-group">
-                        <h4 class="group-title">Account Information</h4>
-                        
-                        <div class="elevated-list">
-                            <div class="info-item copy-item" id="chat-id-copy-btn" role="button" tabindex="0">
-                                <i class="fas fa-id-card-alt"></i>
-                                <div class="info-details">
-                                    <span class="info-title">Telegram User ID (Tap to Copy)</span>
-                                    <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
-                                </div>
-                                <i class="fas fa-copy copy-icon"></i>
+                <div class="list-group">
+                    <h4 class="group-title">Account Information</h4>
+                    <div class="elevated-list">
+                        <div class="info-item copy-item" id="chat-id-copy-btn" role="button" tabindex="0">
+                            <i class="fas fa-id-card-alt"></i>
+                            <div class="info-details">
+                                <span class="info-title">Telegram User ID (Tap to Copy)</span>
+                                <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
                             </div>
+                            <i class="fas fa-copy copy-icon"></i>
                         </div>
                     </div>
+                </div>
 
-                    <div class="list-group">
-                        <h4 class="group-title">App Actions</h4>
-                        
-                        <div class="elevated-list">
-                            <div class="info-item copy-item" id="invite-friends-btn" role="button" tabindex="0">
-                                <i class="fas fa-user-plus"></i>
-                                <div class="info-details">
-                                    <span class="info-title">Invite Friends</span>
-                                    <span class="info-subtitle">Share the Mini App link with contacts.</span>
-                                </div>
-                                <i class="fas fa-share copy-icon"></i>
+                <div class="list-group">
+                    <h4 class="group-title">App Actions</h4>
+                    <div class="elevated-list">
+                        <div class="info-item copy-item" id="invite-friends-btn" role="button" tabindex="0">
+                            <i class="fas fa-user-plus"></i>
+                            <div class="info-details">
+                                <span class="info-title">Invite Friends</span>
+                                <span class="info-subtitle">Share the Mini App link with contacts.</span>
                             </div>
+                            <i class="fas fa-share copy-icon"></i>
+                        </div>
 
-                            <div class="info-item close-item" id="tma-close-btn" role="button" tabindex="0">
-                                <i class="fas fa-power-off"></i>
-                                <div class="info-details">
-                                    <span class="info-title">Close Mini App</span>
-                                </div>
+                        <div class="info-item close-item" id="tma-close-btn" role="button" tabindex="0">
+                            <i class="fas fa-power-off"></i>
+                            <div class="info-details">
+                                <span class="info-title">Close Mini App</span>
                             </div>
                         </div>
                     </div>
@@ -134,33 +126,21 @@
             <div class="modal-content">
                 <h3>Select Background Music Source</h3>
                 <div class="music-option-list">
-                    
                     <button class="music-option" data-music-type="default">
                         <i class="fas fa-play"></i>
-                        <div class="option-details">
-                            <strong>Default Track</strong>
-                            <span>Play the app's predefined background music.</span>
-                        </div>
+                        <div class="option-details"><strong>Default Track</strong><span>Play the app's predefined background music.</span></div>
                     </button>
-                    
                     <button class="music-option" data-music-type="url">
                         <i class="fas fa-link"></i>
-                        <div class="option-details">
-                            <strong>Temporary Music Link (URL)</strong>
-                            <span>Use a direct audio link from the internet.</span>
-                        </div>
+                        <div class="option-details"><strong>Temporary Music Link (URL)</strong><span>Use a direct audio link from the internet.</span></div>
                     </button>
                     
                     <label for="music-upload-input" class="music-option" role="button" tabindex="0">
                         <i class="fas fa-cloud-upload-alt"></i>
-                        <div class="option-details">
-                            <strong>Upload Local File</strong>
-                            <span>Select an audio file from your device.</span>
-                        </div>
+                        <div class="option-details"><strong>Upload Local File</strong><span>Select an audio file from your device.</span></div>
                     </label>
                     <input type="file" id="music-upload-input" accept="audio/*" style="display: none;">
                 </div>
-
                 <button id="cancel-music-modal-btn" class="secondary-btn">Close</button>
             </div>
         </div>
