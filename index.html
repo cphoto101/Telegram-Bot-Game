@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zebec Zaro TMA</title>
-    <!-- style.css ကို အလှပဆုံးဖြစ်အောင် အသစ်ထည့်သွင်းရန် -->
+    <title>Zebec Zaro TMA App</title>
+    <!-- CSS file link -->
     <link rel="stylesheet" href="style.css"> 
     <!-- Font Awesome 6 for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -39,6 +39,7 @@
         .content {
             flex-grow: 1;
             overflow-y: auto;
+            padding: 0 15px; /* Add horizontal padding */
             padding-bottom: 70px; /* Bottom nav အတွက် နေရာပိုချန်ရန် */
             -webkit-overflow-scrolling: touch;
         }
@@ -46,26 +47,10 @@
         /* Screen switching logic */
         .screen {
             display: none;
-            padding: 15px;
+            padding-top: 15px;
         }
         .screen.active {
             display: block;
-        }
-
-        /* Essential Nav Styling */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60px; /* ပိုကြီးပြီး Touch နှိပ်ရလွယ်အောင် */
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background-color: var(--tg-theme-secondary-bg-color, #fff);
-            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-            border-top: 1px solid var(--tg-theme-secondary-bg-color, #eaeaea);
         }
     </style>
 </head>
@@ -93,7 +78,7 @@
                     </div>
                 </header>
                 
-                <!-- Music Status Bar (ရိုးရှင်းသော Status) -->
+                <!-- Music Status Bar -->
                 <div class="music-status-bar">
                     <span id="current-music-status">Music Paused (Tap to Start)</span>
                 </div>
@@ -133,11 +118,11 @@
                     <div class="list-group">
                         <h4 class="group-title">Account Information</h4>
                         
-                        <!-- NEW: CHAT ID COPY BUTTON -->
+                        <!-- CHAT ID COPY BUTTON: One-Tap Copy -->
                         <div class="info-item copy-item" id="chat-id-copy-btn">
                             <i class="fas fa-id-card-alt"></i>
                             <div class="info-details">
-                                <span class="info-title">Chat ID (Tap to Copy)</span>
+                                <span class="info-title">Chat ID (ကူးယူရန် နှိပ်ပါ)</span>
                                 <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
                             </div>
                             <i class="fas fa-copy copy-icon"></i>
@@ -151,7 +136,7 @@
                         <div class="info-item close-item" id="tma-close-btn">
                             <i class="fas fa-power-off"></i>
                             <div class="info-details">
-                                <span class="info-title">Close Mini App</span>
+                                <span class="info-title">Mini App ကို ပိတ်မည်</span>
                             </div>
                         </div>
                     </div>
@@ -187,42 +172,35 @@
             </div>
         </div>
 
-        <!-- 4. Custom Music Modal (REVISED) -->
+        <!-- 4. Custom Music Modal (Simplified) -->
         <div id="music-modal" class="modal">
             <div class="modal-content">
                 <h3>Select Background Music</h3>
                 <div class="music-option-list">
                     
-                    <!-- NEW: Change Permanent Default URL -->
-                    <button class="music-option" data-music-type="change-default">
-                        <i class="fas fa-cog"></i>
-                        <div class="option-details">
-                            <strong>Change Default URL</strong>
-                            <span>App စဖွင့်ရင် ဖွင့်ပေးမယ့် သီချင်းလင့်ခ်ကို ပြောင်းပါ။</span>
-                        </div>
-                    </button>
-                    
-                    <!-- Play Current Default Track -->
+                    <!-- Option 1: Play Default Track -->
                     <button class="music-option" data-music-type="default">
                         <i class="fas fa-play"></i>
                         <div class="option-details">
-                            <strong>Play Current Default Track</strong>
-                            <span id="current-default-url-display"></span>
+                            <strong>Default Track ဖွင့်မည်</strong>
+                            <span>App အတွက် သတ်မှတ်ထားသော Music ကို ဖွင့်ပါ။</span>
                         </div>
                     </button>
                     
-                    <!-- Temporary Custom URL -->
+                    <!-- Option 2: Temporary Custom URL -->
                     <button class="music-option" data-music-type="url">
                         <i class="fas fa-link"></i>
                         <div class="option-details">
-                            <strong>Temporary Custom URL</strong>
-                            <span>တစ်ခါသုံး Music Link ကို ထည့်သွင်းပါ။ (App ပြန်ဖွင့်ရင် Default ပြန်ပြောင်းပါမည်)</span>
+                            <strong>တစ်ခါသုံး Music Link</strong>
+                            <span>အင်တာနက်ပေါ်မှ လင့်ခ်ကို ထည့်သွင်းပါ။</span>
                         </div>
                     </button>
+                    
+                    <!-- Option 3: Local Upload -->
                     <label for="music-upload-input" class="music-option">
                         <i class="fas fa-upload"></i>
                         <div class="option-details">
-                            <strong>Upload File (Local)</strong>
+                            <strong>ဖိုင် တင်မည် (Local)</strong>
                             <span>Device ထဲမှ Audio File တင်ပါ။</span>
                         </div>
                     </label>
@@ -233,7 +211,7 @@
             </div>
         </div>
 
-        <!-- 5. URL Input Nested Modal (For Temporary URL) -->
+        <!-- 5. Temporary URL Input Nested Modal -->
         <div id="url-input-modal" class="modal nested-modal">
             <div class="modal-content">
                 <h3>Enter Temporary Music URL</h3>
@@ -245,19 +223,7 @@
             </div>
         </div>
         
-        <!-- 6. Default URL Input Nested Modal (NEW) -->
-        <div id="default-url-input-modal" class="modal nested-modal">
-            <div class="modal-content">
-                <h3>Set New Default Music URL</h3>
-                <input type="url" id="default-music-url-input" placeholder="New Autoplay URL">
-                <div class="modal-actions">
-                    <button id="close-default-url-modal-btn" class="secondary-btn">Cancel</button>
-                    <button id="set-default-url-btn" class="primary-btn">Set as Default & Play</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 7. Custom Notification/Toast (NEW) -->
+        <!-- 6. Custom Notification/Toast -->
         <div id="custom-toast" class="custom-toast"></div>
         
     </div>
