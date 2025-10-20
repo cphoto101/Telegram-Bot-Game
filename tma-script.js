@@ -7,7 +7,7 @@ const ADMIN_CHAT_ID = 1924452453;
 const POSTS_STORAGE_KEY = 'tma_community_posts_v4'; 
 const LIKES_STORAGE_KEY = 'tma_user_likes_v4'; 
 const CUSTOM_MUSIC_KEY = 'tma_custom_music_url_v4'; 
-const PROFILE_IMAGE_KEY = 'tma_custom_profile_image_v1'; 
+// Profile image key has been removed as per user request.
 
 // --- Global Variables ---
 const defaultMusicUrl = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3';
@@ -429,54 +429,13 @@ function setupAdminPostLogic(isAdmin) {
 }
 
 // ===========================================
-//          PROFILE PHOTO LOGIC
+//          PROFILE PHOTO LOGIC (SIMPLIFIED)
 // ===========================================
 
-// New function to remove custom photo
-function removeProfilePhoto() {
-    // 1. Clear the custom image from localStorage
-    localStorage.removeItem(PROFILE_IMAGE_KEY);
-    
-    // 2. Update the UI to reflect the change
-    updateProfileDisplay(currentUserId, currentUserName, is_admin);
-
-    // 3. Inform the user (optional, but good practice)
-    if (tg && tg.showAlert) {
-        tg.showAlert('Custom profile photo has been removed.');
-    } else {
-        console.log('Custom profile photo removed.');
-    }
-}
-
-function setupCustomPhotoLogic() {
-    const fileInput = document.getElementById('custom-photo-upload-input');
-    const uploadBtn = document.getElementById('upload-photo-btn');
-    const removeBtn = document.getElementById('remove-custom-photo-btn');
-
-    if (uploadBtn && fileInput) {
-        uploadBtn.addEventListener('click', () => fileInput.click());
-    }
-    
-    if (removeBtn) {
-        removeBtn.addEventListener('click', removeProfilePhoto);
-    }
-    
-    if (fileInput) {
-        fileInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const dataUrl = event.target.result;
-                    localStorage.setItem(PROFILE_IMAGE_KEY, dataUrl);
-                    updateProfileDisplay(currentUserId, currentUserName, is_admin); 
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-    }
-}
-
+/**
+ * Updates the profile display using only Telegram's photo or user initials.
+ * Custom photo logic has been completely removed.
+ */
 function updateProfileDisplay(userId, fullName, is_admin) {
     // Safely retrieve user data from the global tg reference
     const tgUser = tg ? tg.initDataUnsafe.user : null;
@@ -490,22 +449,15 @@ function updateProfileDisplay(userId, fullName, is_admin) {
     const adminStatusEl = document.getElementById('admin-status');
     if (adminStatusEl) adminStatusEl.textContent = is_admin ? 'Administrator' : 'Regular User';
 
-    const customPhotoUrl = localStorage.getItem(PROFILE_IMAGE_KEY);
     const tgPhotoUrl = tgUser ? tgUser.photo_url : null;
     const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
-    const removePhotoBtn = document.getElementById('remove-custom-photo-btn');
 
-    // Show/Hide Remove Photo Button
-    if (removePhotoBtn) {
-        removePhotoBtn.style.display = customPhotoUrl ? 'flex' : 'none';
-    }
-    
+    // No custom photo logic needed here.
+
     if (profileAvatarPlaceholder) {
-        const imageUrl = customPhotoUrl || tgPhotoUrl;
-
-        if (imageUrl) {
-            // Use image element
-            profileAvatarPlaceholder.innerHTML = `<img src="${imageUrl}" alt="${fullName || 'Profile Photo'}" onerror="this.onerror=null; this.src='https://placehold.co/80x80/333/fff?text=${(fullName.charAt(0) || 'U').toUpperCase()}'">`;
+        if (tgPhotoUrl) {
+            // Use image element from Telegram URL
+            profileAvatarPlaceholder.innerHTML = `<img src="${tgPhotoUrl}" alt="${fullName || 'Profile Photo'}" onerror="this.onerror=null; this.src='https://placehold.co/80x80/333/fff?text=${(fullName.charAt(0) || 'U').toUpperCase()}'">`;
             profileAvatarPlaceholder.style.backgroundColor = 'transparent';
             profileAvatarPlaceholder.textContent = '';
         } else {
@@ -551,6 +503,9 @@ function setupNavigation() {
 
 document.addEventListener('DOMContentLoaded', () => {
     
+    // Record start time for the minimum loading delay
+    const startTime = Date.now();
+    
     // ---------------------------------------------
     // 1. TMA Integration & Profile Data Initialization
     // ---------------------------------------------
@@ -560,4 +515,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Use robust check for window.Telegram.WebApp existence
     if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
-        tg = window.Telegram.WebApp; // A
+        tg = window.Telegram.WebApp; // Assign to global reference
+        
+        try {
+            tg.ready();
+            tg.expand(); 
+            
+            const user = tg.initDataUnsafe.user;
+            
+            if (user) {
+                currentUserId = user.id || 0;
+                const firstName = user.first_name || '';
+                const lastName = user.last_name || '';
+                const fullName = `${firstName} ${lastName}`.trim();
+                
+                currentUserName = fullName || 'User'; 
+                is_admin = (currentUserId === ADMIN_CHAT_ID);
+
+                // Close App Button: only attach if tg is available
+                const closeBtn = document.getElementById('tma-close-btn');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => tg.close());
+                }
+            } 
+        } catch (e) {
+             console.error("TMA Initialization Error, likely no user data in initDataUnsafe:", e);
+        }
+    } else {
+        console.warn("Mini App launched outside Telegram. Using default user ID 0.");
+        // If outside Telegram, the global tg remains null, and the logic proceeds safely.
+    }
+
+    // ---------------------------------------------
+    // 2. Setup All Features
+    // ---------------------------------------------
+    
+    // Update display (now only uses Telegram photo/initials)
+    updateProfileDisplay(currentUserId, currentUserName, is_admin); 
+    loadPosts(currentUserId); 
+    setupNavigation();
+    
+    setupMusicPlayer(true); 
+    addMusicEventListene
