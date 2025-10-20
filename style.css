@@ -313,9 +313,10 @@ body {
 .option-details span {
     font-size: 0.8rem;
     color: var(--tg-theme-hint-color);
+    word-break: break-all;
 }
 
-#music-url-input {
+#music-url-input, #default-music-url-input {
     width: 100%;
     padding: 10px;
     margin: 15px 0;
@@ -327,7 +328,7 @@ body {
 }
 
 /* ==================================== */
-/* 5. Profile Screen Styles */
+/* 5. Profile Screen Styles (REVISED) */
 /* ==================================== */
 
 .profile-header h2 {
@@ -435,4 +436,38 @@ body {
 }
 .close-item i {
     color: #ff3b30;
+}
+
+/* NEW: Chat ID Copy Section Styling */
+.copy-item {
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+.copy-item:active {
+    background-color: var(--tg-theme-bg-color);
+}
+.copy-icon {
+    margin-left: auto;
+    color: var(--tg-theme-link-color) !important;
+    font-size: 1rem !important;
+}
+
+/* NEW: Custom Toast Notification */
+.custom-toast {
+    position: fixed;
+    bottom: 80px; /* Bottom Nav အပေါ်တွင် ပြသရန် */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    z-index: 3000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+}
+.custom-toast.show {
+    opacity: 1;
     }
