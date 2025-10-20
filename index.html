@@ -18,34 +18,33 @@
                 <div class="header-content">
                     <h2 class="app-title-fixed">Zebec Zaro Feed</h2> 
                     <div class="header-icons">
-                        <i class="fas fa-plus post-add-btn" id="post-add-button" style="display: none;"></i> 
-                        
-                        <i class="fas fa-music" id="music-button"></i> 
-                        <i class="fas fa-volume-off" id="volume-toggle"></i> 
+                        <i class="fas fa-music header-icon" id="music-button" title="Select Music"></i> 
+                        <i class="fas fa-volume-off header-icon" id="volume-toggle" title="Toggle Volume"></i> 
                     </div>
                 </div>
             </header>
             
-            <div class="music-status-bar">
-                <span id="current-music-status">Music Paused (Tap to Start)</span>
+            <div class="music-status-bar" role="button" aria-controls="audio-player" tabindex="0">
+                <span id="current-music-status">Music Paused (Tap Volume Icon to Start)</span>
             </div>
             
-            <div class="post-filter-tabs">
-                <button class="filter-tab active" data-filter="new-posts" id="new-posts-tab">New Posts</button>
-                <button class="filter-tab" data-filter="old-posts" id="old-posts-tab">Old Posts</button>
-            </div>
+            <nav class="post-filter-tabs" role="tablist">
+                <button class="filter-tab active" data-filter="new-posts" id="new-posts-tab" role="tab" aria-selected="true">New Posts</button>
+                <button class="filter-tab" data-filter="old-posts" id="old-posts-tab" role="tab" aria-selected="false">Old Posts</button>
+            </nav>
         </div>
+        
         <div class="content"> 
             
-            <div id="home-screen" class="screen active">
+            <section id="home-screen" class="screen active" role="main">
                 <div class="social-feed-section">
                     <div id="posts-container" class="posts-container">
-                        <p class="loading-text">Loading posts...</p>
+                        <p class="initial-loading-text">Loading posts...</p>
                     </div>
                 </div>
-            </div> 
+            </section> 
             
-            <div id="profile-screen" class="screen"> 
+            <section id="profile-screen" class="screen" role="main"> 
                 <header class="profile-header">
                     <h2>Profile & Settings</h2>
                 </header>
@@ -54,57 +53,64 @@
                     
                     <div class="profile-header-card elevated-card">
                         <div class="profile-avatar-container">
-                            <div class="profile-avatar" id="profile-avatar-placeholder"></div>
+                            <div class="profile-avatar" id="profile-avatar-placeholder" aria-label="User Profile Picture"></div>
                             <h3 id="profile-display-name">Name Not Available</h3>
                             <p id="profile-display-username" class="username-display">Username Not Available</p>
                         </div>
                         <div class="profile-status" id="admin-status">User</div>
                     </div>
 
-                    <div class="list-group elevated-list">
+                    <div class="list-group">
                         <h4 class="group-title">Account Information</h4>
                         
-                        <div class="info-item copy-item" id="chat-id-copy-btn">
-                            <i class="fas fa-id-card-alt"></i>
-                            <div class="info-details">
-                                <span class="info-title">Chat ID (ကူးယူရန် နှိပ်ပါ)</span>
-                                <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
+                        <div class="elevated-list">
+                            <div class="info-item copy-item" id="chat-id-copy-btn" role="button" tabindex="0">
+                                <i class="fas fa-id-card-alt"></i>
+                                <div class="info-details">
+                                    <span class="info-title">Chat ID (ကူးယူရန် နှိပ်ပါ)</span>
+                                    <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
+                                </div>
+                                <i class="fas fa-copy copy-icon"></i>
                             </div>
-                            <i class="fas fa-copy copy-icon"></i>
                         </div>
-                        
                     </div>
 
-                    <div class="list-group elevated-list">
+                    <div class="list-group">
                         <h4 class="group-title">App Actions</h4>
                         
-                        <div class="info-item copy-item" id="invite-friends-btn">
-                            <i class="fas fa-user-plus"></i>
-                            <div class="info-details">
-                                <span class="info-title">သူငယ်ချင်းများကို ဖိတ်ခေါ်မည်</span>
-                                <span class="info-subtitle">Telegram Contacts များသို့ App Link ပေးပို့ပါ။</span>
+                        <div class="elevated-list">
+                            <div class="info-item copy-item" id="invite-friends-btn" role="button" tabindex="0">
+                                <i class="fas fa-user-plus"></i>
+                                <div class="info-details">
+                                    <span class="info-title">သူငယ်ချင်းများကို ဖိတ်ခေါ်မည်</span>
+                                    <span class="info-subtitle">Telegram Contacts များသို့ App Link ပေးပို့ပါ။</span>
+                                </div>
+                                <i class="fas fa-share copy-icon"></i>
                             </div>
-                            <i class="fas fa-share copy-icon"></i>
-                        </div>
 
-                        <div class="info-item close-item" id="tma-close-btn">
-                            <i class="fas fa-power-off"></i>
-                            <div class="info-details">
-                                <span class="info-title">Mini App ကို ပိတ်မည်</span>
+                            <div class="info-item close-item" id="tma-close-btn" role="button" tabindex="0">
+                                <i class="fas fa-power-off"></i>
+                                <div class="info-details">
+                                    <span class="info-title">Mini App ကို ပိတ်မည်</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
             
         </div> 
         
-        <nav class="bottom-nav">
-            <button class="nav-item active" data-screen="home-screen">
+        <button class="fab" id="post-add-button" title="New Post" style="display: none;">
+            <i class="fas fa-plus"></i>
+        </button>
+
+        <nav class="bottom-nav" role="navigation">
+            <button class="nav-item active" data-screen="home-screen" aria-label="Home">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </button>
-            <button class="nav-item" data-screen="profile-screen">
+            <button class="nav-item" data-screen="profile-screen" aria-label="Profile">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </button>
@@ -112,7 +118,7 @@
 
         <audio id="audio-player" controls style="display: none;"></audio>
 
-        <div id="post-modal" class="modal">
+        <div id="post-modal" class="modal" role="dialog" aria-modal="true">
             <div class="modal-content post-modal-content">
                 <h3>New Admin Post</h3>
                 <textarea id="post-input" placeholder="Announce something new..."></textarea>
@@ -123,7 +129,7 @@
             </div>
         </div>
 
-        <div id="music-modal" class="modal">
+        <div id="music-modal" class="modal" role="dialog" aria-modal="true">
             <div class="modal-content">
                 <h3>Select Background Music</h3>
                 <div class="music-option-list">
@@ -144,7 +150,7 @@
                         </div>
                     </button>
                     
-                    <label for="music-upload-input" class="music-option">
+                    <label for="music-upload-input" class="music-option" role="button" tabindex="0">
                         <i class="fas fa-upload"></i>
                         <div class="option-details">
                             <strong>ဖိုင် တင်မည် (Local)</strong>
@@ -158,7 +164,7 @@
             </div>
         </div>
 
-        <div id="url-input-modal" class="modal nested-modal">
+        <div id="url-input-modal" class="modal nested-modal" role="dialog" aria-modal="true">
             <div class="modal-content">
                 <h3>Enter Temporary Music URL</h3>
                 <input type="url" id="music-url-input" placeholder="e.g.: https://example.com/song.mp3">
@@ -169,7 +175,7 @@
             </div>
         </div>
         
-        <div id="custom-toast" class="custom-toast"></div>
+        <div id="custom-toast" class="custom-toast" role="status" aria-live="polite"></div>
         
     </div>
 
