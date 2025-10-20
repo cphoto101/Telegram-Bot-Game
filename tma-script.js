@@ -17,6 +17,8 @@ let volumeToggleIcon;
 let currentUserId = 0; 
 let currentUserName = 'Guest';
 let is_admin = false; 
+let currentPostFilter = 'new-posts'; // Default filter
+const NEW_POSTS_LIMIT = 50; // New Posts အတွက် အများဆုံး limit
 
 // Telegram Web App Global Reference
 let tg = null;
@@ -36,19 +38,6 @@ function stringToColor(str) {
         color += ('00' + value.toString(16)).substr(-2);
     }
     return color;
-}
-
-// Time function is kept, but its output is NOT used in the post card HTML.
-function formatTime(timestamp) {
-    const now = new Date();
-    const date = new Date(timestamp);
-    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
-    
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + ', ' + date.toLocaleDateString('en-US');
 }
 
 // ===========================================
@@ -113,24 +102,42 @@ function createPostElement(post, currentUserId) {
     return postElement;
 }
 
+/**
+ * Filter အလိုက် Posts များကို Load လုပ်ပြီး ပြသသည်။
+ */
 function loadPosts(userId) {
     currentUserId = userId; 
     try {
-        const posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
+        let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
         const container = document.getElementById('posts-container');
+        
+        // 1. Filtering and Sorting Logic
+        if (currentPostFilter === 'new-posts') {
+            // New Posts: အသစ်ဆုံးမှ အဟောင်းဆုံးသို့ စီပြီး ၅၀ ခုသာ ပြမည်
+            posts.sort((a, b) => b.timestamp - a.timestamp); // Descending (Newest first)
+            posts = posts.slice(0, NEW_POSTS_LIMIT);
+        } else if (currentPostFilter === 'old-posts') {
+            // Old Posts: အဟောင်းဆုံးမှ အသစ်ဆုံးသို့ စီပြီး အားလုံးပြမည်
+            posts.sort((a, b) => a.timestamp - b.timestamp); // Ascending (Oldest first)
+        }
+        
+        // 2. Render Posts
         if (container) {
             container.innerHTML = ''; 
-            posts.sort((a, b) => b.timestamp - a.timestamp); 
-            posts.forEach(post => {
-                container.appendChild(createPostElement(post, userId));
-            });
+            if (posts.length === 0) {
+                 container.innerHTML = '<p style="text-align: center; color: var(--tg-theme-hint-color); padding: 20px;">No posts found in this view.</p>';
+            } else {
+                posts.forEach(post => {
+                    container.appendChild(createPostElement(post, userId));
+                });
+            }
         }
         addPostEventListeners(userId);
     } catch (e) {
         console.error("Error loading posts:", e);
         const container = document.getElementById('posts-container');
         if (container) {
-             container.innerHTML = '<p style="text-align: center; color: var(--tg-theme-link-color);">No posts yet.</p>';
+             container.innerHTML = '<p style="text-align: center; color: var(--tg-theme-link-color);">Error loading community posts.</p>';
         }
     }
 }
@@ -138,7 +145,7 @@ function loadPosts(userId) {
 // --- Post Deletion Logic ---
 
 function performDeletePost(postId, userId) {
-    if (userId !== ADMIN_CHAT_ID) return; // Admin မှသာ ဖျက်နိုင်မည်
+    if (userId !== ADMIN_CHAT_ID) return; 
     
     let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
     const updatedPosts = posts.filter(p => p.id !== postId);
@@ -148,7 +155,7 @@ function performDeletePost(postId, userId) {
     delete likes[postId];
     saveLikes(likes);
 
-    loadPosts(userId); // UI ကို ပြန်လည်ပြသမည်
+    loadPosts(userId); // Reload UI with current filter
 }
 
 function addPostEventListeners(userId) {
@@ -160,13 +167,11 @@ function addPostEventListeners(userId) {
         button.onclick = (e) => {
             const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
             
-            // TMA native confirmation ကို သုံးမည်
             if (tg && tg.showConfirm) {
                 tg.showConfirm('ဤ Post ကို ဖျက်ရန် သေချာပါသလား?', (ok) => {
                     if (ok) performDeletePost(postId, userId);
                 });
             } else {
-                // Fallback (console သို့သာ ပို့ပါမည်၊ window.confirm ကို မသုံးပါ)
                 console.warn("Using console confirmation fallback.");
                 performDeletePost(postId, userId); 
             }
@@ -184,7 +189,6 @@ function toggleLike(e, userId) {
 
     if (postIndex === -1) return;
 
-    // Likes များကို string အဖြစ် သိမ်းဆည်းထားရန်
     likes[postId] = likes[postId] ? likes[postId].map(String) : []; 
     const isLiked = likes[postId].includes(userIdStr);
 
@@ -199,12 +203,35 @@ function toggleLike(e, userId) {
     saveLikes(likes);
     savePosts(posts);
     
-    loadPosts(currentUserId); // UI ကို ပြန်လည်ပြသမည်
+    loadPosts(currentUserId); // Reload UI with current filter
 }
 
+// ===========================================
+//          POST FILTER TAB LOGIC (NEW)
+// ===========================================
+
+function setupPostFilters() {
+    const tabs = document.querySelectorAll('.filter-tab');
+    
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const filter = tab.getAttribute('data-filter');
+            
+            // UI Update
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Logic Update
+            if (currentPostFilter !== filter) {
+                currentPostFilter = filter;
+                loadPosts(currentUserId); // Filter အသစ်ဖြင့် Posts ကို ပြန် load
+            }
+        });
+    });
+}
 
 // ===========================================
-//          MODAL & MUSIC LOGIC (No Changes)
+//          MODAL & MUSIC LOGIC 
 // ===========================================
 
 function openModal(modalId) {
@@ -223,9 +250,12 @@ function closeModal(modalId) {
     }
 }
 
-function updateMusicStatus(status) {
+/**
+ * Music Status Update: filename ကိုဖျောက်ပြီး simple status သာပြမည်။
+ */
+function updateMusicStatus(isPlaying) {
     if (musicStatusSpan) {
-        musicStatusSpan.textContent = status;
+        musicStatusSpan.textContent = isPlaying ? 'Music Playing' : 'Music Paused (Tap to Play)';
     }
 }
 
@@ -244,20 +274,19 @@ function setupMusicPlayer(autoplayAttempt = false) {
             // Success
         }).catch(e => {
             console.warn("Autoplay was prevented.", e);
-            updateMusicStatus('Music Paused (Tap to Play)');
+            updateMusicStatus(false);
         });
     }
 
     audioPlayer.onplay = () => {
-        const fileName = currentMusicUrl.split('/').pop().split('?')[0]; 
-        updateMusicStatus(`Playing: ${fileName.substring(0, 30)}...`);
+        updateMusicStatus(true);
         if(volumeToggleIcon) {
             volumeToggleIcon.classList.remove('fa-volume-off');
             volumeToggleIcon.classList.add('fa-volume-up');
         }
     };
     audioPlayer.onpause = () => {
-        updateMusicStatus('Music Paused (Tap to Play)');
+        updateMusicStatus(false);
         if(volumeToggleIcon) {
             volumeToggleIcon.classList.remove('fa-volume-up');
             volumeToggleIcon.classList.add('fa-volume-off');
@@ -266,16 +295,15 @@ function setupMusicPlayer(autoplayAttempt = false) {
     audioPlayer.onerror = (e) => {
         console.error("Audio error:", e);
         if (currentMusicUrl !== defaultMusicUrl) {
-             updateMusicStatus('Error: Custom Music URL failed. Reverting to default.');
+             console.warn('Custom Music URL failed. Reverting to default.');
              setCustomMusic(defaultMusicUrl); 
         } else {
-             updateMusicStatus('Error: Failed to play audio. (Check network)');
+             updateMusicStatus(false);
+             musicStatusSpan.textContent = 'Error: Failed to load music.';
         }
     };
 
-    if (audioPlayer.paused) {
-        updateMusicStatus('Music Paused (Tap to Play)');
-    }
+    updateMusicStatus(!audioPlayer.paused); // Initial status
 }
 
 function toggleVolume() {
@@ -284,7 +312,7 @@ function toggleVolume() {
     if (audioPlayer.paused) {
         audioPlayer.play().catch(e => {
             console.error("Failed to play on user click:", e);
-            updateMusicStatus('Failed to Play! Check URL or select a different track.');
+            musicStatusSpan.textContent = 'Failed to Play! Check track.';
         });
     } else {
         audioPlayer.pause();
@@ -302,7 +330,8 @@ function setCustomMusic(url) {
 
     audioPlayer.play().catch(e => {
         console.error("Failed to play music immediately after setting URL:", e);
-        updateMusicStatus('Music track updated. Tap to play.');
+        updateMusicStatus(false);
+        musicStatusSpan.textContent = 'Music updated. Tap to play.';
     });
     
     closeModal('music-modal');
@@ -352,7 +381,7 @@ function addMusicEventListeners() {
 }
 
 // ===========================================
-//          ADMIN POST LOGIC (Fixed)
+//          ADMIN POST LOGIC
 // ===========================================
 
 function setupAdminPostLogic(isAdmin) {
@@ -362,7 +391,6 @@ function setupAdminPostLogic(isAdmin) {
     const postInput = document.getElementById('post-input');
 
     if (isAdmin) {
-        // Admin များသာ Post ခလုတ်ကို မြင်ရမည်
         if (postAddButton) postAddButton.style.display = 'block';
 
         if (postAddButton) postAddButton.onclick = () => openModal('post-modal');
@@ -376,16 +404,21 @@ function setupAdminPostLogic(isAdmin) {
                     const newPost = {
                         id: Date.now(),
                         authorId: currentUserId,
-                        authorName: currentUserName, // data သိမ်းဆည်းရန်အတွက်သာ
+                        authorName: currentUserName, 
                         isAdmin: true,
                         content: content,
-                        timestamp: Date.now(), // data သိမ်းဆည်းရန်အတွက်သာ
+                        timestamp: Date.now(), 
                         likesCount: 0
                     };
                     posts.push(newPost);
                     savePosts(posts);
                     postInput.value = ''; 
-                    loadPosts(currentUserId);
+                    // New Post တင်ပြီးပါက 'new-posts' tab ကို အလိုအလျောက်ပြောင်းရန်
+                    if (currentPostFilter !== 'new-posts') {
+                        document.getElementById('new-posts-tab').click(); 
+                    } else {
+                        loadPosts(currentUserId);
+                    }
                     closeModal('post-modal'); 
                 } else {
                     console.error("Post content cannot be empty.");
@@ -393,7 +426,6 @@ function setupAdminPostLogic(isAdmin) {
             };
         }
     } else {
-         // Non-admin များအတွက် ခလုတ်ကို လုံးဝဖျောက်ထားသည်
          if (postAddButton) postAddButton.style.display = 'none';
     }
 }
@@ -495,7 +527,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     } else {
         console.warn("Mini App launched outside Telegram. Using default user ID 0.");
-        // Non-admin mode for desktop testing
         is_admin = (currentUserId === ADMIN_CHAT_ID); 
     }
 
@@ -504,7 +535,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---------------------------------------------
     
     updateProfileDisplay(currentUserId, currentUserName, is_admin); 
-    loadPosts(currentUserId); 
+    setupPostFilters(); // Post Filter Logic ကို စတင်ရန်
+    loadPosts(currentUserId); // Default filter ဖြင့် စတင် load မည် 
     setupNavigation();
     
     setupMusicPlayer(true); 
@@ -512,5 +544,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupAdminPostLogic(is_admin);
 
-    console.log("App loaded successfully. Post metadata hidden, admin posting restricted.");
+    console.log("App loaded successfully. Post filtering and music status UI applied.");
 });
