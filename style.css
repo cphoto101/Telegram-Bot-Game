@@ -26,24 +26,61 @@ body {
 }
 
 /* ==================================== */
+/* NEW: FIXED HEADER AREA STYLES */
+/* ==================================== */
+
+/* Fixed Container: Always stays at the top */
+.fixed-header-area {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0 15px; /* Horizontal padding for alignment */
+    background-color: var(--tg-theme-bg-color); /* Background for fixed header */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    z-index: 1010; /* Above content, below modals */
+    /* Ensure the background color covers the entire area even on scroll */
+    padding-bottom: 10px; /* Spacing at the bottom of the fixed area */
+}
+
+/* Compensate the content for the fixed header height */
+/* This height must match the total height of the fixed-header-area */
+.app-container > .content {
+    padding-top: 155px; /* Adjust this value if the fixed header elements' heights change */
+}
+
+/* ==================================== */
 /* 1. Header and Navigation */
 /* ==================================== */
 
 .main-header {
-    margin-bottom: 20px;
-    padding-top: 5px; /* Adjust header padding */
+    margin-bottom: 10px; /* Reduced margin since we have music bar below */
+    padding-top: 15px; /* Top padding to match old screen start */
 }
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-.header-content h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
+
+/* NEW: Cool App Name Font Styling */
+.app-title-fixed {
+    font-size: 1.6rem; /* Slightly larger */
+    font-weight: 900; /* Extra Bold */
     margin: 0;
-    color: var(--tg-theme-text-color);
+    /* Use a strong, contrasting color */
+    color: var(--tg-theme-text-color, #1a1a1a); 
+    /* Add a subtle shadow for depth and "coolness" */
+    text-shadow: 
+        1px 1px 0 var(--tg-theme-secondary-bg-color),
+        2px 2px 5px rgba(0, 0, 0, 0.1); 
+    /* Optionally: if you want a subtle gradient effect for extra pop */
+    /* background-image: linear-gradient(45deg, var(--tg-theme-link-color), var(--tg-theme-button-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; */
 }
+
+
 .header-icons i {
     font-size: 1.3rem;
     margin-left: 15px;
@@ -104,14 +141,14 @@ body {
 .music-status-bar {
     background-color: var(--tg-theme-secondary-bg-color);
     padding: 10px 15px;
-    margin-bottom: 15px;
+    margin: 0 15px 10px 15px; /* Adjust horizontal margin to align with fixed area padding */
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     text-align: center;
     font-size: 0.9rem;
-    color: var(--tg-theme-text-color); /* Status ကို ပိုထင်ရှားစေရန် */
+    color: var(--tg-theme-text-color);
     font-weight: 600;
-    cursor: pointer; /* Click to start/toggle play */
+    cursor: pointer; 
 }
 .music-status-bar:active {
     opacity: 0.8;
@@ -125,7 +162,7 @@ body {
     display: flex;
     justify-content: space-around;
     gap: 10px;
-    margin-bottom: 20px;
+    margin: 0 15px 0 15px; /* Adjust horizontal margin to align with fixed area padding */
     padding: 5px;
     background-color: var(--tg-theme-secondary-bg-color);
     border-radius: 12px;
@@ -347,10 +384,13 @@ body {
 /* 5. Profile Screen Styles (REVISED) */
 /* ==================================== */
 
+/* Note: Profile screen header is *not* part of fixed area, 
+   so we keep the original padding-top for its h2 */
 .profile-header h2 {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 20px;
+    padding-top: 15px; /* To start below the fixed header area */
 }
 
 .profile-header-card {
