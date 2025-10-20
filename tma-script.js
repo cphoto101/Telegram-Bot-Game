@@ -6,15 +6,13 @@ const ADMIN_CHAT_ID = 1924452453;
 // --- LOCAL STORAGE KEYS ---
 const POSTS_STORAGE_KEY = 'tma_community_posts_v4'; 
 const LIKES_STORAGE_KEY = 'tma_user_likes_v4'; 
-const CUSTOM_MUSIC_KEY = 'tma_custom_music_url_v4'; 
-const DEFAULT_MUSIC_URL_KEY = 'tma_default_music_url'; // Default music key
+const CUSTOM_MUSIC_KEY = 'tma_custom_music_url_v4'; // Temporary music key
 
 // --- Global Variables ---
-const INITIAL_DEFAULT_URL = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3';
-// App စဖွင့်တိုင်း ဖွင့်မယ့် Music URL
-let persistentDefaultMusicUrl = localStorage.getItem(DEFAULT_MUSIC_URL_KEY) || INITIAL_DEFAULT_URL;
-// လက်ရှိဖွင့်နေတဲ့ Music URL (Temporary custom url ဖြစ်နိုင်၊ မဟုတ်ရင် persistent default)
-let currentMusicUrl = localStorage.getItem(CUSTOM_MUSIC_KEY) || persistentDefaultMusicUrl; 
+// Default Music URL ကို hardcode လုပ်ထားခြင်း
+const INITIAL_DEFAULT_URL = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3'; 
+// လက်ရှိဖွင့်နေတဲ့ Music URL (Local Storage ကနေ ယူ၊ မရှိရင် Initial Value)
+let currentMusicUrl = localStorage.getItem(CUSTOM_MUSIC_KEY) || INITIAL_DEFAULT_URL; 
 
 let audioPlayer;
 let musicStatusSpan;
@@ -60,7 +58,7 @@ function showToast(message) {
 }
 
 /**
- * Chat ID Copy Function (NEW)
+ * Chat ID Copy Function: Single-Tap Copy
  */
 function copyChatId(chatId) {
     const tempInput = document.createElement('textarea');
@@ -74,7 +72,6 @@ function copyChatId(chatId) {
         if (successful) {
             showToast('Chat ID ကူးယူပြီးပါပြီ။');
         } else {
-            // Fallback for some environments
             showToast('ကူးယူမရပါ၊ စာသားကို ကိုယ်တိုင်ရွေးချယ်ကူးယူပေးပါ။');
         }
     } catch (err) {
@@ -156,7 +153,7 @@ function loadPosts(userId) {
         if (container) {
             container.innerHTML = ''; 
             if (posts.length === 0) {
-                 container.innerHTML = '<p style="text-align: center; color: var(--tg-theme-hint-color); padding: 20px;">No posts found in this view.</p>';
+                 container.innerHTML = '<p style="text-align: center; color: var(--tg-theme-hint-color); padding: 20px;">ဤနေရာတွင် Post မရှိသေးပါ။</p>';
             } else {
                 posts.forEach(post => {
                     container.appendChild(createPostElement(post, userId));
@@ -254,7 +251,7 @@ function setupPostFilters() {
 }
 
 // ===========================================
-//          MODAL & MUSIC LOGIC (REVISED)
+//          MODAL & MUSIC LOGIC (SIMPLE VERSION)
 // ===========================================
 
 function openModal(modalId) {
@@ -275,49 +272,26 @@ function closeModal(modalId) {
 
 function updateMusicStatus(isPlaying) {
     if (musicStatusSpan) {
-        musicStatusSpan.textContent = isPlaying ? 'Music Playing' : 'Music Paused (Tap to Play)';
+        musicStatusSpan.textContent = isPlaying ? 'Music Playing' : 'Music Paused (Tap to Start)';
     }
 }
 
 /**
- * Default URL ကို Update လုပ်ရန် UI ကိုလည်း Update လုပ်မည်။
+ * Music Player ကို စတင်သတ်မှတ်ခြင်း (Autoplay မလုပ်ရ)
  */
-function updateDefaultMusicUrlDisplay() {
-    const displayEl = document.getElementById('current-default-url-display');
-    if (displayEl) {
-        const urlDisplay = persistentDefaultMusicUrl.length > 50 
-            ? persistentDefaultMusicUrl.substring(0, 47) + '...' 
-            : persistentDefaultMusicUrl;
-        displayEl.textContent = `Current Default: ${urlDisplay}`;
-    }
-}
-
-
-function setupMusicPlayer(autoplayAttempt = false) {
+function setupMusicPlayer() { 
     audioPlayer = document.getElementById('audio-player');
     musicStatusSpan = document.getElementById('current-music-status');
     volumeToggleIcon = document.getElementById('volume-toggle');
 
     if (!audioPlayer) return;
 
-    // App စဖွင့်တိုင်း Temporary URL မရှိရင် Default Music URL ကို ယူမည်
-    if (!localStorage.getItem(CUSTOM_MUSIC_KEY)) {
-        currentMusicUrl = persistentDefaultMusicUrl;
-    }
-    
+    // Local Storage မှ Temporary URL ကိုယူ၊ မရှိရင် hardcode default ကို ယူ
     audioPlayer.src = currentMusicUrl;
     audioPlayer.loop = true;
 
-    if (autoplayAttempt) {
-        // Music တန်းဖွင့်ပေးရန် Autoplay Attempt
-        audioPlayer.play().then(() => {
-            console.log("Autoplay successful.");
-        }).catch(e => {
-            console.warn("Autoplay was prevented. User must interact to start music.", e);
-            updateMusicStatus(false);
-        });
-    }
-
+    // Autoplay မလုပ်ပါ၊ User click မှ စမည်။
+    
     audioPlayer.onplay = () => {
         updateMusicStatus(true);
         if(volumeToggleIcon) {
@@ -339,7 +313,6 @@ function setupMusicPlayer(autoplayAttempt = false) {
     };
 
     updateMusicStatus(!audioPlayer.paused); 
-    updateDefaultMusicUrlDisplay(); 
 }
 
 function toggleVolume() {
@@ -356,9 +329,9 @@ function toggleVolume() {
 }
 
 /**
- * Temporary Music URL သတ်မှတ်ခြင်း (App ပိတ်ရင် ပျောက်သွားမည်)
+ * Music URL သတ်မှတ်ခြင်း (Temporary Only)
  */
-function setTemporaryMusic(url) {
+function setMusicUrl(url) {
     if (!url || !audioPlayer) return;
     
     currentMusicUrl = url;
@@ -367,64 +340,34 @@ function setTemporaryMusic(url) {
     audioPlayer.src = url;
     audioPlayer.load();
 
-    audioPlayer.play().catch(e => {
-        console.error("Failed to play music immediately after setting URL:", e);
-        updateMusicStatus(false);
-        musicStatusSpan.textContent = 'Music updated. Tap to play.';
-    });
+    // URL အသစ်ပြောင်းရင် ဖွင့်မထားရ၊ Pause ပေးထားရမည်။
+    audioPlayer.pause(); 
     
     closeModal('music-modal');
     closeModal('url-input-modal');
-}
-
-/**
- * Permanent Default Music URL သတ်မှတ်ခြင်း (App ပိတ်ရင်လည်း မပျောက်ဘဲ Auto-play တွင် အသုံးပြုမည်)
- */
-function setPermanentDefaultMusic(url) {
-    if (!url || !audioPlayer) return;
-
-    persistentDefaultMusicUrl = url;
-    localStorage.setItem(DEFAULT_MUSIC_URL_KEY, url); // Default URL ကို Permanent သိမ်းထား
-    localStorage.removeItem(CUSTOM_MUSIC_KEY); // Temporary custom URL ကို ဖျက်
-    
-    currentMusicUrl = url; // လက်ရှိဖွင့်မည့် URL ကို Default အသစ်ဖြင့် ပြောင်း
-    
-    audioPlayer.src = url;
-    audioPlayer.load();
-
-    audioPlayer.play().catch(e => {
-        console.error("Failed to play music immediately after setting default URL:", e);
-        updateMusicStatus(false);
-        musicStatusSpan.textContent = 'Default music set. Tap to play.';
-    });
-    
-    updateDefaultMusicUrlDisplay();
-    closeModal('default-url-input-modal');
-    closeModal('music-modal');
-    showToast("Default Music URL ကို ပြောင်းလဲသတ်မှတ်ပြီးပါပြီ။");
+    showToast("Music source updated. Tap play icon to start.");
 }
 
 
 function addMusicEventListeners() {
+    // Music Button: Open Music Modal
     document.getElementById('music-button').onclick = () => {
-         updateDefaultMusicUrlDisplay(); // Modal ဖွင့်တိုင်း Default URL ကို Update လုပ်ပေး
          openModal('music-modal');
     }
+    
+    // Volume Icon: Toggle Play/Pause
     if(volumeToggleIcon) volumeToggleIcon.onclick = toggleVolume; 
     document.getElementById('cancel-music-modal-btn').onclick = () => closeModal('music-modal');
     
+    // Music Option Clicks (Default & URL)
     document.querySelectorAll('.music-option-list .music-option').forEach(option => {
         option.onclick = (e) => {
             const type = e.currentTarget.getAttribute('data-music-type');
             
-            if (type === 'change-default') {
-                 closeModal('music-modal'); 
-                 openModal('default-url-input-modal');
-                 const input = document.getElementById('default-music-url-input');
-                 if (input) input.value = persistentDefaultMusicUrl; 
-            } else if (type === 'default') {
-                setTemporaryMusic(persistentDefaultMusicUrl); 
+            if (type === 'default') {
+                // Default ကို ဖွင့်လျှင် Temporary URL ကို ဖျက်
                 localStorage.removeItem(CUSTOM_MUSIC_KEY); 
+                setMusicUrl(INITIAL_DEFAULT_URL); // Hardcoded default URL ကို သုံး
             } else if (type === 'url') {
                 closeModal('music-modal'); 
                 openModal('url-input-modal'); 
@@ -432,7 +375,7 @@ function addMusicEventListeners() {
         };
     });
 
-    // Temporary URL Input Modal
+    // Temporary URL Input Modal Logic
     document.getElementById('close-url-modal-btn').onclick = () => {
         closeModal('url-input-modal');
         openModal('music-modal'); 
@@ -441,34 +384,20 @@ function addMusicEventListeners() {
         const urlInput = document.getElementById('music-url-input');
         const url = urlInput ? urlInput.value.trim() : '';
         if (url) {
-            setTemporaryMusic(url);
+            setMusicUrl(url); 
             urlInput.value = ''; 
         } else {
             showToast("URL မထည့်ရသေးပါ!");
         }
     };
     
-    // Default URL Input Modal (NEW)
-    document.getElementById('close-default-url-modal-btn').onclick = () => {
-        closeModal('default-url-input-modal');
-        openModal('music-modal'); 
-    };
-    document.getElementById('set-default-url-btn').onclick = () => {
-        const urlInput = document.getElementById('default-music-url-input');
-        const url = urlInput ? urlInput.value.trim() : '';
-        if (url) {
-            setPermanentDefaultMusic(url);
-        } else {
-             showToast("URL မထည့်ရသေးပါ!");
-        }
-    };
-
+    // File Upload Logic
     const fileInput = document.getElementById('music-upload-input');
     fileInput.onchange = (e) => {
         const file = e.target.files[0];
         if (file) {
             const url = URL.createObjectURL(file);
-            setTemporaryMusic(url);
+            setMusicUrl(url); 
         }
     };
 }
@@ -506,6 +435,7 @@ function setupAdminPostLogic(isAdmin) {
                     posts.push(newPost);
                     savePosts(posts);
                     postInput.value = ''; 
+                    // Post အသစ်တင်ရင် New Posts tab ကို ပြန်ပြမည်
                     if (currentPostFilter !== 'new-posts') {
                         document.getElementById('new-posts-tab').click(); 
                     } else {
@@ -513,7 +443,7 @@ function setupAdminPostLogic(isAdmin) {
                     }
                     closeModal('post-modal'); 
                 } else {
-                    console.error("Post content cannot be empty.");
+                    showToast("Post content cannot be empty.");
                 }
             };
         }
@@ -576,4 +506,77 @@ function setupNavigation() {
     const navItems = document.querySelectorAll('.bottom-nav .nav-item');
 
     navItems.forEach(item => {
-        item.addEventListe
+        item.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            const targetScreenId = item.getAttribute('data-screen');
+            navItems.forEach(nav => nav.classList.remove('active'));
+            item.classList.add('active');
+            switchScreen(targetScreenId);
+        });
+    });
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // ---------------------------------------------
+    // 1. TMA Integration & Profile Data Initialization
+    // ---------------------------------------------
+    
+    if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+        tg = window.Telegram.WebApp; 
+        
+        try {
+            tg.ready();
+            tg.expand(); 
+            
+            const user = tg.initDataUnsafe.user;
+            
+            if (user) {
+                currentUserId = user.id || 0;
+                const firstName = user.first_name || '';
+                const lastName = user.last_name || '';
+                const fullName = `${firstName} ${lastName}`.trim();
+                
+                currentUserName = fullName || 'User'; 
+                is_admin = (currentUserId === ADMIN_CHAT_ID);
+
+                const closeBtn = document.getElementById('tma-close-btn');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => tg.close());
+                }
+            } 
+        } catch (e) {
+             console.error("TMA Initialization Error:", e);
+        }
+    } else {
+        console.warn("Mini App launched outside Telegram. Using default user ID 0.");
+        is_admin = (currentUserId === ADMIN_CHAT_ID); 
+    }
+
+    // ---------------------------------------------
+    // 2. Setup All Features
+    // ---------------------------------------------
+    
+    updateProfileDisplay(currentUserId, currentUserName, is_admin); 
+    
+    // Chat ID Copy Event Listener (Fixed)
+    const chatIdCopyBtn = document.getElementById('chat-id-copy-btn');
+    if (chatIdCopyBtn) {
+        chatIdCopyBtn.addEventListener('click', () => {
+            copyChatId(currentUserId);
+        });
+    }
+
+    setupPostFilters(); 
+    loadPosts(currentUserId); 
+    setupNavigation();
+    
+    // Music Player Setup: No Autoplay
+    setupMusicPlayer(); 
+    addMusicEventListeners();
+
+    setupAdminPostLogic(is_admin);
+
+    console.log("App loaded. Chat ID copy feature enabled.");
+});
