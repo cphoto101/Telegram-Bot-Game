@@ -1,7 +1,7 @@
-/* --- Root Variables & Base Setup (Enhanced) --- */
+/* --- Root Variables & Base Setup (Modern Standard) --- */
 :root {
-    /* Fallback Telegram Theme Variables */
-    --tg-theme-bg-color: #f0f2f5; /* Lighter background for a cleaner feel */
+    /* Fallback Telegram Theme Variables (Will be overwritten by TMA SDK) */
+    --tg-theme-bg-color: #f0f2f5; 
     --tg-theme-text-color: #1c1c1e;
     --tg-theme-link-color: #007aff;
     --tg-theme-hint-color: #999;
@@ -14,11 +14,10 @@
     /* UI Spacing & Geometry Variables */
     --spacing-xs: 5px;
     --spacing-sm: 10px;
-    --spacing-md: 16px; /* Standardized to 8-point grid multiple */
+    --spacing-md: 16px; 
     --spacing-lg: 24px;
     --card-radius: 12px; 
     
-    /* Subtle shadow for a clean 'lifted' look */
     --shadow-subtle: 0 1px 4px rgba(0, 0, 0, 0.08); 
     --shadow-header: 0 1px 2px rgba(0, 0, 0, 0.05); 
 }
@@ -27,67 +26,16 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     margin: 0;
     padding: 0;
-    /* IMPORTANT: Ensure this picks up the Telegram theme or the fallback */
     background-color: var(--tg-theme-bg-color); 
     color: var(--tg-theme-text-color);
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden;
+    overflow: hidden; /* Controlled by JS when modal is open */
     -webkit-user-select: none;
     user-select: none;
     transition: background-color 0.3s;
 }
-
-/* --- MODAL STYLES (CRITICAL FIXES) --- */
-.modal {
-    /* Ensure it covers the whole screen */
-    position: fixed; 
-    z-index: 1000; /* Highest z-index to overlay everything */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    /* Use transparent black background */
-    background-color: rgba(0, 0, 0, 0.5); 
-    
-    /* Center the content at the bottom */
-    display: flex;
-    justify-content: center;
-    align-items: flex-end; /* Align content to the bottom */
-    
-    /* Initial state for transition */
-    opacity: 0;
-    pointer-events: none; /* Disable interaction when hidden */
-    transition: opacity 0.3s ease;
-}
-
-.modal.active {
-    opacity: 1;
-    pointer-events: auto; /* Enable interaction when active */
-}
-
-.modal-content {
-    background-color: var(--tg-theme-secondary-bg-color);
-    width: 100%;
-    max-height: 80vh;
-    border-top-left-radius: 20px; 
-    border-top-right-radius: 20px;
-    padding: var(--spacing-lg);
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
-
-    /* Slide-up effect (for transition) */
-    transform: translateY(100%);
-    transition: transform 0.3s ease-out;
-}
-
-.modal.active .modal-content {
-    transform: translateY(0);
-}
-/* --- END OF MODAL FIXES --- */
-
-/* --- Rest of the previous CSS remains the same (Ensuring UI/UX integrity) --- */
 
 .app-container {
     flex-grow: 1;
@@ -96,8 +44,8 @@ body {
     overflow: hidden;
     position: relative; 
 }
-/* ... rest of your style.css ... */
 
+/* --- Content & Screen Management --- */
 .fixed-header-area {
     width: 100%;
     background-color: var(--tg-theme-bg-color);
@@ -112,7 +60,6 @@ body {
     padding: 0 var(--spacing-md); 
     padding-bottom: 70px; /* Space for bottom nav */
     -webkit-overflow-scrolling: touch;
-    transition: padding-top 0.3s;
 }
 
 .screen {
@@ -122,7 +69,7 @@ body {
     display: block;
 }
 
-/* --- Header Styles (More Compact) --- */
+/* --- Header Styles --- */
 .main-header {
     padding: var(--spacing-xs) var(--spacing-md) 0 var(--spacing-md);
 }
@@ -145,7 +92,7 @@ body {
     transition: opacity 0.2s;
 }
 
-/* --- Music Status Bar (Less intrusive) --- */
+/* --- Music Status Bar (Compact Status) --- */
 .music-status-bar {
     text-align: center;
     font-size: 0.8rem;
@@ -156,11 +103,9 @@ body {
     cursor: pointer;
     margin: var(--spacing-xs) var(--spacing-md);
     border-radius: 8px;
-    transition: background-color 0.2s;
 }
 
-
-/* --- Filter Tabs (Cleaner & Compact) --- */
+/* --- Filter Tabs (Clean Navigation) --- */
 .post-filter-tabs {
     display: flex;
     justify-content: flex-start;
@@ -192,7 +137,7 @@ body {
     background-color: var(--tg-theme-link-color);
 }
 
-/* --- Post Card Styles (Added Author Info) --- */
+/* --- Post Card Styles (Modern Card Look) --- */
 .posts-container {
     padding-top: var(--spacing-md);
 }
@@ -204,7 +149,6 @@ body {
     box-shadow: var(--shadow-subtle); 
     word-wrap: break-word;
     white-space: pre-wrap;
-    transition: transform 0.1s;
     display: flex;
     flex-direction: column;
 }
@@ -212,25 +156,25 @@ body {
     display: flex;
     align-items: center;
     margin-bottom: var(--spacing-sm);
-    color: var(--tg-theme-text-color);
 }
 .post-author-name {
     font-weight: 600;
     font-size: 0.95rem;
     margin-right: var(--spacing-sm);
+    color: var(--tg-theme-text-color);
 }
 .post-content {
     font-size: 1rem;
     line-height: 1.5;
-    margin-bottom: var(--spacing-sm);
     margin-top: var(--spacing-xs);
-    width: 100%;
+    margin-bottom: var(--spacing-sm);
 }
 .post-actions {
     display: flex;
     justify-content: space-between; 
     align-items: center;
     padding-top: var(--spacing-sm);
+    border-top: 1px solid rgba(0, 0, 0, 0.05); /* Subtle separator */
     margin-top: var(--spacing-xs);
 }
 .post-timestamp {
@@ -238,7 +182,6 @@ body {
     color: var(--tg-theme-hint-color); 
 }
 .like-btn, .delete-btn {
-    /* Base Button Reset/Style */
     background: none;
     border: none;
     cursor: pointer;
@@ -252,18 +195,8 @@ body {
 .like-btn.liked {
     color: var(--tg-theme-destructive-text-color); 
 }
-.like-btn i {
-    margin-right: 5px;
-}
-.delete-btn {
-    color: var(--tg-theme-destructive-text-color);
-}
-.delete-btn i {
-    margin-right: 5px;
-}
 
-
-/* --- Bottom Navigation (Refined) --- */
+/* --- Bottom Navigation --- */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -314,11 +247,207 @@ body {
     font-size: 1.3rem;
     cursor: pointer;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-    transition: transform 0.2s, background-color 0.2s;
     z-index: 90;
 }
 
-/* --- Button Styles --- */
+/* --- Profile Screen & List Styles (Telegram Native Look) --- */
+.profile-header {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-lg);
+}
+.profile-header-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    background-color: var(--tg-theme-secondary-bg-color);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-subtle);
+}
+.profile-avatar-container {
+    text-align: center;
+    margin-bottom: var(--spacing-sm);
+}
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: var(--tg-theme-link-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0 auto var(--spacing-xs) auto;
+    overflow: hidden;
+}
+.username-display {
+    font-size: 0.85rem;
+    color: var(--tg-theme-hint-color);
+}
+.profile-status {
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: white;
+    background-color: var(--tg-theme-link-color);
+    margin-top: var(--spacing-sm);
+}
+
+.list-group {
+    margin-bottom: var(--spacing-lg);
+}
+.group-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--tg-theme-hint-color);
+    margin-left: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+.elevated-list {
+    background-color: var(--tg-theme-secondary-bg-color);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-subtle);
+    overflow: hidden;
+}
+.info-item {
+    display: flex;
+    align-items: center;
+    padding: 14px var(--spacing-md); 
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.info-item:last-child {
+    border-bottom: none;
+}
+.info-item i {
+    font-size: 1.1rem;
+    width: 25px;
+    color: var(--tg-theme-link-color);
+}
+.info-details {
+    flex-grow: 1;
+    margin-left: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+}
+.info-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+.info-subtitle {
+    font-size: 0.8rem;
+    color: var(--tg-theme-hint-color);
+}
+.copy-icon {
+    color: var(--tg-theme-hint-color) !important;
+    width: 20px !important;
+}
+
+/* --- Modal Styles (Slide-up effect) --- */
+.modal {
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); 
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; 
+    opacity: 0;
+    pointer-events: none; 
+    transition: opacity 0.3s ease;
+}
+.modal.active {
+    opacity: 1;
+    pointer-events: auto; 
+}
+.modal-content {
+    background-color: var(--tg-theme-secondary-bg-color);
+    width: 100%;
+    max-height: 90vh;
+    border-top-left-radius: 20px; 
+    border-top-right-radius: 20px;
+    padding: var(--spacing-lg);
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-content h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--tg-theme-text-color);
+}
+textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: var(--spacing-sm);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    resize: none;
+    box-sizing: border-box;
+    font-size: 1rem;
+    background-color: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+}
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+}
+
+/* Music Modal Specifics */
+.music-option-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+.music-option {
+    display: flex;
+    align-items: center;
+    background-color: var(--tg-theme-bg-color);
+    border: none;
+    border-radius: 8px;
+    padding: var(--spacing-sm);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+.music-option i {
+    font-size: 1.2rem;
+    color: var(--tg-theme-link-color);
+    margin-right: var(--spacing-md);
+    width: 20px;
+    text-align: center;
+}
+.music-option .option-details {
+    display: flex;
+    flex-direction: column;
+}
+.music-option .option-details strong {
+    font-size: 0.95rem;
+    color: var(--tg-theme-text-color);
+}
+.music-option .option-details span {
+    font-size: 0.75rem;
+    color: var(--tg-theme-hint-color);
+}
+
+/* Button Styles */
 .primary-btn, .secondary-btn {
     padding: 10px 20px;
     border-radius: 8px;
@@ -327,7 +456,6 @@ body {
     cursor: pointer;
     transition: background-color 0.2s;
 }
-
 .primary-btn {
     background-color: var(--tg-theme-button-color);
     color: var(--tg-theme-button-text-color);
@@ -339,21 +467,22 @@ body {
     border: 1px solid var(--tg-theme-hint-color);
 }
 
+
 /* --- Custom Toast Notification --- */
 .custom-toast {
-    /* ... (Toast styles are fine) ... */
     visibility: hidden;
-    min-width: 250px;
+    min-width: 200px;
+    max-width: 90%;
     background-color: #333;
     color: #fff;
     text-align: center;
     border-radius: 8px;
     padding: 10px;
     position: fixed;
-    z-index: 1001; /* Higher than modal */
+    z-index: 1001; 
     left: 50%;
     transform: translate(-50%, 0);
-    bottom: 80px;
+    bottom: 80px; /* Positioned above the nav bar */
     font-size: 14px;
     opacity: 0;
     transition: opacity 0.5s, bottom 0.5s;
@@ -362,4 +491,5 @@ body {
     visibility: visible;
     opacity: 1;
     bottom: 100px; 
-}
+                                }
+    
