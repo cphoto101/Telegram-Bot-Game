@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZarOC (SarTo) TMA</title>
+    <title>Zebec Zaro TMA</title>
     <link rel="stylesheet" href="style.css">
     <!-- Font Awesome 6 for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -11,6 +11,12 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script> 
 </head>
 <body>
+
+    <!-- 0. Loading Overlay (အက်ပ်စတင်ချိန်တွင် ပြသမည်) -->
+    <div id="loading-overlay" class="active">
+        <div class="spinner"></div>
+        <p>Loading Zebec Zaro...</p>
+    </div>
 
     <div class="app-container">
         <!-- Main Content Area: Scrollable area -->
@@ -20,7 +26,8 @@
             <div id="home-screen" class="screen active">
                 <header class="main-header">
                     <div class="header-content">
-                        <h2>ZarOC Feed</h2>
+                        <!-- နာမည်ကို Zebec Zaro သို့ ပြောင်းလဲခြင်း -->
+                        <h2>Zebec Zaro Feed</h2> 
                         <div class="header-icons">
                             <!-- Admin Only Post Button -->
                             <i class="fas fa-plus post-add-btn" id="post-add-button" style="display: none;"></i> 
@@ -60,7 +67,6 @@
                     <!-- Profile Card -->
                     <div class="profile-header-card">
                         <div class="profile-avatar-container">
-                            <!-- This div will contain either initials, Telegram photo, or custom photo -->
                             <div class="profile-avatar" id="profile-avatar-placeholder"></div>
                             <h3 id="profile-display-name">Name Not Available</h3>
                             <p id="profile-display-username" class="username-display">Username Not Available</p>
@@ -79,6 +85,16 @@
                             </div>
                         </div>
                         <input type="file" id="custom-photo-upload-input" accept="image/*" style="display: none;">
+                        
+                        <!-- Custom Photo ကို ဖျက်ရန် ခလုတ်အသစ် -->
+                        <div class="info-item close-item" id="remove-custom-photo-btn" style="display: none;">
+                            <i class="fas fa-trash-alt"></i>
+                            <div class="info-details">
+                                <span class="info-title">Remove Custom Photo</span>
+                                <span class="info-subtitle">Revert to Telegram's photo or initials.</span>
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- Account Details -->
@@ -186,4 +202,3 @@
 </body>
 </html>
 
-                    
