@@ -27,7 +27,8 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: var(--tg-theme-bg-color);
+    /* IMPORTANT: Ensure this picks up the Telegram theme or the fallback */
+    background-color: var(--tg-theme-bg-color); 
     color: var(--tg-theme-text-color);
     display: flex;
     flex-direction: column;
@@ -38,6 +39,56 @@ body {
     transition: background-color 0.3s;
 }
 
+/* --- MODAL STYLES (CRITICAL FIXES) --- */
+.modal {
+    /* Ensure it covers the whole screen */
+    position: fixed; 
+    z-index: 1000; /* Highest z-index to overlay everything */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    /* Use transparent black background */
+    background-color: rgba(0, 0, 0, 0.5); 
+    
+    /* Center the content at the bottom */
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* Align content to the bottom */
+    
+    /* Initial state for transition */
+    opacity: 0;
+    pointer-events: none; /* Disable interaction when hidden */
+    transition: opacity 0.3s ease;
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: auto; /* Enable interaction when active */
+}
+
+.modal-content {
+    background-color: var(--tg-theme-secondary-bg-color);
+    width: 100%;
+    max-height: 80vh;
+    border-top-left-radius: 20px; 
+    border-top-right-radius: 20px;
+    padding: var(--spacing-lg);
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+
+    /* Slide-up effect (for transition) */
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+/* --- END OF MODAL FIXES --- */
+
+/* --- Rest of the previous CSS remains the same (Ensuring UI/UX integrity) --- */
+
 .app-container {
     flex-grow: 1;
     display: flex;
@@ -45,8 +96,8 @@ body {
     overflow: hidden;
     position: relative; 
 }
+/* ... rest of your style.css ... */
 
-/* --- Content & Screen Management --- */
 .fixed-header-area {
     width: 100%;
     background-color: var(--tg-theme-bg-color);
@@ -79,7 +130,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 40px; /* Compact height */
+    height: 40px; 
 }
 .app-title-fixed {
     font-size: 1.3rem; 
@@ -87,7 +138,7 @@ body {
     color: var(--tg-theme-text-color);
 }
 .header-icons .header-icon {
-    font-size: 1.2rem; /* Slightly smaller icons */
+    font-size: 1.2rem; 
     cursor: pointer;
     margin-left: var(--spacing-md);
     color: var(--tg-theme-link-color);
@@ -101,7 +152,7 @@ body {
     font-weight: 500;
     padding: var(--spacing-xs) var(--spacing-md);
     color: var(--tg-theme-hint-color);
-    background-color: color-mix(in srgb, var(--tg-theme-secondary-bg-color), var(--tg-theme-link-color) 5%); /* Slightly off-white */
+    background-color: color-mix(in srgb, var(--tg-theme-secondary-bg-color), var(--tg-theme-link-color) 5%); 
     cursor: pointer;
     margin: var(--spacing-xs) var(--spacing-md);
     border-radius: 8px;
@@ -116,14 +167,14 @@ body {
     padding: var(--spacing-sm) var(--spacing-md);
     gap: var(--spacing-lg);
     background-color: var(--tg-theme-bg-color);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Subtle separator */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05); 
 }
 .filter-tab {
     background: transparent;
     border: none;
     color: var(--tg-theme-hint-color);
     padding: var(--spacing-xs) 0;
-    font-size: 0.95rem; /* Slightly smaller text */
+    font-size: 0.95rem; 
     font-weight: 600;
     position: relative;
     transition: color 0.2s;
@@ -132,8 +183,12 @@ body {
     color: var(--tg-theme-text-color);
 }
 .filter-tab.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
     bottom: -5px; 
-    height: 2px; /* Thinner line */
+    height: 2px; 
     background-color: var(--tg-theme-link-color);
 }
 
@@ -150,7 +205,6 @@ body {
     word-wrap: break-word;
     white-space: pre-wrap;
     transition: transform 0.1s;
-    /* Added flex for user info */
     display: flex;
     flex-direction: column;
 }
@@ -170,11 +224,12 @@ body {
     line-height: 1.5;
     margin-bottom: var(--spacing-sm);
     margin-top: var(--spacing-xs);
-    /* Ensure content takes full width */
     width: 100%;
 }
 .post-actions {
-    justify-content: space-between; /* Space out elements */
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
     padding-top: var(--spacing-sm);
     margin-top: var(--spacing-xs);
 }
@@ -183,65 +238,128 @@ body {
     color: var(--tg-theme-hint-color); 
 }
 .like-btn, .delete-btn {
+    /* Base Button Reset/Style */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--tg-theme-hint-color);
     padding: 0;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+.like-btn.liked {
+    color: var(--tg-theme-destructive-text-color); 
 }
 .like-btn i {
     margin-right: 5px;
 }
+.delete-btn {
+    color: var(--tg-theme-destructive-text-color);
+}
+.delete-btn i {
+    margin-right: 5px;
+}
+
 
 /* --- Bottom Navigation (Refined) --- */
 .bottom-nav {
-    height: 65px; /* Slightly taller for better touch target */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 65px; 
+    background-color: var(--tg-theme-secondary-bg-color);
     box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1); 
+    z-index: 100;
+}
+.nav-item {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--tg-theme-hint-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+.nav-item.active {
+    color: var(--tg-theme-link-color);
 }
 .nav-item i {
-    font-size: 1.5rem; /* Larger icon */
+    font-size: 1.5rem; 
     margin-bottom: 1px;
 }
 .nav-item span {
     font-size: 0.7rem;
+    font-weight: 500;
 }
 
 /* --- Floating Action Button (FAB) --- */
 .fab {
-    background-color: var(--tg-theme-accent); /* Use accent color for admin action */
+    position: fixed;
+    right: var(--spacing-md);
+    bottom: 75px; 
+    background-color: var(--tg-theme-accent); 
     color: var(--tg-theme-button-text-color);
-    width: 50px; /* Slightly smaller FAB */
+    border: none;
+    border-radius: 50%;
+    width: 50px; 
     height: 50px;
     font-size: 1.3rem;
-    bottom: 75px; 
-}
-.fab:active {
-    background-color: color-mix(in srgb, var(--tg-theme-accent), black 10%);
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s, background-color 0.2s;
+    z-index: 90;
 }
 
-/* --- Profile Screen Styles --- */
-.profile-header {
-    font-size: 1.6rem;
-}
-.profile-avatar {
-    border: 3px solid var(--tg-theme-link-color); 
-}
-.list-group {
-    margin-bottom: var(--spacing-lg);
-    padding: 0 var(--spacing-xs); /* Adjust list group title indent */
-}
-.group-title {
-    margin-left: var(--spacing-md);
-}
-.info-item {
-    padding: 14px var(--spacing-md); /* Better padding for list items */
-}
-.info-title {
+/* --- Button Styles --- */
+.primary-btn, .secondary-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
     font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-/* --- Modal Styles --- */
-.modal-content {
-    border-top-left-radius: 20px; 
-    border-top-right-radius: 20px;
-    padding: var(--spacing-lg);
-}
 .primary-btn {
     background-color: var(--tg-theme-button-color);
-    }
+    color: var(--tg-theme-button-text-color);
+    border: none;
+}
+.secondary-btn {
+    background-color: var(--tg-theme-secondary-bg-color);
+    color: var(--tg-theme-text-color);
+    border: 1px solid var(--tg-theme-hint-color);
+}
+
+/* --- Custom Toast Notification --- */
+.custom-toast {
+    /* ... (Toast styles are fine) ... */
+    visibility: hidden;
+    min-width: 250px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 10px;
+    position: fixed;
+    z-index: 1001; /* Higher than modal */
+    left: 50%;
+    transform: translate(-50%, 0);
+    bottom: 80px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+}
+.custom-toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 100px; 
+}
