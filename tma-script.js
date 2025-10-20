@@ -22,7 +22,7 @@ let isMusicMuted = false;
 let tg = null;
 
 // ===========================================
-//          HELPER FUNCTIONS
+//          HELPER FUNCTIONS (UNCHANGED)
 // ===========================================
 
 /** Generates a color based on a string for avatar backgrounds. */
@@ -78,7 +78,7 @@ function performLegacyCopy(text) {
 }
 
 // ===========================================
-//          DATA STORAGE HANDLERS
+//          DATA STORAGE HANDLERS (UNCHANGED)
 // ===========================================
 
 function getPosts() {
@@ -120,13 +120,16 @@ function saveLikes(likes) {
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC
+//          POSTS & LIKES LOGIC (Modified)
 // ===========================================
 
-/** Creates the HTML element for a single post. */
+/** Creates the HTML element for a single post. 
+ * MODIFIED: Removed Author Name and Timestamp display.
+ */
 function createPostElement(post, userId) {
     const likes = getLikes();
     const userIdStr = userId.toString(); 
+    // Ensure post ID is treated as a string key in the likes object
     const postLikesArray = Array.isArray(likes[post.id]) ? likes[post.id].map(String) : []; 
     const isLiked = postLikesArray.includes(userIdStr);
     const isAdmin = (userId === ADMIN_CHAT_ID); 
@@ -136,19 +139,14 @@ function createPostElement(post, userId) {
     postElement.setAttribute('data-post-id', post.id);
 
     const displayLikesCount = postLikesArray.length; 
-    const authorName = post.authorName || 'Anonymous User';
     
-    const date = new Date(post.timestamp);
-    const dateString = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const timeString = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-
+    // NOTE: Author name and timestamp removed as requested.
     const deleteButton = isAdmin 
         ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
 
     postElement.innerHTML = `
         <div class="post-header">
-            <span class="post-author-name">${authorName}</span>
             ${post.isAdmin ? '<span style="font-size: 0.8rem; font-weight: 600; color: var(--tg-theme-accent);"><i class="fas fa-crown"></i> Admin</span>' : ''}
         </div>
         <p class="post-content">${post.content}</p>
@@ -157,16 +155,13 @@ function createPostElement(post, userId) {
                 <i class="fas fa-heart"></i> 
                 ${displayLikesCount}
             </button>
-            <span class="post-timestamp">
-                ${dateString} at ${timeString}
-            </span>
             ${deleteButton}
         </div>
     `;
     return postElement;
 }
 
-/** Loads and renders posts based on the current filter. */
+/** Loads and renders posts based on the current filter. (UNCHANGED) */
 function loadPosts(userId) {
     currentUserId = userId; 
     let posts = getPosts();
@@ -194,7 +189,7 @@ function loadPosts(userId) {
     addPostEventListeners(userId);
 }
 
-/** Permanently deletes a post and its associated likes. */
+/** Permanently deletes a post and its associated likes. (UNCHANGED) */
 function performDeletePost(postId, userId) {
     if (userId !== ADMIN_CHAT_ID) { 
         showToast("Only Admin can delete posts.");
@@ -213,22 +208,33 @@ function performDeletePost(postId, userId) {
     loadPosts(userId); 
 }
 
-/** Toggles a like on a post. */
+/** Toggles a like on a post. 
+ * FIX: Ensures postId is a string key for the likes object.
+ */
 function toggleLike(e, userId) {
-    const postId = parseInt(e.currentTarget.getAttribute('data-post-id')); 
-    if (isNaN(postId)) return;
+    // Ensure post ID is handled consistently as a number then converted to string key
+    const postIdAttr = e.currentTarget.getAttribute('data-post-id');
+    const postId = parseInt(postIdAttr); 
+    if (isNaN(postId)) {
+        console.error("Invalid postId for like toggle:", postIdAttr);
+        return;
+    }
 
+    const postIdStr = postId.toString(); // Use string for likes object key consistency
     const userIdStr = userId.toString();
-    let likes = getLikes();
-    likes[postId] = Array.isArray(likes[postId]) ? likes[postId].map(String) : []; 
     
-    const isLiked = likes[postId].includes(userIdStr);
+    let likes = getLikes();
+    
+    // Ensure the array exists and contains strings for this postId
+    likes[postIdStr] = Array.isArray(likes[postIdStr]) ? likes[postIdStr].map(String) : []; 
+    
+    const isLiked = likes[postIdStr].includes(userIdStr);
 
     if (isLiked) {
-        likes[postId] = likes[postId].filter(id => id !== userIdStr);
+        likes[postIdStr] = likes[postIdStr].filter(id => id !== userIdStr);
         showToast("Unliked.");
     } else {
-        likes[postId].push(userIdStr);
+        likes[postIdStr].push(userIdStr);
         showToast("Liked!");
     }
     
@@ -236,7 +242,7 @@ function toggleLike(e, userId) {
     loadPosts(currentUserId); 
 }
 
-/** Adds event listeners to all newly rendered posts. */
+/** Adds event listeners to all newly rendered posts. (UNCHANGED) */
 function addPostEventListeners(userId) {
     document.querySelectorAll('.like-btn').forEach(button => {
         button.onclick = (e) => toggleLike(e, userId); 
@@ -258,7 +264,7 @@ function addPostEventListeners(userId) {
     });
 }
 
-/** Sets up event listeners for post filter tabs. */
+/** Sets up event listeners for post filter tabs. (UNCHANGED) */
 function setupPostFilters() {
     const tabs = document.querySelectorAll('.filter-tab');
     tabs.forEach(tab => {
@@ -283,7 +289,7 @@ function setupPostFilters() {
 }
 
 // ===========================================
-//          MODAL & MUSIC LOGIC 
+//          MODAL & MUSIC LOGIC (UNCHANGED)
 // ===========================================
 
 /** Opens a modal window and disables body scroll. */
@@ -318,7 +324,6 @@ function closeModal(modalId) {
         }
     }, 400); 
 }
-
 
 /** Updates the visual status of the music player. */
 function updateMusicStatus(isPlaying) {
@@ -448,7 +453,7 @@ function addMusicEventListeners() {
 }
 
 // ===========================================
-//          ADMIN POST LOGIC 
+//          ADMIN POST LOGIC (UNCHANGED)
 // ===========================================
 
 /** Sets up admin-specific functionality. */
@@ -497,10 +502,10 @@ function setupAdminPostLogic(isAdmin) {
 
 
 // ===========================================
-//          PROFILE LOGIC 
+//          PROFILE LOGIC (Modified: Invite Removed)
 // ===========================================
 
-/** Updates the display of user profile information. */
+/** Updates the display of user profile information. (UNCHANGED) */
 function updateProfileDisplay(userId, fullName, username, is_admin) {
     const displayUsername = username ? `@${username}` : 'Username N/A';
     
@@ -532,7 +537,10 @@ function updateProfileDisplay(userId, fullName, username, is_admin) {
     }
 }
 
-/** Sets up listeners for profile actions. */
+/** Sets up listeners for profile actio
+TcopyTocopyTo
+ * MODIFIED: Invite Friends logic removed.
+ */
 function setupProfileListeners() {
     const copyBtn = document.getElementById('chat-id-copy-btn');
     if (copyBtn) copyBtn.onclick = () => copyToClipboard(currentUserId.toString(), 'User ID copied.');
@@ -540,20 +548,12 @@ function setupProfileListeners() {
     const closeBtn = document.getElementById('tma-close-btn');
     if (closeBtn) closeBtn.onclick = () => tg && tg.close ? tg.close() : showToast("Mini App Close API Not Available.");
     
-    const inviteBtn = document.getElementById('invite-friends-btn');
-    if (inviteBtn) inviteBtn.addEventListener('click', () => {
-        if (tg && tg.showInvitePopup) {
-            tg.showInvitePopup(); 
-            showToast("Invite link prepared for sharing.");
-        } else {
-            showToast("Invite Feature not available in this TMA environment.");
-        }
-    });
+    // NOTE: Invite Friends logic was removed from both HTML and JS
 }
 
 
 // ===========================================
-//          NAVIGATION & MAIN ENTRY 
+//          NAVIGATION & MAIN ENTRY (UNCHANGED)
 // ===========================================
 
 /** Switches the active content screen. */
@@ -659,7 +659,6 @@ function setupTMA() {
             themeParams: {},
             ready: () => console.log('TMA Mock Ready'),
             close: () => console.log('TMA Mock Close'),
-            showInvitePopup: () => showToast("Invite Popup (Mock): Not available outside TMA."),
             showConfirm: (msg, callback) => callback(window.confirm(msg)),
             HapticFeedback: { impactOccurred: () => console.log('Haptic: Light') },
             MainButton: { hide: () => console.log('MainButton: Hide') }
