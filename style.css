@@ -1,149 +1,108 @@
+/* Telegram Web App Theme Variables (Optional but good practice) */
 :root {
-    --primary-color: #1ed760; /* Vibrant accent color (e.g., Spotify Green) */
-    --secondary-color: #0e0e0e; /* Darkest background */
-    --card-color: #181818; /* Slightly lighter card background */
-    --text-color: #ffffff;
-    --text-muted: #b3b3b3;
-    --border-radius: 12px;
-    --padding-base: 16px;
-    --button-bg: #282828;
+    --tg-theme-bg-color: #f4f4f4;
+    --tg-theme-text-color: #1a1a1a;
+    --tg-theme-link-color: #007aff;
+    --tg-theme-hint-color: #999;
+    --tg-theme-button-color: #007aff;
+    --tg-theme-button-text-color: #ffffff;
+    --tg-theme-secondary-bg-color: #ffffff;
 }
 
-/* Base Styles */
+/* Adjust colors based on actual TMA theme if available */
 body {
-    background-color: var(--secondary-color);
-    color: var(--text-color);
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* Prevent horizontal scroll */
+    background-color: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+    font-size: 16px;
 }
 
-/* ------------------------------------------------ */
-/* NEW: Loading Overlay Styles */
-/* ------------------------------------------------ */
-#loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: var(--secondary-color);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    transition: opacity 0.3s ease;
-    opacity: 0;
-    pointer-events: none; /* Allow interaction when faded out */
-}
-
-#loading-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.spinner {
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid var(--primary-color);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 10px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-/* ------------------------------------------------ */
-/* END: Loading Overlay Styles */
-/* ------------------------------------------------ */
-
-
-.app-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    max-width: 500px; /* Max width for central alignment on desktop */
-    margin: 0 auto;
-}
-
-/* Content Area (Scrollable) */
-.content {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding-bottom: 80px; /* Space for fixed bottom nav */
-}
-
-.screen {
-    padding: var(--padding-base);
+/* Scrollbar Hide (iOS/Android smooth scrolling) */
+.content::-webkit-scrollbar {
     display: none;
-    min-height: calc(100vh - 80px); /* Fill space when active */
+}
+.content {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
-.screen.active {
-    display: block;
-}
+/* ==================================== */
+/* 1. Header and Navigation */
+/* ==================================== */
 
-/* Header & Status Bar */
-.main-header, .profile-header {
-    position: sticky;
-    top: 0;
-    background-color: var(--secondary-color);
-    padding: 10px 0;
-    border-bottom: 1px solid #282828;
-    z-index: 10;
+.main-header {
+    margin-bottom: 20px;
 }
-
 .header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-
-h2 {
+.header-content h2 {
     font-size: 1.5rem;
-    color: var(--text-color);
+    font-weight: 700;
     margin: 0;
+    color: var(--tg-theme-text-color);
 }
-
-.header-icons {
-    display: flex;
-    gap: 12px;
-}
-
 .header-icons i {
     font-size: 1.3rem;
+    margin-left: 15px;
     cursor: pointer;
-    color: var(--text-muted);
-    transition: color 0.2s ease;
+    color: var(--tg-theme-hint-color);
+    transition: color 0.2s, transform 0.2s;
+}
+.header-icons i:active {
+    transform: scale(0.9);
+}
+/* Active volume icon color */
+.header-icons .fa-volume-up {
+    color: var(--tg-theme-link-color);
 }
 
-.header-icons i:hover {
-    color: var(--primary-color);
+.bottom-nav {
+    border-top: 1px solid var(--tg-theme-hint-color);
+    background-color: var(--tg-theme-secondary-bg-color);
+}
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--tg-theme-hint-color);
+    transition: color 0.2s;
+    outline: none;
+}
+.nav-item.active {
+    color: var(--tg-theme-button-color);
+}
+.nav-item i {
+    font-size: 1.2rem;
+    margin-bottom: 3px;
+}
+.nav-item span {
+    font-size: 0.7rem;
+    font-weight: 600;
 }
 
+/* Music Status Bar */
 .music-status-bar {
-    padding: 8px var(--padding-base);
-    background-color: #282828;
-    color: #fff;
-    font-size: 0.85rem;
-    border-radius: var(--border-radius);
-    margin-bottom: var(--padding-base);
+    background-color: var(--tg-theme-secondary-bg-color);
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     text-align: center;
+    font-size: 0.9rem;
+    color: var(--tg-theme-hint-color);
 }
 
-/* Social Feed Section */
-.social-feed-section {
-    padding: 0 var(--padding-base);
-}
+/* ==================================== */
+/* 2. Post Card Styles (Modern & Clean) */
+/* ==================================== */
 
 .posts-container {
     display: flex;
@@ -152,370 +111,294 @@ h2 {
 }
 
 .post-card {
-    background-color: var(--card-color);
-    padding: var(--padding-base);
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    background-color: var(--tg-theme-secondary-bg-color);
+    padding: 15px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.post-card:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.post-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 0.9rem;
-}
-
-.post-author {
-    font-weight: 600;
-    color: var(--text-color);
-}
-
-.post-author.admin {
-    color: var(--primary-color);
-}
-
-.post-timestamp {
-    color: var(--text-muted);
-}
-
+/* Post Content Styling */
 .post-content {
-    margin: 0 0 15px 0;
+    font-size: 1rem;
     line-height: 1.5;
-    white-space: pre-wrap; /* Preserve formatting */
+    margin: 10px 0 15px 0;
+    white-space: pre-wrap; /* For line breaks in posts */
 }
 
+/* Post Actions (Like/Delete) */
 .post-actions {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid #282828;
+    border-top: 1px solid var(--tg-theme-hint-color, #f0f0f0);
     padding-top: 10px;
+    margin-top: 10px;
 }
 
-.like-btn, .delete-btn, .primary-btn, .secondary-btn {
+/* ==================================== */
+/* 3. Button Styles (Primary/Secondary) */
+/* ==================================== */
+
+.primary-btn, .secondary-btn, .like-btn, .delete-btn {
     padding: 8px 15px;
-    border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     font-weight: 600;
-    transition: background-color 0.2s ease, transform 0.1s;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s, opacity 0.2s, transform 0.1s;
+    border: none;
+    outline: none;
 }
-
-.like-btn {
-    background-color: var(--button-bg);
-    color: var(--text-muted);
-}
-
-.like-btn.liked {
-    background-color: #cf3c3c; /* Red color for liked state */
-    color: var(--text-color);
-}
-
-.like-btn:active, .delete-btn:active, .primary-btn:active, .secondary-btn:active {
+.primary-btn:active, .secondary-btn:active, .like-btn:active, .delete-btn:active {
     transform: scale(0.98);
 }
 
-.delete-btn {
-    background-color: #444;
-    color: #ff4545; /* Error red */
-}
-
 .primary-btn {
-    background-color: var(--primary-color);
-    color: var(--secondary-color);
+    background-color: var(--tg-theme-button-color);
+    color: var(--tg-theme-button-text-color);
 }
-
 .secondary-btn {
-    background-color: #333;
-    color: var(--text-color);
+    background-color: var(--tg-theme-bg-color, #eee);
+    color: var(--tg-theme-text-color);
+    border: 1px solid var(--tg-theme-hint-color, #ccc);
 }
 
-
-/* Profile Screen Styles */
-.telegram-info-section {
-    padding: 0 var(--padding-base);
+/* Like Button Specific */
+.like-btn {
+    background: none;
+    color: var(--tg-theme-hint-color);
+    font-weight: 500;
 }
-
-.profile-header-card {
-    background-color: var(--card-color);
-    padding: 20px;
-    border-radius: var(--border-radius);
-    text-align: center;
-    margin-bottom: var(--padding-base);
+.like-btn i {
+    margin-right: 5px;
 }
-
-.profile-avatar-container {
-    margin-bottom: 15px;
-}
-
-.profile-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    margin: 0 auto 10px;
-    background-color: #444; /* Fallback color */
-    color: var(--text-color);
-    font-size: 2rem;
-    line-height: 80px;
-    font-weight: bold;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border: none;
-}
-
-h3 {
-    margin: 0;
-    font-size: 1.2rem;
-}
-
-.username-display {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-top: 4px;
-}
-
-.profile-status {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 5px;
-    background-color: #333;
-    color: var(--primary-color);
-    font-size: 0.8rem;
+.like-btn.liked {
+    color: #ff3b30; /* iOS Red */
     font-weight: 600;
 }
 
-.list-group {
-    margin-bottom: 20px;
-}
-
-.group-title {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    padding: 0 0 8px 0;
-    margin: 0;
-}
-
-.info-item {
-    background-color: var(--card-color);
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    border-radius: var(--border-radius);
-    margin-bottom: 5px;
-    cursor: pointer; /* Ensure clickability for custom photo upload */
-}
-
-.info-item i {
-    font-size: 1.2rem;
-    color: var(--primary-color);
-    margin-right: 15px;
-}
-
-.info-details {
-    flex-grow: 1;
-    text-align: left;
-}
-
-.info-title {
-    display: block;
+/* Delete Button Specific (Admin only) */
+.delete-btn {
+    background: none;
+    color: #ff3b30;
     font-weight: 500;
 }
 
-.info-subtitle {
-    display: block;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    word-break: break-all;
-}
+/* ==================================== */
+/* 4. Modal Styles */
+/* ==================================== */
 
-.close-item {
-    cursor: pointer;
-    color: #ff4545;
-}
-
-.close-item i {
-    color: #ff4545;
-}
-
-/* Bottom Navigation */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    max-width: 500px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background-color: #121212;
-    padding: 10px 0;
-    border-top: 1px solid #282828;
-    z-index: 20;
-}
-
-.nav-item {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 5px 15px;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.nav-item i {
-    font-size: 1.2rem;
-    margin-bottom: 3px;
-}
-
-.nav-item span {
-    font-size: 0.7rem;
-}
-
-.nav-item.active {
-    color: var(--primary-color);
-}
-
-
-/* Modal Styles */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: none; /* Hidden by default */
+    background-color: rgba(0, 0, 0, 0.4); /* Dark overlay */
+    display: none; /* Hide by default */
     justify-content: center;
     align-items: center;
-    z-index: 100;
-    padding: var(--padding-base);
-}
-
-.modal.active {
-    display: flex;
-}
-
-.modal-content {
-    background-color: var(--card-color);
-    padding: 20px;
-    border-radius: var(--border-radius);
-    width: 100%;
-    max-width: 350px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
-    transform: translateY(20px);
+    z-index: 2000;
     opacity: 0;
-    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    transition: opacity 0.3s ease-in-out;
 }
-
-.modal.active .modal-content {
-    transform: translateY(0);
+.modal.active {
     opacity: 1;
 }
-
-.modal h3 {
-    margin-top: 0;
-    border-bottom: 1px solid #282828;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+.modal-content {
+    background-color: var(--tg-theme-secondary-bg-color);
+    padding: 20px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s ease-in-out;
+}
+.modal.active .modal-content {
+    transform: translateY(0);
 }
 
-/* Specific Music Modal Styles */
-.music-option-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.music-option {
-    display: flex;
-    align-items: center;
-    padding: 12px;
-    background-color: #282828;
-    border: none;
-    border-radius: 8px;
-    text-align: left;
-    color: var(--text-color);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.music-option:hover {
-    background-color: #333;
-}
-
-.music-option i {
-    font-size: 1.5rem;
-    margin-right: 15px;
-    color: var(--primary-color);
-}
-
-.option-details {
-    flex-grow: 1;
-}
-
-.option-details strong {
-    display: block;
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-.option-details span {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-/* Form Elements in Modals */
-.modal input[type="url"], .modal textarea {
+.post-modal-content textarea {
     width: 100%;
+    min-height: 100px;
     padding: 10px;
-    margin-bottom: 15px;
+    margin: 15px 0;
     border-radius: 8px;
-    border: 1px solid #333;
-    background-color: #282828;
-    color: var(--text-color);
-    box-sizing: border-box;
-    font-size: 1rem;
-    resize: none;
+    border: 1px solid var(--tg-theme-hint-color);
+    background-color: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+    resize: vertical;
+    outline: none;
 }
-
-.modal textarea {
-    height: 120px;
-}
-
 .modal-actions {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-top: 15px;
 }
 
-/* Admin Post Message */
-.admin-message {
-    background-color: #333;
-    color: #ff9800; /* Amber for warning/info */
-    padding: 10px;
-    border-radius: var(--border-radius);
-    margin-bottom: var(--padding-base);
-    font-size: 0.9rem;
+/* Music Modal Specific */
+.music-option-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0 20px;
+}
+.music-option {
     display: flex;
     align-items: center;
-    gap: 10px;
+    padding: 10px;
+    border: 1px solid var(--tg-theme-hint-color);
+    border-radius: 10px;
+    background-color: var(--tg-theme-bg-color);
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.2s;
+}
+.music-option:hover {
+    background-color: var(--tg-theme-bg-color);
+}
+.music-option i {
+    font-size: 1.2rem;
+    margin-right: 15px;
+    color: var(--tg-theme-link-color);
+}
+.option-details {
+    display: flex;
+    flex-direction: column;
+}
+.option-details strong {
+    font-size: 1rem;
+    color: var(--tg-theme-text-color);
+}
+.option-details span {
+    font-size: 0.8rem;
+    color: var(--tg-theme-hint-color);
 }
 
-.admin-message i {
-    color: #ff9800;
+#music-url-input {
+    width: 100%;
+    padding: 10px;
+    margin: 15px 0;
+    border-radius: 8px;
+    border: 1px solid var(--tg-theme-hint-color);
+    background-color: var(--tg-theme-bg-color);
+    color: var(--tg-theme-text-color);
+    box-sizing: border-box;
+}
+
+/* ==================================== */
+/* 5. Profile Screen Styles */
+/* ==================================== */
+
+.profile-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.profile-header-card {
+    background-color: var(--tg-theme-secondary-bg-color);
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.profile-avatar-container {
+    margin-bottom: 15px;
+}
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    overflow: hidden;
+}
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.profile-header-card h3 {
+    margin: 5px 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+.username-display {
+    color: var(--tg-theme-hint-color);
+    font-size: 0.9rem;
+}
+.profile-status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background-color: var(--tg-theme-link-color);
+    color: #ffffff;
+}
+
+.list-group {
+    background-color: var(--tg-theme-secondary-bg-color);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.group-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--tg-theme-text-color);
+    padding: 15px 15px 5px;
+    margin: 0;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-top: 1px solid var(--tg-theme-bg-color);
+    cursor: default;
+}
+.list-group .info-item:first-of-type {
+    border-top: none;
+}
+.info-item i {
+    font-size: 1.2rem;
+    margin-right: 15px;
+    color: var(--tg-theme-link-color);
+}
+.info-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.info-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--tg-theme-text-color);
+}
+.info-subtitle {
+    font-size: 0.8rem;
+    color: var(--tg-theme-hint-color);
+    word-break: break-all;
+}
+.close-item {
+    color: #ff3b30;
+    cursor: pointer;
+}
+.close-item i {
+    color: #ff3b30;
     }
