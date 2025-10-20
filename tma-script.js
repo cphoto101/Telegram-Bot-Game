@@ -25,7 +25,6 @@ let tg = null;
 //          HELPER FUNCTIONS (UNCHANGED)
 // ===========================================
 
-/** Generates a color based on a string for avatar backgrounds. */
 function stringToColor(str) {
     let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
     let color = '#';
@@ -37,7 +36,6 @@ function stringToColor(str) {
     return color;
 }
 
-/** Displays a custom toast notification. */
 function showToast(message) {
     const toast = document.getElementById('custom-toast');
     if (!toast) return;
@@ -50,7 +48,6 @@ function showToast(message) {
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 }
 
-/** Copies a string to the clipboard (using modern API with fallback). */
 function copyToClipboard(text, successMsg = 'Copied successfully.') {
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => showToast(successMsg)).catch(() => performLegacyCopy(text));
@@ -59,7 +56,6 @@ function copyToClipboard(text, successMsg = 'Copied successfully.') {
     }
 }
 
-/** Fallback for copying text (legacy method). */
 function performLegacyCopy(text) {
     const tempInput = document.createElement('textarea');
     tempInput.value = text;
@@ -120,17 +116,17 @@ function saveLikes(likes) {
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC (Modified)
+//          POSTS & LIKES LOGIC (MODIFIED)
 // ===========================================
 
 /** Creates the HTML element for a single post. 
- * MODIFIED: Removed Author Name and Timestamp display.
+ * MODIFIED: Removed Admin Tag from post content.
  */
 function createPostElement(post, userId) {
     const likes = getLikes();
     const userIdStr = userId.toString(); 
-    // Ensure post ID is treated as a string key in the likes object
-    const postLikesArray = Array.isArray(likes[post.id]) ? likes[post.id].map(String) : []; 
+    const postIdStr = post.id.toString(); // Use string key for consistency
+    const postLikesArray = Array.isArray(likes[postIdStr]) ? likes[postIdStr].map(String) : []; 
     const isLiked = postLikesArray.includes(userIdStr);
     const isAdmin = (userId === ADMIN_CHAT_ID); 
     
@@ -140,15 +136,15 @@ function createPostElement(post, userId) {
 
     const displayLikesCount = postLikesArray.length; 
     
-    // NOTE: Author name and timestamp removed as requested.
     const deleteButton = isAdmin 
         ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
 
+    // NOTE: post-header is kept for layout consistency but is empty of text.
+    // The content is now directly under post-header.
     postElement.innerHTML = `
         <div class="post-header">
-            ${post.isAdmin ? '<span style="font-size: 0.8rem; font-weight: 600; color: var(--tg-theme-accent);"><i class="fas fa-crown"></i> Admin</span>' : ''}
-        </div>
+            </div>
         <p class="post-content">${post.content}</p>
         <div class="post-actions">
             <button class="like-btn ${isLiked ? 'liked' : ''}" data-post-id="${post.id}" aria-label="${isLiked ? 'Unlike' : 'Like'} Post">
@@ -208,9 +204,7 @@ function performDeletePost(postId, userId) {
     loadPosts(userId); 
 }
 
-/** Toggles a like on a post. 
- * FIX: Ensures postId is a string key for the likes object.
- */
+/** Toggles a like on a post. (FIXED LOGIC) */
 function toggleLike(e, userId) {
     // Ensure post ID is handled consistently as a number then converted to string key
     const postIdAttr = e.currentTarget.getAttribute('data-post-id');
@@ -220,7 +214,7 @@ function toggleLike(e, userId) {
         return;
     }
 
-    const postIdStr = postId.toString(); // Use string for likes object key consistency
+    const postIdStr = postId.toString(); 
     const userIdStr = userId.toString();
     
     let likes = getLikes();
@@ -292,7 +286,6 @@ function setupPostFilters() {
 //          MODAL & MUSIC LOGIC (UNCHANGED)
 // ===========================================
 
-/** Opens a modal window and disables body scroll. */
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
@@ -306,7 +299,6 @@ function openModal(modalId) {
     if (fab) fab.style.display = 'none'; 
 }
 
-/** Closes a modal window and re-enables body scroll. */
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
@@ -325,7 +317,6 @@ function closeModal(modalId) {
     }, 400); 
 }
 
-/** Updates the visual status of the music player. */
 function updateMusicStatus(isPlaying) {
     if (!musicStatusSpan || !volumeToggleIcon) return;
     let statusText = isPlaying ? `🎶 Music Playing ${isMusicMuted ? '(Muted)' : ''} 🎶` : 'Music Paused (Tap Icon to Play)';
@@ -342,7 +333,6 @@ function updateMusicStatus(isPlaying) {
     }
 }
 
-/** Toggles playing and muting logic. */
 function toggleVolume() {
     if (!audioPlayer) return;
 
@@ -362,7 +352,6 @@ function toggleVolume() {
     }
 }
 
-/** Initializes the audio player element. */
 function setupMusicPlayer() { 
     audioPlayer = document.getElementById('audio-player');
     musicStatusSpan = document.getElementById('current-music-status');
@@ -389,7 +378,6 @@ function setupMusicPlayer() {
     updateMusicStatus(false); 
 }
 
-/** Loads a new music URL and prepares it for playing. */
 function setMusicUrl(url, sourceName) {
     if (!url || !audioPlayer) return;
     
@@ -408,7 +396,6 @@ function setMusicUrl(url, sourceName) {
     showToast(`${sourceName} set. Tap the Volume Icon to play.`);
 }
 
-/** Adds event listeners for music selection and modal controls. */
 function addMusicEventListeners() {
     document.getElementById('music-button').onclick = () => openModal('music-modal');
     document.getElementById('cancel-music-modal-btn').onclick = () => closeModal('music-modal');
@@ -456,7 +443,6 @@ function addMusicEventListeners() {
 //          ADMIN POST LOGIC (UNCHANGED)
 // ===========================================
 
-/** Sets up admin-specific functionality. */
 function setupAdminPostLogic(isAdmin) {
     const postAddButton = document.getElementById('post-add-button');
     const submitPostBtn = document.getElementById('submit-post-btn');
@@ -502,10 +488,9 @@ function setupAdminPostLogic(isAdmin) {
 
 
 // ===========================================
-//          PROFILE LOGIC (Modified: Invite Removed)
+//          PROFILE LOGIC (INVITE CODE REMOVED)
 // ===========================================
 
-/** Updates the display of user profile information. (UNCHANGED) */
 function updateProfileDisplay(userId, fullName, username, is_admin) {
     const displayUsername = username ? `@${username}` : 'Username N/A';
     
@@ -537,9 +522,8 @@ function updateProfileDisplay(userId, fullName, username, is_admin) {
     }
 }
 
-/** Sets up listeners for profile actio
-TcopyTocopyTo
- * MODIFIED: Invite Friends logic removed.
+/** Sets up listeners for profile actions. 
+ * MODIFIED: All Invite Friends logic removed.
  */
 function setupProfileListeners() {
     const copyBtn = document.getElementById('chat-id-copy-btn');
@@ -548,7 +532,7 @@ function setupProfileListeners() {
     const closeBtn = document.getElementById('tma-close-btn');
     if (closeBtn) closeBtn.onclick = () => tg && tg.close ? tg.close() : showToast("Mini App Close API Not Available.");
     
-    // NOTE: Invite Friends logic was removed from both HTML and JS
+    // NOTE: Invite Friends logic was removed in the previous step and is verified absent here.
 }
 
 
@@ -556,7 +540,6 @@ function setupProfileListeners() {
 //          NAVIGATION & MAIN ENTRY (UNCHANGED)
 // ===========================================
 
-/** Switches the active content screen. */
 function switchScreen(targetScreenId) {
     document.querySelectorAll('.content .screen').forEach(screen => screen.classList.remove('active'));
     
@@ -586,14 +569,12 @@ function switchScreen(targetScreenId) {
     if (contentArea) contentArea.scrollTop = 0;
 }
 
-/** Adds event listeners for bottom navigation buttons. */
 function addNavigationListeners() {
     document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
         item.addEventListener('click', (e) => switchScreen(e.currentTarget.getAttribute('data-screen')));
     });
 }
 
-/** Main function to initialize all components. */
 function main() {
     const user = tg.initDataUnsafe.user;
     if (user && user.id) {
@@ -622,7 +603,6 @@ function main() {
     tg.ready();
 }
 
-/** Initializes Telegram Web App SDK and Theme */
 function setupTMA() {
     if (window.Telegram && window.Telegram.WebApp) {
         tg = window.Telegram.WebApp;
