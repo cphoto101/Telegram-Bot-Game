@@ -111,6 +111,10 @@ body {
     font-size: 0.9rem;
     color: var(--tg-theme-text-color); /* Status ကို ပိုထင်ရှားစေရန် */
     font-weight: 600;
+    cursor: pointer; /* Click to start/toggle play */
+}
+.music-status-bar:active {
+    opacity: 0.8;
 }
 
 /* ==================================== */
@@ -470,7 +474,7 @@ body {
     bottom: 80px; /* Bottom Nav အပေါ်တွင် ပြသရန် */
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.75);
     color: white;
     padding: 10px 20px;
     border-radius: 10px;
@@ -478,8 +482,9 @@ body {
     z-index: 3000;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s ease-in-out;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
 }
 .custom-toast.show {
     opacity: 1;
+    transform: translateX(-50%) translateY(0);
     }
