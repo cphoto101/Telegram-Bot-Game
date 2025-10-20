@@ -1,5 +1,5 @@
 // ********** SET YOUR ADMIN CHAT ID HERE **********
-// Set your Telegram Chat ID here.
+// Set your Telegram Chat ID here. You MUST replace this with your actual ID.
 const ADMIN_CHAT_ID = 1924452453; 
 // *************************************************
 
@@ -7,7 +7,7 @@ const ADMIN_CHAT_ID = 1924452453;
 const POSTS_STORAGE_KEY = 'tma_community_posts_v4'; 
 const LIKES_STORAGE_KEY = 'tma_user_likes_v4'; 
 const CUSTOM_MUSIC_KEY = 'tma_custom_music_url_v4'; 
-const PROFILE_IMAGE_KEY = 'tma_custom_profile_image_v1'; // New key for custom photo
+const PROFILE_IMAGE_KEY = 'tma_custom_profile_image_v1'; 
 
 // --- Global Variables ---
 const defaultMusicUrl = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3';
@@ -17,7 +17,10 @@ let musicStatusSpan;
 let volumeToggleIcon;
 let currentUserId = 0; 
 let currentUserName = 'Guest';
-let is_admin = false; // Track admin status globally
+let is_admin = false; 
+
+// Critical Fix: Global reference for Telegram Web App
+let tg = null;
 
 // ===========================================
 //          HELPER FUNCTIONS
@@ -79,7 +82,9 @@ function saveLikes(likes) {
 
 function createPostElement(post, currentUserId) {
     const likes = getLikes();
-    const isLiked = likes[post.id] && likes[post.id].includes(currentUserId);
+    // Use toString() for user ID comparison consistency
+    const userIdStr = currentUserId.toString(); 
+    const isLiked = likes[post.id] && likes[post.id].map(String).includes(userIdStr);
     const isAdmin = (currentUserId === ADMIN_CHAT_ID);
     const postElement = document.createElement('div');
     postElement.className = 'post-card';
@@ -107,7 +112,7 @@ function createPostElement(post, currentUserId) {
 }
 
 function loadPosts(userId) {
-    currentUserId = userId; // Update global user ID
+    currentUserId = userId; 
     try {
         const posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
         const container = document.getElementById('posts-container');
@@ -128,10 +133,9 @@ function loadPosts(userId) {
     }
 }
 
-// --- CORE FIX: Post Deletion Logic ---
+// --- Post Deletion Logic ---
 
 function performDeletePost(postId, userId) {
-    // Check for Admin privilege
     if (userId !== ADMIN_CHAT_ID) return; 
     
     let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
@@ -150,19 +154,19 @@ function addPostEventListeners(userId) {
         button.onclick = (e) => toggleLike(e, userId);
     });
 
-    // Fix: Handle confirmation outside the core deletion logic
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.onclick = (e) => {
             const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
             
-            if (window.Telegram.WebApp.showConfirm) {
+            // CRITICAL FIX: Use the global 'tg' reference for safe access
+            if (tg && tg.showConfirm) {
                 // Use TMA native confirmation
-                window.Telegram.WebApp.showConfirm('Are you sure you want to delete this post?', (ok) => {
+                tg.showConfirm('Are you sure you want to delete this post?', (ok) => {
                     if (ok) performDeletePost(postId, userId);
                 });
             } else {
-                // Fallback confirmation
-                if (confirm('Are you sure you want to delete this post?')) {
+                // Fallback to standard browser confirmation
+                if (window.confirm('Are you sure you want to delete this post?')) {
                      performDeletePost(postId, userId);
                 }
             }
@@ -172,23 +176,27 @@ function addPostEventListeners(userId) {
 
 function toggleLike(e, userId) {
     const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
+    const userIdStr = userId.toString();
+    
     let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
     let likes = getLikes();
     const postIndex = posts.findIndex(p => p.id === postId);
 
     if (postIndex === -1) return;
 
-    likes[postId] = likes[postId] || []; 
-    const isLiked = likes[postId].includes(userId);
+    // Ensure likes are stored as strings for comparison
+    likes[postId] = likes[postId] ? likes[postId].map(String) : []; 
+    const isLiked = likes[postId].includes(userIdStr);
 
     if (isLiked) {
-        likes[postId] = likes[postId].filter(id => id !== userId);
+        likes[postId] = likes[postId].filter(id => id !== userIdStr);
         posts[postIndex].likesCount = (posts[postIndex].likesCount || 1) - 1;
     } else {
-        likes[postId].push(userId);
+        likes[postId].push(userIdStr);
         posts[postIndex].likesCount = (posts[postIndex].likesCount || 0) + 1;
     }
 
+    // Save likes, ensuring IDs are stored as strings if necessary
     saveLikes(likes);
     savePosts(posts);
     
@@ -204,7 +212,7 @@ function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.style.display = 'flex';
-        modal.classList.add('active'); // Add active class for CSS transition
+        modal.classList.add('active'); 
     }
 }
 
@@ -311,7 +319,8 @@ function setCustomMusic(url) {
 
 function addMusicEventListeners() {
     document.getElementById('music-button').onclick = () => openModal('music-modal');
-    volumeToggleIcon.onclick = toggleVolume;
+    // Ensure volumeToggleIcon is not null before attaching the event
+    if(volumeToggleIcon) volumeToggleIcon.onclick = toggleVolume; 
     document.getElementById('cancel-music-modal-btn').onclick = () => closeModal('music-modal');
     
     // Music Options 
@@ -348,7 +357,6 @@ function addMusicEventListeners() {
     fileInput.onchange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Note: createObjectURL URLs are temporary and local
             const url = URL.createObjectURL(file);
             setCustomMusic(url);
         }
@@ -361,18 +369,15 @@ function addMusicEventListeners() {
 
 function setupAdminPostLogic(isAdmin) {
     const postAddButton = document.getElementById('post-add-button');
-    const postModal = document.getElementById('post-modal');
     const submitPostBtn = document.getElementById('submit-post-btn');
     const cancelPostBtn = document.getElementById('cancel-post-btn');
     const postInput = document.getElementById('post-input');
     const adminMessageEl = document.getElementById('admin-message');
 
     if (isAdmin) {
-        // Show the "+" icon for Admin
         if (postAddButton) postAddButton.style.display = 'block';
-        if (adminMessageEl) adminMessageEl.style.display = 'none'; // Hide general message
+        if (adminMessageEl) adminMessageEl.style.display = 'none'; 
 
-        // Add event listeners for the new modal flow
         if (postAddButton) postAddButton.onclick = () => openModal('post-modal');
         if (cancelPostBtn) cancelPostBtn.onclick = () => closeModal('post-modal');
 
@@ -392,30 +397,28 @@ function setupAdminPostLogic(isAdmin) {
                     };
                     posts.push(newPost);
                     savePosts(posts);
-                    postInput.value = ''; // Clear input
+                    postInput.value = ''; 
                     loadPosts(currentUserId);
-                    closeModal('post-modal'); // Close after successful post
+                    closeModal('post-modal'); 
                 } else {
                     console.error("Post content cannot be empty.");
                 }
             };
         }
     } else {
-         // Show the info message for Regular User
          if (postAddButton) postAddButton.style.display = 'none';
          if (adminMessageEl) adminMessageEl.style.display = 'flex'; 
     }
 }
 
 // ===========================================
-//          PROFILE PHOTO LOGIC (NEW)
+//          PROFILE PHOTO LOGIC
 // ===========================================
 
 function setupCustomPhotoLogic() {
     const fileInput = document.getElementById('custom-photo-upload-input');
     const uploadBtn = document.getElementById('upload-photo-btn');
 
-    // Click handler for the info-item to trigger the hidden file input
     if (uploadBtn && fileInput) {
         uploadBtn.addEventListener('click', () => fileInput.click());
     }
@@ -428,7 +431,6 @@ function setupCustomPhotoLogic() {
                 reader.onload = (event) => {
                     const dataUrl = event.target.result;
                     localStorage.setItem(PROFILE_IMAGE_KEY, dataUrl);
-                    // Rerender profile info to show the new image immediately
                     updateProfileDisplay(currentUserId, currentUserName, is_admin); 
                 };
                 reader.readAsDataURL(file);
@@ -438,10 +440,10 @@ function setupCustomPhotoLogic() {
 }
 
 function updateProfileDisplay(userId, fullName, is_admin) {
-    const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+    // Safely retrieve user data from the global tg reference
+    const tgUser = tg ? tg.initDataUnsafe.user : null;
     const username = tgUser ? tgUser.username : null;
     
-    // Update text content
     if (document.getElementById('profile-display-name')) document.getElementById('profile-display-name').textContent = fullName || 'Name Not Available';
     if (document.getElementById('profile-display-username')) document.getElementById('profile-display-username').textContent = username ? `@${username}` : 'N/A';
     if (document.getElementById('telegram-chat-id')) document.getElementById('telegram-chat-id').textContent = userId.toString();
@@ -449,7 +451,6 @@ function updateProfileDisplay(userId, fullName, is_admin) {
     const adminStatusEl = document.getElementById('admin-status');
     if (adminStatusEl) adminStatusEl.textContent = is_admin ? 'Administrator' : 'Regular User';
 
-    // **PROFILE PICTURE LOGIC (UPDATED) - Priority: Custom > Telegram > Initials**
     const customPhotoUrl = localStorage.getItem(PROFILE_IMAGE_KEY);
     const tgPhotoUrl = tgUser ? tgUser.photo_url : null;
     const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
@@ -458,6 +459,7 @@ function updateProfileDisplay(userId, fullName, is_admin) {
         const imageUrl = customPhotoUrl || tgPhotoUrl;
 
         if (imageUrl) {
+            // Use image element
             profileAvatarPlaceholder.innerHTML = `<img src="${imageUrl}" alt="${fullName || 'Profile Photo'}" onerror="this.onerror=null; this.src='https://placehold.co/80x80/333/fff?text=${(fullName.charAt(0) || 'U').toUpperCase()}'">`;
             profileAvatarPlaceholder.style.backgroundColor = 'transparent';
             profileAvatarPlaceholder.textContent = '';
@@ -505,15 +507,17 @@ function setupNavigation() {
 document.addEventListener('DOMContentLoaded', () => {
     
     // ---------------------------------------------
-    // 1. TMA Integration & Profile Data Initialization
+    // 1. TMA Integration & Profile Data Initialization (CRITICAL FIX HERE)
     // ---------------------------------------------
     
-    if (typeof window.Telegram.WebApp !== 'undefined') {
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand(); // Ensure the app is fully expanded
+    // Use robust check for window.Telegram.WebApp existence
+    if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+        tg = window.Telegram.WebApp; // Assign to global reference
         
         try {
+            tg.ready();
+            tg.expand(); 
+            
             const user = tg.initDataUnsafe.user;
             
             if (user) {
@@ -525,23 +529,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentUserName = fullName || 'User'; 
                 is_admin = (currentUserId === ADMIN_CHAT_ID);
 
-                // Update Profile Display
-                updateProfileDisplay(currentUserId, currentUserName, is_admin);
-
-                // Close App Button
+                // Close App Button: only attach if tg is available
                 const closeBtn = document.getElementById('tma-close-btn');
                 if (closeBtn) {
                     closeBtn.addEventListener('click', () => tg.close());
                 }
-                
             } 
         } catch (e) {
-             console.error("TMA Initialization Error:", e);
+             console.error("TMA Initialization Error, likely no user data in initDataUnsafe:", e);
         }
     } else {
         console.warn("Mini App launched outside Telegram. Using default user ID 0.");
-        updateProfileDisplay(currentUserId, currentUserName, is_admin);
+        // If outside Telegram, the global tg remains null, and the logic proceeds safely.
     }
+
+    // Update Profile Display with resolved data (even if guest)
+    updateProfileDisplay(currentUserId, currentUserName, is_admin);
 
     // ---------------------------------------------
     // 2. Setup All Features
@@ -550,11 +553,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPosts(currentUserId); 
     setupNavigation();
     
-    // Setup Music Player and attempt Autoplay
     setupMusicPlayer(true); 
     addMusicEventListeners();
 
-    // Setup new Admin Post UI
     setupAdminPostLogic(is_admin);
 
-    // Setup Custom Photo Upl
+    setupCustomPhotoLogic();
+});
