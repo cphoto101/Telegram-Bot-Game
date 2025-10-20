@@ -37,7 +37,7 @@ function formatTime(timestamp) {
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC 
+//          POSTS & LIKES LOGIC (Unchanged - Stable)
 // ===========================================
 
 function savePosts(posts) {
@@ -167,8 +167,9 @@ function deletePost(e, currentUserId) {
     loadPosts(currentUserId);
 }
 
+
 // ===========================================
-//          MUSIC & MODAL LOGIC (Stabilized)
+//          MUSIC & MODAL LOGIC (FIXED)
 // ===========================================
 
 const defaultMusicUrl = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3';
@@ -181,7 +182,7 @@ let musicStatusSpan;
 let volumeToggleIcon;
 
 
-function setupMusicPlayer() {
+function setupMusicPlayer(autoplay = false) {
     audioPlayer = document.getElementById('audio-player');
     musicModal = document.getElementById('music-modal');
     urlInputModal = document.getElementById('url-input-modal');
@@ -193,21 +194,24 @@ function setupMusicPlayer() {
     audioPlayer.src = currentMusicUrl;
     audioPlayer.loop = true;
 
-    // Use oncanplay to attempt play after a user interaction
-    audioPlayer.oncanplay = () => {
-        if (isMusicOn) {
-            audioPlayer.play().catch(e => {
-                updateMusicStatus('Music Paused (Tap to Start)');
-            });
-        }
-    };
-    
+    if (autoplay) {
+        audioPlayer.play().then(() => {
+            isMusicOn = true;
+        }).catch(e => {
+            console.warn("Autoplay was prevented. User needs to interact.", e);
+            isMusicOn = false;
+            updateMusicStatus('Music Paused (Tap to Start)');
+        });
+    }
+
+    // Event listeners for status update
     audioPlayer.onplay = () => {
         updateMusicStatus(`Now Playing: ${currentMusicUrl.split('/').pop().substring(0, 30)}...`);
         if(volumeToggleIcon) {
             volumeToggleIcon.classList.remove('fa-volume-off');
             volumeToggleIcon.classList.add('fa-volume-up');
         }
+        isMusicOn = true;
     };
     audioPlayer.onpause = () => {
         updateMusicStatus('Music Paused (Tap to Start)');
@@ -215,10 +219,18 @@ function setupMusicPlayer() {
             volumeToggleIcon.classList.remove('fa-volume-up');
             volumeToggleIcon.classList.add('fa-volume-off');
         }
+        isMusicOn = false;
+    };
+    audioPlayer.onerror = (e) => {
+        console.error("Audio error:", e);
+        updateMusicStatus('Error loading music. Tap to check.');
+        isMusicOn = false;
     };
 
-    audioPlayer.pause();
-    updateMusicStatus('Music Paused (Tap to Start)');
+    // Initial status based on whether we attempted to autoplay or not
+    if (!autoplay || audioPlayer.paused) {
+        updateMusicStatus('Music Paused (Tap to Start)');
+    }
 }
 
 function updateMusicStatus(status) {
@@ -231,11 +243,12 @@ function toggleVolume() {
     if (!audioPlayer) return;
 
     if (audioPlayer.paused) {
-        audioPlayer.play();
-        isMusicOn = true;
+        audioPlayer.play().catch(e => {
+            console.error("Failed to play on user click:", e);
+            updateMusicStatus('Autoplay failed. Check URL.');
+        });
     } else {
         audioPlayer.pause();
-        isMusicOn = false;
     }
 }
 
@@ -252,13 +265,26 @@ function closeModal(modal) {
 }
 
 function setCustomMusic(url) {
+    if (!url || !audioPlayer) {
+        console.error("Invalid URL or audio player not found.");
+        return;
+    }
+    
     currentMusicUrl = url;
     localStorage.setItem(CUSTOM_MUSIC_KEY, url);
-    if(audioPlayer) {
-        audioPlayer.src = url;
-        audioPlayer.load();
-        audioPlayer.play().catch(e => console.error("Play failed after setting URL:", e));
-    }
+    
+    // Reset and Load
+    audioPlayer.src = url;
+    audioPlayer.load();
+
+    // Attempt to play immediately
+    audioPlayer.play().then(() => {
+        console.log("Music started playing successfully.");
+    }).catch(e => {
+        console.error("Failed to play music immediately after setting URL:", e);
+        // Show an error or pause status if it fails
+        updateMusicStatus('Failed to play. Tap to start.');
+    });
     
     closeModal(musicModal);
     closeModal(urlInputModal);
@@ -298,9 +324,12 @@ function addMusicEventListeners() {
     if (document.getElementById('play-url-btn')) {
         document.getElementById('play-url-btn').onclick = () => {
             const urlInput = document.getElementById('music-url-input');
-            if (urlInput && urlInput.value) {
-                setCustomMusic(urlInput.value);
+            const url = urlInput ? urlInput.value.trim() : '';
+            if (url) {
+                setCustomMusic(url);
                 urlInput.value = ''; 
+            } else {
+                alert("Please enter a valid music URL.");
             }
         };
     }
@@ -320,7 +349,7 @@ function addMusicEventListeners() {
 
 
 // ===========================================
-//          NAVIGATION & MAIN ENTRY (FIXED to Home/Profile Only)
+//          NAVIGATION & MAIN ENTRY
 // ===========================================
 
 function switchScreen(targetScreenId) {
@@ -345,8 +374,6 @@ function setupNavigation() {
             switchScreen(targetScreenId);
         });
     });
-
-    // NOTE: Removed all User List related navigation checks
 }
 
 
@@ -364,13 +391,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             const user = tg.initDataUnsafe.user;
-            const photoUrl = user.photo_url; 
-
+            
             if (user) {
                 currentUserId = user.id || 0;
                 const firstName = user.first_name || '';
                 const lastName = user.last_name || '';
                 const username = user.username;
+                const photoUrl = user.photo_url; // Directly use the photo URL from initDataUnsafe
                 const fullName = `${firstName} ${lastName}`.trim();
                 
                 currentUserName = fullName || 'User'; 
@@ -399,17 +426,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Profile Photo Logic 
+                // **PROFILE PICTURE FIX: Use photoUrl if available**
                 const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
                 if (profileAvatarPlaceholder) {
                     if (photoUrl) {
-                        profileAvatarPlaceholder.innerHTML = `<img src="${photoUrl}" alt="Profile Photo">`;
+                        // Clear the content and insert the image tag directly
+                        profileAvatarPlaceholder.innerHTML = `<img src="${photoUrl}" alt="${fullName || 'Profile Photo'}">`;
                         profileAvatarPlaceholder.style.backgroundColor = 'transparent';
                         profileAvatarPlaceholder.textContent = '';
                     } else {
+                        // Fallback to initials and color
                         const userIdStr = currentUserId.toString();
                         const userColor = stringToColor(userIdStr);
                         const initial = (fullName.charAt(0) || 'U').toUpperCase();
+                        profileAvatarPlaceholder.innerHTML = ''; // Ensure no img tag remains
                         profileAvatarPlaceholder.style.backgroundColor = userColor;
                         profileAvatarPlaceholder.textContent = initial;
                     }
@@ -460,7 +490,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     loadPosts(currentUserId); 
     setupNavigation();
-    setupMusicPlayer();
+    
+    // **AUTOPLAY IMPLEMENTATION**: Call setupMusicPlayer with true to attempt autoplay
+    setupMusicPlayer(true); 
     addMusicEventListeners();
 });
-                         
+        
