@@ -29,7 +29,7 @@ let tg = null;
 function hideLoadingScreen() {
     const overlay = document.getElementById('loading-overlay');
     if (overlay) {
-        // 0.3s transition is defined in CSS
+        // 0.3s transition is defined in CSS (now embedded in index.html)
         overlay.style.opacity = '0'; 
         // Remove 'active' after transition to ensure pointer-events: none works
         setTimeout(() => {
@@ -511,7 +511,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---------------------------------------------
     
     const loadingOverlay = document.getElementById('loading-overlay');
-    if (loadingOverlay) loadingOverlay.classList.add('active'); // Ensure loading is visible immediately
+    // The 'active' class is now handled by inline CSS for better reliability
+    if (loadingOverlay) loadingOverlay.classList.add('active'); 
 
     // Use robust check for window.Telegram.WebApp existence
     if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
@@ -553,7 +554,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update display (now only uses Telegram photo/initials)
     updateProfileDisplay(currentUserId, currentUserName, is_admin); 
     loadPosts(currentUserId); 
-    setupNavigation();
-    
-    setupMusicPlayer(true); 
-    addMusicEventListene
+    setupNavig
