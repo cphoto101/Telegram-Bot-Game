@@ -1,6 +1,4 @@
 // ********** SET YOUR ADMIN CHAT ID HERE **********
-// Set your Telegram Chat ID for administrative privileges. 
-// This is the only line you MUST change to gain admin rights.
 const ADMIN_CHAT_ID = 1924452453; 
 // *************************************************
 
@@ -10,9 +8,7 @@ const LIKES_STORAGE_KEY = 'tma_user_likes_v5';
 const TEMP_MUSIC_KEY = 'tma_temp_music_url_v5'; 
 
 // --- Global Variables ---
-// Default background music URL (Can be changed to any direct MP3 link)
 const INITIAL_DEFAULT_URL = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3'; 
-
 let audioPlayer;
 let musicStatusSpan;
 let volumeToggleIcon;
@@ -23,24 +19,15 @@ let is_admin = false;
 let currentPostFilter = 'new-posts'; 
 const NEW_POSTS_LIMIT = 50; 
 let isMusicMuted = false; 
-
-// Telegram Web App Global Reference
 let tg = null;
 
 // ===========================================
 //          HELPER FUNCTIONS
 // ===========================================
 
-/**
- * Generates a color based on a string for avatar backgrounds.
- * @param {string} str 
- * @returns {string} Hex color code.
- */
+/** Generates a color based on a string for avatar backgrounds. */
 function stringToColor(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
+    let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
     let color = '#';
     for (let i = 0; i < 3; i++) {
         const value = (hash >> (i * 8)) & 0xFF;
@@ -50,67 +37,43 @@ function stringToColor(str) {
     return color;
 }
 
-/**
- * Displays a custom toast notification.
- * @param {string} message 
- */
+/** Displays a custom toast notification. */
 function showToast(message) {
     const toast = document.getElementById('custom-toast');
     if (!toast) return;
-
     clearTimeout(toast.timeoutId);
     toast.textContent = message;
     toast.classList.add('show');
-    
     toast.timeoutId = setTimeout(() => {
         toast.classList.remove('show');
     }, 3000);
-    
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 }
 
-/**
- * Copies a string to the clipboard.
- * @param {string} text 
- * @param {string} successMsg 
- */
+/** Copies a string to the clipboard (using modern API with fallback). */
 function copyToClipboard(text, successMsg = 'Copied successfully.') {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(() => {
-            showToast(successMsg);
-        }).catch(() => {
-            performLegacyCopy(text);
-        });
+        navigator.clipboard.writeText(text).then(() => showToast(successMsg)).catch(() => performLegacyCopy(text));
     } else {
         performLegacyCopy(text);
     }
 }
 
-/**
- * Fallback for copying text.
- * @param {string} text 
- */
+/** Fallback for copying text (legacy method). */
 function performLegacyCopy(text) {
     const tempInput = document.createElement('textarea');
     tempInput.value = text;
     tempInput.style.position = 'absolute';
     tempInput.style.left = '-9999px';
     document.body.appendChild(tempInput);
-    
     tempInput.select();
     tempInput.setSelectionRange(0, 99999); 
-    
     try {
-        const success = document.execCommand('copy');
-        if (success) {
-            showToast('Copied successfully.');
-        } else {
-            showToast('Copy failed, please select and copy manually.');
-        }
+        document.execCommand('copy');
+        showToast('Copied successfully (Legacy).');
     } catch (err) {
         showToast('Copy failed, please select and copy manually.');
     }
-    
     document.body.removeChild(tempInput);
 }
 
@@ -121,7 +84,6 @@ function performLegacyCopy(text) {
 function getPosts() {
     try {
         const posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
-        // Ensure posts is an array and each post has required fields (id, content)
         return Array.isArray(posts) ? posts.filter(p => p && p.id && p.content) : []; 
     } catch (e) {
         console.error("Error loading posts:", e);
@@ -142,11 +104,9 @@ function savePosts(posts) {
 function getLikes() {
     try {
         const likes = JSON.parse(localStorage.getItem(LIKES_STORAGE_KEY) || '{}');
-        // Ensure likes is a non-null object
         return typeof likes === 'object' && likes !== null ? likes : {}; 
     } catch (e) {
         console.error("Error loading likes:", e);
-        showToast("Error loading likes data.");
         return {};
     }
 }
@@ -156,7 +116,6 @@ function saveLikes(likes) {
         localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(likes));
     } catch (e) {
         console.error("Error saving likes:", e);
-        showToast("Error saving likes data.");
     }
 }
 
@@ -164,16 +123,10 @@ function saveLikes(likes) {
 //          POSTS & LIKES LOGIC
 // ===========================================
 
-/**
- * Creates the HTML element for a single post.
- * @param {object} post 
- * @param {number} userId 
- * @returns {HTMLElement}
- */
+/** Creates the HTML element for a single post. */
 function createPostElement(post, userId) {
     const likes = getLikes();
     const userIdStr = userId.toString(); 
-    // Ensure likes[post.id] is an array of strings
     const postLikesArray = Array.isArray(likes[post.id]) ? likes[post.id].map(String) : []; 
     const isLiked = postLikesArray.includes(userIdStr);
     const isAdmin = (userId === ADMIN_CHAT_ID); 
@@ -183,8 +136,6 @@ function createPostElement(post, userId) {
     postElement.setAttribute('data-post-id', post.id);
 
     const displayLikesCount = postLikesArray.length; 
-    
-    // FIX: Ensure author name is displayed, defaulting to 'Anonymous User'
     const authorName = post.authorName || 'Anonymous User';
     
     const date = new Date(post.timestamp);
@@ -215,10 +166,7 @@ function createPostElement(post, userId) {
     return postElement;
 }
 
-/**
- * Loads and renders posts based on the current filter.
- * @param {number} userId 
- */
+/** Loads and renders posts based on the current filter. */
 function loadPosts(userId) {
     currentUserId = userId; 
     let posts = getPosts();
@@ -228,7 +176,7 @@ function loadPosts(userId) {
 
     container.innerHTML = '<p class="initial-loading-text">Fetching posts...</p>'; 
 
-    // Apply sorting based on filter
+    // Apply sorting
     if (currentPostFilter === 'new-posts') {
         posts.sort((a, b) => b.timestamp - a.timestamp); 
         posts = posts.slice(0, NEW_POSTS_LIMIT); 
@@ -241,18 +189,12 @@ function loadPosts(userId) {
     if (posts.length === 0) {
          container.innerHTML = '<p class="initial-loading-text">No posts found yet. Be the first to post!</p>';
     } else {
-        posts.forEach(post => {
-            container.appendChild(createPostElement(post, userId));
-        });
+        posts.forEach(post => container.appendChild(createPostElement(post, userId)));
     }
     addPostEventListeners(userId);
 }
 
-/**
- * Permanently deletes a post and its associated likes.
- * @param {number} postId 
- * @param {number} userId 
- */
+/** Permanently deletes a post and its associated likes. */
 function performDeletePost(postId, userId) {
     if (userId !== ADMIN_CHAT_ID) { 
         showToast("Only Admin can delete posts.");
@@ -271,26 +213,13 @@ function performDeletePost(postId, userId) {
     loadPosts(userId); 
 }
 
-/**
- * Toggles a like on a post.
- * @param {Event} e 
- * @param {number} userId 
- */
+/** Toggles a like on a post. */
 function toggleLike(e, userId) {
-    // Ensure post-id is correctly parsed as an integer
-    const postIdAttr = e.currentTarget.getAttribute('data-post-id');
-    const postId = parseInt(postIdAttr); 
-    
-    if (isNaN(postId)) {
-        console.error("Invalid postId for like toggle:", postIdAttr);
-        return;
-    }
+    const postId = parseInt(e.currentTarget.getAttribute('data-post-id')); 
+    if (isNaN(postId)) return;
 
     const userIdStr = userId.toString();
-    
     let likes = getLikes();
-    
-    // Ensure the array exists and contains strings
     likes[postId] = Array.isArray(likes[postId]) ? likes[postId].map(String) : []; 
     
     const isLiked = likes[postId].includes(userIdStr);
@@ -304,15 +233,10 @@ function toggleLike(e, userId) {
     }
     
     saveLikes(likes);
-    
-    // Re-render to update the like count and icon instantly
     loadPosts(currentUserId); 
 }
 
-/**
- * Adds event listeners to all newly rendered posts.
- * @param {number} userId 
- */
+/** Adds event listeners to all newly rendered posts. */
 function addPostEventListeners(userId) {
     document.querySelectorAll('.like-btn').forEach(button => {
         button.onclick = (e) => toggleLike(e, userId); 
@@ -321,14 +245,11 @@ function addPostEventListeners(userId) {
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.onclick = (e) => {
             const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
-            
             if (tg && tg.showConfirm) {
-                // Use Telegram's native confirmation dialog
                 tg.showConfirm('Are you sure you want to delete this post?', (ok) => {
                     if (ok) performDeletePost(postId, userId);
                 });
             } else {
-                // Fallback to browser's confirmation
                 if (window.confirm('Are you sure you want to delete this post?')) {
                      performDeletePost(postId, userId);
                 }
@@ -337,12 +258,9 @@ function addPostEventListeners(userId) {
     });
 }
 
-/**
- * Sets up event listeners for post filter tabs.
- */
+/** Sets up event listeners for post filter tabs. */
 function setupPostFilters() {
     const tabs = document.querySelectorAll('.filter-tab');
-    
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const filter = tab.getAttribute('data-filter');
@@ -357,7 +275,7 @@ function setupPostFilters() {
             if (currentPostFilter !== filter) {
                 currentPostFilter = filter;
                 const contentArea = document.querySelector('.content');
-                if (contentArea) contentArea.scrollTop = 0; // Scroll to top on filter change
+                if (contentArea) contentArea.scrollTop = 0; 
                 loadPosts(currentUserId); 
             }
         });
@@ -365,107 +283,81 @@ function setupPostFilters() {
 }
 
 // ===========================================
-//          MODAL & MUSIC LOGIC (Fixed)
+//          MODAL & MUSIC LOGIC 
 // ===========================================
 
-/**
- * Opens a modal window and disables body scroll.
- * @param {string} modalId 
- */
+/** Opens a modal window and disables body scroll. */
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     
     modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden'; // Disable body scroll
+    document.body.style.overflow = 'hidden'; 
 
     requestAnimationFrame(() => modal.classList.add('active')); 
     
     const fab = document.getElementById('post-add-button');
-    if (fab) fab.style.display = 'none'; // Hide FAB when modal is open
+    if (fab) fab.style.display = 'none'; 
 }
 
-/**
- * Closes a modal window and re-enables body scroll.
- * @param {string} modalId 
- */
+/** Closes a modal window and re-enables body scroll. */
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     
     modal.classList.remove('active');
     
-    // Wait for the CSS transition to finish before setting display: none
     setTimeout(() => {
         modal.style.display = 'none';
-        document.body.style.overflow = ''; // Re-enable scroll
+        document.body.style.overflow = ''; 
 
-        // Only show FAB if we are back on the home screen AND are an admin
         const homeScreen = document.getElementById('home-screen');
         if (homeScreen && homeScreen.classList.contains('active') && is_admin) {
             const fab = document.getElementById('post-add-button');
             if (fab) fab.style.display = 'flex'; 
         }
-    }, 400); // 400ms is slightly longer than the 300ms transition time
+    }, 400); 
 }
 
 
-/**
- * Updates the visual status of the music player.
- * @param {boolean} isPlaying 
- */
+/** Updates the visual status of the music player. */
 function updateMusicStatus(isPlaying) {
     if (!musicStatusSpan || !volumeToggleIcon) return;
-
     let statusText = isPlaying ? `🎶 Music Playing ${isMusicMuted ? '(Muted)' : ''} 🎶` : 'Music Paused (Tap Icon to Play)';
     musicStatusSpan.textContent = statusText;
     
     if (isPlaying) {
-        // Show volume-up if playing AND NOT muted, volume-off otherwise
         volumeToggleIcon.classList.toggle('fa-volume-up', !isMusicMuted);
         volumeToggleIcon.classList.toggle('fa-volume-off', isMusicMuted);
         volumeToggleIcon.title = isMusicMuted ? "Unmute Music" : "Mute Music";
     } else {
-        // If paused, always show volume-off icon (or just music icon)
         volumeToggleIcon.classList.remove('fa-volume-up');
         volumeToggleIcon.classList.add('fa-volume-off');
         volumeToggleIcon.title = "Start Playing Music";
     }
 }
 
-/**
- * Toggles playing and muting logic.
- */
+/** Toggles playing and muting logic. */
 function toggleVolume() {
     if (!audioPlayer) return;
 
     if (audioPlayer.paused) {
-        // Play logic
         audioPlayer.volume = isMusicMuted ? 0 : 1; 
         audioPlayer.play().then(() => {
              showToast(isMusicMuted ? "Music started (Muted)." : "Music started playing.");
         }).catch(e => {
             console.error("Failed to play on user click:", e);
-            // On mobile, play() often requires a direct user interaction.
             showToast('Playback Error: Tap the screen first to allow playback.');
         });
     } else {
-        // Toggle mute state
         isMusicMuted = !isMusicMuted;
         audioPlayer.volume = isMusicMuted ? 0 : 1;
-
-        if (isMusicMuted) {
-            showToast("Music muted.");
-        } else {
-            showToast("Music unmuted.");
-        }
+        showToast(isMusicMuted ? "Music muted." : "Music unmuted.");
         updateMusicStatus(true);
     }
 }
 
-/**
- * Initializes the audio player element.
- */
+/** Initializes the audio player element. */
 function setupMusicPlayer() { 
     audioPlayer = document.getElementById('audio-player');
     musicStatusSpan = document.getElementById('current-music-status');
@@ -480,49 +372,38 @@ function setupMusicPlayer() {
     
     if(volumeToggleIcon) volumeToggleIcon.onclick = toggleVolume; 
     
-    const musicStatusBar = document.querySelector('.music-status-bar');
-    if (musicStatusBar) musicStatusBar.onclick = () => showToast("Use the Volume Icon to control music playback.");
-
     audioPlayer.onplay = () => updateMusicStatus(true);
     audioPlayer.onpause = () => updateMusicStatus(false);
     audioPlayer.onerror = (e) => {
         console.error("Audio error:", e);
         audioPlayer.pause();
         updateMusicStatus(false);
-        showToast("Music Load Error. Playing stopped. (Check URL or file type)");
+        showToast("Music Load Error. Playing stopped.");
     };
 
     updateMusicStatus(false); 
 }
 
-/**
- * Loads a new music URL and prepares it for playing.
- * @param {string} url 
- * @param {string} sourceName 
- */
+/** Loads a new music URL and prepares it for playing. */
 function setMusicUrl(url, sourceName) {
     if (!url || !audioPlayer) return;
     
-    // Basic URL validation
     if (!url.match(/^https?:\/\/.+\..+$/) && url !== INITIAL_DEFAULT_URL && !url.startsWith('blob:')) {
         showToast("Invalid URL format. http/https required.");
         return;
     }
 
     localStorage.setItem(TEMP_MUSIC_KEY, url); 
-    
     audioPlayer.src = url;
-    audioPlayer.load(); // Load the new source
-    audioPlayer.pause(); // Pause after load
+    audioPlayer.load(); 
+    audioPlayer.pause(); 
     
     closeModal('music-modal');
     closeModal('url-input-modal');
     showToast(`${sourceName} set. Tap the Volume Icon to play.`);
 }
 
-/**
- * Adds event listeners for music selection and modal controls.
- */
+/** Adds event listeners for music selection and modal controls. */
 function addMusicEventListeners() {
     document.getElementById('music-button').onclick = () => openModal('music-modal');
     document.getElementById('cancel-music-modal-btn').onclick = () => closeModal('music-modal');
@@ -530,7 +411,6 @@ function addMusicEventListeners() {
     document.querySelectorAll('.music-option-list .music-option').forEach(option => {
         option.onclick = (e) => {
             const type = e.currentTarget.getAttribute('data-music-type');
-            
             if (type === 'default') {
                 setMusicUrl(INITIAL_DEFAULT_URL, "Default Track"); 
             } else if (type === 'url') {
@@ -544,12 +424,11 @@ function addMusicEventListeners() {
 
     document.getElementById('close-url-modal-btn').onclick = () => {
         closeModal('url-input-modal');
-        openModal('music-modal'); // Go back to music selection
+        openModal('music-modal'); 
     };
     
     document.getElementById('play-url-btn').onclick = () => {
-        const urlInput = document.getElementById('music-url-input');
-        const url = urlInput ? urlInput.value.trim() : '';
+        const url = document.getElementById('music-url-input').value.trim();
         if (url) {
             setMusicUrl(url, "Custom URL"); 
         } else {
@@ -564,7 +443,7 @@ function addMusicEventListeners() {
             const url = URL.createObjectURL(file); 
             setMusicUrl(url, file.name); 
         }
-        e.target.value = null; // Clear file input
+        e.target.value = null; 
     };
 }
 
@@ -572,10 +451,7 @@ function addMusicEventListeners() {
 //          ADMIN POST LOGIC 
 // ===========================================
 
-/**
- * Sets up admin-specific functionality (FAB button and posting logic).
- * @param {boolean} isAdmin 
- */
+/** Sets up admin-specific functionality. */
 function setupAdminPostLogic(isAdmin) {
     const postAddButton = document.getElementById('post-add-button');
     const submitPostBtn = document.getElementById('submit-post-btn');
@@ -584,7 +460,6 @@ function setupAdminPostLogic(isAdmin) {
 
     if (isAdmin) {
         if (postAddButton) postAddButton.style.display = 'flex'; 
-
         if (postAddButton) postAddButton.onclick = () => openModal('post-modal');
         if (cancelPostBtn) cancelPostBtn.onclick = () => closeModal('post-modal');
 
@@ -596,16 +471,15 @@ function setupAdminPostLogic(isAdmin) {
                     const newPost = {
                         id: Date.now(), 
                         authorId: currentUserId,
-                        authorName: currentUserName || 'Admin', // Ensure a name is saved
+                        authorName: currentUserName || 'Admin', 
                         isAdmin: true,
                         content: content,
                         timestamp: Date.now(), 
                     };
-                  posts.push(newPost);
+                    posts.push(newPost);
                     savePosts(posts);
                     postInput.value = ''; 
                     
-                    // Automatically switch to Newest tab and reload to show the new post
                     const newPostsTab = document.getElementById('new-posts-tab');
                     if (newPostsTab) newPostsTab.click(); 
                     
@@ -623,16 +497,10 @@ function setupAdminPostLogic(isAdmin) {
 
 
 // ===========================================
-//          PROFILE LOGIC (Fixed Username/Invite)
+//          PROFILE LOGIC 
 // ===========================================
 
-/**
- * Updates the display of user profile information.
- * @param {number} userId 
- * @param {string} fullName 
- * @param {string|null} username 
- * @param {boolean} is_admin 
- */
+/** Updates the display of user profile information. */
 function updateProfileDisplay(userId, fullName, username, is_admin) {
     const displayUsername = username ? `@${username}` : 'Username N/A';
     
@@ -654,9 +522,7 @@ function updateProfileDisplay(userId, fullName, username, is_admin) {
             profileAvatarPlaceholder.style.backgroundColor = 'transparent';
             profileAvatarPlaceholder.textContent = '';
         } else {
-            // Fallback for no photo: colored initial
-            const userIdStr = userId.toString();
-            const userColor = stringToColor(userIdStr);
+            const userColor = stringToColor(userId.toString());
             const initial = (fullName.charAt(0) || 'U').toUpperCase();
             profileAvatarPlaceholder.innerHTML = ''; 
             profileAvatarPlaceholder.style.backgroundColor = userColor;
@@ -666,42 +532,23 @@ function updateProfileDisplay(userId, fullName, username, is_admin) {
     }
 }
 
-/**
- * Sets up listeners for profile actions (copy ID, close app, invite).
- */
+/** Sets up listeners for profile actions. */
 function setupProfileListeners() {
-    // 1. Chat ID Copy Button
     const copyBtn = document.getElementById('chat-id-copy-btn');
-    if (copyBtn) {
-        copyBtn.onclick = () => copyToClipboard(currentUserId.toString(), 'User ID copied.');
-    }
+    if (copyBtn) copyBtn.onclick = () => copyToClipboard(currentUserId.toString(), 'User ID copied.');
     
-    // 2. TMA Close Button
     const closeBtn = document.getElementById('tma-close-btn');
-    if (closeBtn) {
-        closeBtn.onclick = () => {
-            if (tg && tg.close) {
-                tg.close();
-            } else {
-                showToast("Mini App Close API Not Available (Local Mock).");
-            }
-        };
-    }
+    if (closeBtn) closeBtn.onclick = () => tg && tg.close ? tg.close() : showToast("Mini App Close API Not Available.");
     
-    // 3. Invite Friends Logic (FIXED: Uses native showInvitePopup API)
     const inviteBtn = document.getElementById('invite-friends-btn');
-    if (inviteBtn) {
-        inviteBtn.addEventListener('click', () => {
-            if (tg && tg.showInvitePopup) {
-                tg.showInvitePopup(); 
-                // Note: showInvitePopup doesn't provide a success/failure callback, 
-                // so we show a general message.
-                showToast("Invite link prepared for sharing.");
-            } else {
-                showToast("Invite Feature not available in this TMA environment.");
-            }
-        });
-    }
+    if (inviteBtn) inviteBtn.addEventListener('click', () => {
+        if (tg && tg.showInvitePopup) {
+            tg.showInvitePopup(); 
+            showToast("Invite link prepared for sharing.");
+        } else {
+            showToast("Invite Feature not available in this TMA environment.");
+        }
+    });
 }
 
 
@@ -709,34 +556,21 @@ function setupProfileListeners() {
 //          NAVIGATION & MAIN ENTRY 
 // ===========================================
 
-/**
- * Switches the active content screen.
- * @param {string} targetScreenId 
- */
+/** Switches the active content screen. */
 function switchScreen(targetScreenId) {
     document.querySelectorAll('.content .screen').forEach(screen => screen.classList.remove('active'));
     
     const targetScreen = document.getElementById(targetScreenId);
-    if (targetScreen) {
-        targetScreen.classList.add('active');
-        const contentArea = document.querySelector('.content');
-        if (contentArea) contentArea.scrollTop = 0;
-    }
+    if (targetScreen) targetScreen.classList.add('active');
     
     document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
-        if (item.getAttribute('data-screen') === targetScreenId) {
-            item.classList.add('active');
-        } else {
-            item.classList.remove('active');
-        }
+        item.classList.toggle('active', item.getAttribute('data-screen') === targetScreenId);
     });
 
-    // Header Visibility & FAB Logic
     const fixedHeaderArea = document.querySelector('.fixed-header-area');
     const fab = document.getElementById('post-add-button');
     const contentArea = document.querySelector('.content');
 
-    // Calculate fixed header height dynamically
     const headerHeight = fixedHeaderArea ? fixedHeaderArea.offsetHeight : 0;
 
     if (targetScreenId === 'profile-screen') {
@@ -745,42 +579,32 @@ function switchScreen(targetScreenId) {
         if (fab) fab.style.display = 'none';
     } else { // home-screen
         if (fixedHeaderArea) fixedHeaderArea.style.display = 'block';
-        // Add padding at the top of content equal to header height + some margin
         if (contentArea) contentArea.style.paddingTop = `${headerHeight + 20}px`; 
         if (fab && is_admin) fab.style.display = 'flex'; 
     }
+    
+    if (contentArea) contentArea.scrollTop = 0;
 }
 
-/**
- * Adds event listeners for bottom navigation buttons.
- */
+/** Adds event listeners for bottom navigation buttons. */
 function addNavigationListeners() {
     document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            const screenId = e.currentTarget.getAttribute('data-screen');
-            if (screenId) {
-                switchScreen(screenId);
-            }
-        });
+        item.addEventListener('click', (e) => switchScreen(e.currentTarget.getAttribute('data-screen')));
     });
 }
 
-/**
- * Main function to initialize all components.
- */
+/** Main function to initialize all components. */
 function main() {
-    // 1. Determine User Info and Admin Status
     const user = tg.initDataUnsafe.user;
     if (user && user.id) {
         currentUserId = parseInt(user.id); 
-        // FIX: Better name handling: first_name + last_name, or just first_name
         const nameParts = [user.first_name, user.last_name].filter(Boolean);
         currentUserName = nameParts.length > 0 ? nameParts.join(' ') : 'Anonymous User';
         currentUserUsername = user.username || null;
         is_admin = currentUserId === ADMIN_CHAT_ID;
     }
     
-    // 2. Setup Core Components
+    // Setup
     addNavigationListeners();
     setupPostFilters();
     setupMusicPlayer();
@@ -788,21 +612,17 @@ function main() {
     setupProfileListeners();
     setupAdminPostLogic(is_admin);
     
-    // 3. Load Data & Update UI
+    // Load Data & UI
     updateProfileDisplay(currentUserId, currentUserName, currentUserUsername, is_admin);
     loadPosts(currentUserId); 
     
-    // 4. Set Initial Screen & Padding (Crucial for fixed header)
+    // Finalization
     switchScreen('home-screen');
-
-    // 5. Signal TMA is ready
     if (tg.MainButton) tg.MainButton.hide(); 
     tg.ready();
 }
 
-/**
- * Initializes Telegram Web App SDK and Theme
- */
+/** Initializes Telegram Web App SDK and Theme */
 function setupTMA() {
     if (window.Telegram && window.Telegram.WebApp) {
         tg = window.Telegram.WebApp;
@@ -825,7 +645,6 @@ function setupTMA() {
             for (const [prop, value] of Object.entries(themeMap)) {
                 if (value) root.style.setProperty(prop, value);
             }
-            
             document.body.style.backgroundColor = themeParams.bg_color || 'var(--tg-theme-bg-color)';
         }
 
@@ -835,9 +654,7 @@ function setupTMA() {
         // Fallback for testing outside Telegram (Mock Data)
         console.warn("Telegram WebApp SDK not found. Running in fallback mode.");
         
-        // Mock TG object for local testing
         tg = {
-            // Mock a non-admin user for local testing
             initDataUnsafe: { user: { id: ADMIN_CHAT_ID + 100, first_name: "Local", last_name: "Tester", username: "local_tester", photo_url: null } },
             themeParams: {},
             ready: () => console.log('TMA Mock Ready'),
