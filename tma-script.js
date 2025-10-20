@@ -563,10 +563,7 @@ function switchScreen(targetScreenId) {
     if (targetScreen) {
         targetScreen.classList.add('active');
     }
-}
-
-function setupNavigation() {
-    const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-
-    navItems.forEach(item => {
-        item.addE
+    
+    // Fixed Header ၏ Visibility ကို Home Screen အတွက်သာ ဖွင့်/ပိတ်
+    const fixedHeader = document.querySelector('.fixed-header-area');
+    if (fix
