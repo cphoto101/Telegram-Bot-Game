@@ -1,11 +1,21 @@
 // ********** SET YOUR ADMIN CHAT ID HERE **********
+// ဤနေရာတွင် သင့်၏ Telegram Chat ID ကို ထည့်သွင်းပါ။
 const ADMIN_CHAT_ID = 1924452453; 
 // *************************************************
 
 // --- LOCAL STORAGE KEYS ---
-const POSTS_STORAGE_KEY = 'tma_community_posts_v3'; 
-const LIKES_STORAGE_KEY = 'tma_user_likes'; 
-const CUSTOM_MUSIC_KEY = 'tma_custom_music_url'; 
+const POSTS_STORAGE_KEY = 'tma_community_posts_v4'; 
+const LIKES_STORAGE_KEY = 'tma_user_likes_v4'; 
+const CUSTOM_MUSIC_KEY = 'tma_custom_music_url_v4'; 
+
+// --- Global Variables ---
+const defaultMusicUrl = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3';
+let currentMusicUrl = localStorage.getItem(CUSTOM_MUSIC_KEY) || defaultMusicUrl;
+let audioPlayer;
+let musicStatusSpan;
+let volumeToggleIcon;
+let currentUserId = 0; 
+let currentUserName = 'Guest';
 
 // ===========================================
 //          HELPER FUNCTIONS
@@ -29,15 +39,15 @@ function formatTime(timestamp) {
     const date = new Date(timestamp);
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
     
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    if (diffInMinutes < 1) return 'ယခုလေးတင်';
+    if (diffInMinutes < 60) return `${diffInMinutes} မိနစ်ခန့်က`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} နာရီခန့်က`;
     
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + ', ' + date.toLocaleDateString('en-US');
+    return date.toLocaleTimeString('my-MM', { hour: '2-digit', minute: '2-digit' }) + ', ' + date.toLocaleDateString('my-MM');
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC (Unchanged - Stable)
+//          POSTS & LIKES LOGIC
 // ===========================================
 
 function savePosts(posts) {
@@ -45,27 +55,6 @@ function savePosts(posts) {
         localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts));
     } catch (e) {
         console.error("Error saving posts:", e);
-    }
-}
-
-function loadPosts(currentUserId) {
-    try {
-        const posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
-        const container = document.getElementById('posts-container');
-        if (container) {
-            container.innerHTML = ''; 
-            posts.sort((a, b) => b.timestamp - a.timestamp); 
-            posts.forEach(post => {
-                container.appendChild(createPostElement(post, currentUserId));
-            });
-        }
-        addPostEventListeners(currentUserId);
-    } catch (e) {
-        console.error("Error loading posts:", e);
-        const container = document.getElementById('posts-container');
-        if (container) {
-             container.innerHTML = '<p style="text-align: center; color: #ff5252;">Failed to load posts due to an error.</p>';
-        }
     }
 }
 
@@ -95,7 +84,7 @@ function createPostElement(post, currentUserId) {
     postElement.setAttribute('data-post-id', post.id);
 
     const deleteButton = isAdmin 
-        ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
+        ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> ဖျက်မည်</button>` 
         : '';
 
     postElement.innerHTML = `
@@ -115,17 +104,50 @@ function createPostElement(post, currentUserId) {
     return postElement;
 }
 
-function addPostEventListeners(currentUserId) {
+function loadPosts(userId) {
+    currentUserId = userId; // Update global user ID
+    try {
+        const posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
+        const container = document.getElementById('posts-container');
+        if (container) {
+            container.innerHTML = ''; 
+            posts.sort((a, b) => b.timestamp - a.timestamp); 
+            posts.forEach(post => {
+                container.appendChild(createPostElement(post, userId));
+            });
+        }
+        addPostEventListeners(userId);
+    } catch (e) {
+        console.error("Error loading posts:", e);
+        const container = document.getElementById('posts-container');
+        if (container) {
+             container.innerHTML = '<p style="text-align: center; color: #ff5252;">Post များတင်ရာတွင် အမှားအယွင်းရှိနေပါသည်။</p>';
+        }
+    }
+}
+
+function addPostEventListeners(userId) {
     document.querySelectorAll('.like-btn').forEach(button => {
-        button.onclick = (e) => toggleLike(e, currentUserId);
+        button.onclick = (e) => toggleLike(e, userId);
     });
 
     document.querySelectorAll('.delete-btn').forEach(button => {
-        button.onclick = (e) => deletePost(e, currentUserId);
+        button.onclick = (e) => {
+            if (window.Telegram.WebApp.showConfirm) {
+                window.Telegram.WebApp.showConfirm('ဒီ Post ကို ဖျက်မှာ သေချာပါသလား?', (ok) => {
+                    if (ok) deletePost(e, userId);
+                });
+            } else {
+                // Fallback for non-TMA environment or older versions
+                if (confirm('Are you sure you want to delete this post?')) {
+                     deletePost(e, userId);
+                }
+            }
+        };
     });
 }
 
-function toggleLike(e, currentUserId) {
+function toggleLike(e, userId) {
     const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
     let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
     let likes = getLikes();
@@ -134,31 +156,27 @@ function toggleLike(e, currentUserId) {
     if (postIndex === -1) return;
 
     likes[postId] = likes[postId] || []; 
-    const isLiked = likes[postId].includes(currentUserId);
+    const isLiked = likes[postId].includes(userId);
 
     if (isLiked) {
-        likes[postId] = likes[postId].filter(id => id !== currentUserId);
+        likes[postId] = likes[postId].filter(id => id !== userId);
         posts[postIndex].likesCount = (posts[postIndex].likesCount || 1) - 1;
     } else {
-        likes[postId].push(currentUserId);
+        likes[postId].push(userId);
         posts[postIndex].likesCount = (posts[postIndex].likesCount || 0) + 1;
     }
 
     saveLikes(likes);
     savePosts(posts);
     
-    loadPosts(currentUserId); 
+    loadPosts(userId); 
 }
 
-function deletePost(e, currentUserId) {
-    if (currentUserId !== ADMIN_CHAT_ID) return; 
+function deletePost(e, userId) {
+    if (userId !== ADMIN_CHAT_ID) return; 
     
     const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
-    
-    // Custom Modal/Confirmation needed instead of alert/confirm
-    // For now, we use a console warning as a placeholder
-    console.warn("Delete confirmation skipped for brevity in this example.");
-    
+
     let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
     const updatedPosts = posts.filter(p => p.id !== postId);
     savePosts(updatedPosts);
@@ -167,85 +185,26 @@ function deletePost(e, currentUserId) {
     delete likes[postId];
     saveLikes(likes);
 
-    loadPosts(currentUserId);
+    loadPosts(userId);
 }
 
-
 // ===========================================
-//          MUSIC & MODAL LOGIC (FIXED)
+//          MODAL & MUSIC LOGIC (FIXED)
 // ===========================================
 
-const defaultMusicUrl = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3';
-let currentMusicUrl = localStorage.getItem(CUSTOM_MUSIC_KEY) || defaultMusicUrl;
-let isMusicOn = true;
-let audioPlayer;
-let musicModal;
-let urlInputModal;
-let musicStatusSpan;
-let volumeToggleIcon;
-
-
-function setupMusicPlayer(autoplay = false) {
-    audioPlayer = document.getElementById('audio-player');
-    musicModal = document.getElementById('music-modal');
-    urlInputModal = document.getElementById('url-input-modal');
-    musicStatusSpan = document.getElementById('current-music-status');
-    volumeToggleIcon = document.getElementById('volume-toggle');
-
-    if (!audioPlayer) return;
-
-    audioPlayer.src = currentMusicUrl;
-    audioPlayer.loop = true;
-
-    // Autoplay attempt (will only work after initial user interaction in TMA)
-    if (autoplay) {
-        audioPlayer.play().then(() => {
-            isMusicOn = true;
-        }).catch(e => {
-            console.warn("Autoplay was prevented (Chrome/Telegram policy). User needs to interact.", e);
-            isMusicOn = false;
-            updateMusicStatus('Music Paused (Tap to Start)');
-        });
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active'); // Add active class for CSS transition
     }
+}
 
-    // Event listeners for status update
-    audioPlayer.onplay = () => {
-        // Display only the file name, avoiding long URLs
-        const fileName = currentMusicUrl.split('/').pop().split('?')[0]; 
-        updateMusicStatus(`Now Playing: ${fileName.substring(0, 30)}...`);
-        if(volumeToggleIcon) {
-            volumeToggleIcon.classList.remove('fa-volume-off');
-            volumeToggleIcon.classList.add('fa-volume-up');
-        }
-        isMusicOn = true;
-    };
-    audioPlayer.onpause = () => {
-        updateMusicStatus('Music Paused (Tap to Start)');
-        if(volumeToggleIcon) {
-            volumeToggleIcon.classList.remove('fa-volume-up');
-            volumeToggleIcon.classList.add('fa-volume-off');
-        }
-        isMusicOn = false;
-    };
-    audioPlayer.onerror = (e) => {
-        console.error("Audio error:", e);
-        // Reset to default if custom URL failed
-        if (currentMusicUrl !== defaultMusicUrl) {
-             // Temporarily stop re-attempting the faulty URL
-             updateMusicStatus('Error: Failed to load custom music. Reset to Default.');
-             currentMusicUrl = defaultMusicUrl;
-             localStorage.setItem(CUSTOM_MUSIC_KEY, defaultMusicUrl);
-             audioPlayer.src = defaultMusicUrl;
-             audioPlayer.load();
-        } else {
-             updateMusicStatus('Error loading music. Check connection.');
-        }
-        isMusicOn = false;
-    };
-
-    // Initial status based on whether we attempted to autoplay or not
-    if (!autoplay || audioPlayer.paused) {
-        updateMusicStatus('Music Paused (Tap to Start)');
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
     }
 }
 
@@ -255,28 +214,69 @@ function updateMusicStatus(status) {
     }
 }
 
+function setupMusicPlayer(autoplayAttempt = false) {
+    audioPlayer = document.getElementById('audio-player');
+    musicStatusSpan = document.getElementById('current-music-status');
+    volumeToggleIcon = document.getElementById('volume-toggle');
+
+    if (!audioPlayer) return;
+
+    audioPlayer.src = currentMusicUrl;
+    audioPlayer.loop = true;
+
+    // Autoplay attempt on app launch
+    if (autoplayAttempt) {
+        audioPlayer.play().then(() => {
+            // Success
+        }).catch(e => {
+            console.warn("Autoplay was prevented. Tap volume icon to start.", e);
+            updateMusicStatus('သီချင်းရပ်နားထားပါသည်။ (ဖွင့်ရန် နှိပ်ပါ)');
+        });
+    }
+
+    // Event listeners for status update and error handling
+    audioPlayer.onplay = () => {
+        const fileName = currentMusicUrl.split('/').pop().split('?')[0]; 
+        updateMusicStatus(`ဖွင့်နေသည်: ${fileName.substring(0, 30)}...`);
+        if(volumeToggleIcon) {
+            volumeToggleIcon.classList.remove('fa-volume-off');
+            volumeToggleIcon.classList.add('fa-volume-up');
+        }
+    };
+    audioPlayer.onpause = () => {
+        updateMusicStatus('သီချင်းရပ်နားထားပါသည်။ (ဖွင့်ရန် နှိပ်ပါ)');
+        if(volumeToggleIcon) {
+            volumeToggleIcon.classList.remove('fa-volume-up');
+            volumeToggleIcon.classList.add('fa-volume-off');
+        }
+    };
+    audioPlayer.onerror = (e) => {
+        console.error("Audio error:", e);
+        if (currentMusicUrl !== defaultMusicUrl) {
+             updateMusicStatus('Error: Custom Music URL အမှား။ မူလသီချင်းသို့ ပြောင်းလဲလိုက်ပါပြီ။');
+             setCustomMusic(defaultMusicUrl); // Revert to default
+        } else {
+             updateMusicStatus('Error: သီချင်းဖွင့်မရပါ။ (ကွန်ယက်စစ်ပါ)');
+        }
+    };
+
+    // Initial status 
+    if (audioPlayer.paused) {
+        updateMusicStatus('သီချင်းရပ်နားထားပါသည်။ (ဖွင့်ရန် နှိပ်ပါ)');
+    }
+}
+
 function toggleVolume() {
     if (!audioPlayer) return;
 
     if (audioPlayer.paused) {
         audioPlayer.play().catch(e => {
             console.error("Failed to play on user click (Interaction needed):", e);
-            updateMusicStatus('Autoplay failed. Tap music icon to choose.');
+            // Show a temporary message if play fails after click
+            updateMusicStatus('ဖွင့်မရပါ! URL စစ်ဆေးပါ သို့ ရွေးချယ်ပါ။');
         });
     } else {
         audioPlayer.pause();
-    }
-}
-
-function openModal(modal) {
-    if (modal) {
-        modal.style.display = 'flex';
-    }
-}
-
-function closeModal(modal) {
-    if (modal) {
-        modal.style.display = 'none';
     }
 }
 
@@ -289,33 +289,23 @@ function setCustomMusic(url) {
     currentMusicUrl = url;
     localStorage.setItem(CUSTOM_MUSIC_KEY, url);
     
-    // Reset and Load
+    // Reset, Load, and Attempt to Play
     audioPlayer.src = url;
     audioPlayer.load();
 
-    // Attempt to play immediately
-    audioPlayer.play().then(() => {
-        console.log("Music started playing successfully.");
-    }).catch(e => {
+    audioPlayer.play().catch(e => {
         console.error("Failed to play music immediately after setting URL:", e);
-        // Show pause status if it fails
-        updateMusicStatus('Failed to play. Tap volume icon to start.');
+        updateMusicStatus('သီချင်းပြောင်းလဲပြီးပါပြီ။ ဖွင့်ရန် နှိပ်ပါ');
     });
     
-    closeModal(musicModal);
-    closeModal(urlInputModal);
+    closeModal('music-modal');
+    closeModal('url-input-modal');
 }
 
 function addMusicEventListeners() {
-    if (document.getElementById('music-button')) {
-        document.getElementById('music-button').onclick = () => openModal(musicModal);
-    }
-    if (volumeToggleIcon) {
-        volumeToggleIcon.onclick = toggleVolume;
-    }
-    if (document.getElementById('cancel-modal-btn')) {
-        document.getElementById('cancel-modal-btn').onclick = () => closeModal(musicModal);
-    }
+    document.getElementById('music-button').onclick = () => openModal('music-modal');
+    volumeToggleIcon.onclick = toggleVolume;
+    document.getElementById('cancel-music-modal-btn').onclick = () => closeModal('music-modal');
     
     // Music Options 
     document.querySelectorAll('.music-option-list .music-option').forEach(option => {
@@ -324,43 +314,89 @@ function addMusicEventListeners() {
             if (type === 'default') {
                 setCustomMusic(defaultMusicUrl);
             } else if (type === 'url') {
-                closeModal(musicModal); 
-                openModal(urlInputModal); 
+                closeModal('music-modal'); 
+                openModal('url-input-modal'); 
             }
         };
     });
 
     // URL Modal Buttons
-    if (document.getElementById('close-url-modal-btn')) {
-        document.getElementById('close-url-modal-btn').onclick = () => {
-            closeModal(urlInputModal);
-            openModal(musicModal); 
-        };
-    }
-    if (document.getElementById('play-url-btn')) {
-        document.getElementById('play-url-btn').onclick = () => {
-            const urlInput = document.getElementById('music-url-input');
-            const url = urlInput ? urlInput.value.trim() : '';
-            if (url) {
-                setCustomMusic(url);
-                urlInput.value = ''; 
-            } else {
-                // Use console.error instead of alert
-                console.error("Please enter a valid music URL.");
-            }
-        };
-    }
+    document.getElementById('close-url-modal-btn').onclick = () => {
+        closeModal('url-input-modal');
+        openModal('music-modal'); 
+    };
+    document.getElementById('play-url-btn').onclick = () => {
+        const urlInput = document.getElementById('music-url-input');
+        const url = urlInput ? urlInput.value.trim() : '';
+        if (url) {
+            setCustomMusic(url);
+            urlInput.value = ''; 
+        } else {
+            console.error("သီချင်း URL ထည့်သွင်းပေးပါ။");
+        }
+    };
     
     // File Upload
     const fileInput = document.getElementById('music-upload-input');
-    if (fileInput) {
-        fileInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const url = URL.createObjectURL(file);
-                setCustomMusic(url);
-            }
-        };
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Note: createObjectURL URLs are temporary and local
+            const url = URL.createObjectURL(file);
+            setCustomMusic(url);
+        }
+    };
+}
+
+// ===========================================
+//          ADMIN POST LOGIC (NEW)
+// ===========================================
+
+function setupAdminPostLogic(isAdmin) {
+    const postAddButton = document.getElementById('post-add-button');
+    const postModal = document.getElementById('post-modal');
+    const submitPostBtn = document.getElementById('submit-post-btn');
+    const cancelPostBtn = document.getElementById('cancel-post-btn');
+    const postInput = document.getElementById('post-input');
+    const adminMessageEl = document.getElementById('admin-message');
+
+    if (isAdmin) {
+        // Show the "+" icon for Admin
+        if (postAddButton) postAddButton.style.display = 'block';
+        if (adminMessageEl) adminMessageEl.style.display = 'none'; // Hide general message
+
+        // Add event listeners for the new modal flow
+        if (postAddButton) postAddButton.onclick = () => openModal('post-modal');
+        if (cancelPostBtn) cancelPostBtn.onclick = () => closeModal('post-modal');
+
+        if (submitPostBtn && postInput) {
+            submitPostBtn.onclick = () => {
+                const content = postInput.value.trim();
+                if (content) {
+                    let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
+                    const newPost = {
+                        id: Date.now(),
+                        authorId: currentUserId,
+                        authorName: currentUserName,
+                        isAdmin: true,
+                        content: content,
+                        timestamp: Date.now(),
+                        likesCount: 0
+                    };
+                    posts.push(newPost);
+                    savePosts(posts);
+                    postInput.value = ''; // Clear input
+                    loadPosts(currentUserId);
+                    closeModal('post-modal'); // Close after successful post
+                } else {
+                    console.error("Post content cannot be empty.");
+                }
+            };
+        }
+    } else {
+         // Show the info message for Regular User
+         if (postAddButton) postAddButton.style.display = 'none';
+         if (adminMessageEl) adminMessageEl.style.display = 'flex'; 
     }
 }
 
@@ -381,7 +417,6 @@ function switchScreen(targetScreenId) {
 function setupNavigation() {
     const navItems = document.querySelectorAll('.bottom-nav .nav-item');
 
-    // Bottom Nav Click Listener (Home/Profile only)
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault(); 
@@ -396,15 +431,16 @@ function setupNavigation() {
 
 document.addEventListener('DOMContentLoaded', () => {
     
-    let currentUserId = 0; 
-    let currentUserName = 'Guest';
+    // ---------------------------------------------
+    // 1. TMA Integration & Profile Data Initialization
+    // ---------------------------------------------
+    
+    let is_admin = false;
 
-    // ---------------------------------------------
-    // 1. TMA Integration & Profile Data Filling Logic 
-    // ---------------------------------------------
     if (typeof window.Telegram.WebApp !== 'undefined') {
         const tg = window.Telegram.WebApp;
         tg.ready();
+        tg.expand(); // Ensure the app is fully expanded
         
         try {
             const user = tg.initDataUnsafe.user;
@@ -414,42 +450,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const firstName = user.first_name || '';
                 const lastName = user.last_name || '';
                 const username = user.username;
-                // FIX: Retrieve photo URL accurately
                 const photoUrl = user.photo_url; 
                 const fullName = `${firstName} ${lastName}`.trim();
                 
                 currentUserName = fullName || 'User'; 
-                const isAdmin = (currentUserId === ADMIN_CHAT_ID);
+                is_admin = (currentUserId === ADMIN_CHAT_ID);
 
                 // --- PROFILE DATA FILLING ---
-                if (document.getElementById('profile-display-name')) document.getElementById('profile-display-name').textContent = fullName || 'No Name Provided';
+                if (document.getElementById('profile-display-name')) document.getElementById('profile-display-name').textContent = fullName || 'အမည် မရရှိပါ';
                 if (document.getElementById('profile-display-username')) document.getElementById('profile-display-username').textContent = username ? `@${username}` : 'N/A';
                 if (document.getElementById('telegram-chat-id')) document.getElementById('telegram-chat-id').textContent = currentUserId.toString();
                 
-                // Admin Status & Post Box Logic
                 const adminStatusEl = document.getElementById('admin-status');
-                const adminPostBoxEl = document.getElementById('admin-post-box');
-                const adminMessageEl = document.getElementById('admin-message');
+                if (adminStatusEl) adminStatusEl.textContent = is_admin ? 'အုပ်ချုပ်သူ (Admin)' : 'ရိုးရိုးအသုံးပြုသူ';
 
-                if (isAdmin) {
-                    if (adminStatusEl) adminStatusEl.textContent = 'Administrator';
-                    if (adminPostBoxEl) adminPostBoxEl.style.display = 'block';
-                    if (adminMessageEl) adminMessageEl.style.display = 'none';
-                } else {
-                    if (adminStatusEl) adminStatusEl.textContent = 'Regular User';
-                    if (adminPostBoxEl) adminPostBoxEl.style.display = 'none';
-                    if (adminMessageEl) {
-                        adminMessageEl.textContent = 'Only the Admin can post announcements.';
-                        adminMessageEl.style.display = 'block';
-                    }
-                }
-
-                // **PROFILE PICTURE FIX: Use photoUrl if available**
+                // **PROFILE PICTURE LOGIC (FIXED)**
                 const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
                 if (profileAvatarPlaceholder) {
                     if (photoUrl) {
-                        // FIX: Use <img> tag to display the photo URL from Telegram
-                        profileAvatarPlaceholder.innerHTML = `<img src="${photoUrl}" alt="${fullName || 'Profile Photo'}" onerror="this.onerror=null; this.src='https://placehold.co/100x100/333/fff?text=${(fullName.charAt(0) || 'U').toUpperCase()}'">`;
+                        profileAvatarPlaceholder.innerHTML = `<img src="${photoUrl}" alt="${fullName || 'Profile Photo'}" onerror="this.onerror=null; this.src='https://placehold.co/80x80/333/fff?text=${(fullName.charAt(0) || 'U').toUpperCase()}'">`;
                         profileAvatarPlaceholder.style.backgroundColor = 'transparent';
                         profileAvatarPlaceholder.textContent = '';
                     } else {
@@ -466,33 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Close App Button
                 const closeBtn = document.getElementById('tma-close-btn');
                 if (closeBtn) {
-                    // Use tg.close() to close the Mini App
                     closeBtn.addEventListener('click', () => tg.close());
-                }
-                
-                // Admin Post Submission Listener
-                const submitPostBtn = document.getElementById('submit-post-btn');
-                const postInput = document.getElementById('post-input');
-                if (submitPostBtn && postInput && isAdmin) {
-                    submitPostBtn.onclick = () => {
-                        const content = postInput.value.trim();
-                        if (content) {
-                            let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
-                            const newPost = {
-                                id: Date.now(),
-                                authorId: currentUserId,
-                                authorName: currentUserName,
-                                isAdmin: true,
-                                content: content,
-                                timestamp: Date.now(),
-                                likesCount: 0
-                            };
-                            posts.push(newPost);
-                            savePosts(posts);
-                            postInput.value = '';
-                            loadPosts(currentUserId);
-                        }
-                    };
                 }
                 
             } 
@@ -510,7 +503,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPosts(currentUserId); 
     setupNavigation();
     
-    // **AUTOPLAY IMPLEMENTATION**: Call setupMusicPlayer with true
+    // Setup Music Player and attempt Autoplay
     setupMusicPlayer(true); 
     addMusicEventListeners();
+
+    // Setup new Admin Post UI
+    setupAdminPostLogic(is_admin);
 });
