@@ -85,14 +85,15 @@
                             <!-- Admin Only Post Button (JS ကသာ ပြသပေးမည်) -->
                             <i class="fas fa-plus post-add-btn" id="post-add-button" style="display: none;"></i> 
                             
-                            <!-- Music Button -->
+                            <!-- Music Button (Modal ဖွင့်ရန်) -->
                             <i class="fas fa-music" id="music-button"></i> 
+                            <!-- Volume Toggle (Play/Pause) -->
                             <i class="fas fa-volume-off" id="volume-toggle"></i> 
                         </div>
                     </div>
                 </header>
                 
-                <!-- Music File Name ဖျောက်ပြီး ရိုးရှင်းသော Status Bar -->
+                <!-- Music Status Bar (ရိုးရှင်းသော Status) -->
                 <div class="music-status-bar">
                     <span id="current-music-status">Music Paused (Tap to Start)</span>
                 </div>
@@ -131,13 +132,17 @@
                     <!-- Account Details -->
                     <div class="list-group">
                         <h4 class="group-title">Account Information</h4>
-                        <div class="info-item">
+                        
+                        <!-- NEW: CHAT ID COPY BUTTON -->
+                        <div class="info-item copy-item" id="chat-id-copy-btn">
                             <i class="fas fa-id-card-alt"></i>
                             <div class="info-details">
-                                <span class="info-title">Chat ID (Important)</span>
+                                <span class="info-title">Chat ID (Tap to Copy)</span>
                                 <span class="info-subtitle" id="telegram-chat-id">Loading...</span>
                             </div>
+                            <i class="fas fa-copy copy-icon"></i>
                         </div>
+                        
                     </div>
 
                     <!-- App Actions -->
@@ -182,30 +187,43 @@
             </div>
         </div>
 
-        <!-- 4. Custom Music Modal (Same as before) -->
+        <!-- 4. Custom Music Modal (REVISED) -->
         <div id="music-modal" class="modal">
             <div class="modal-content">
                 <h3>Select Background Music</h3>
                 <div class="music-option-list">
-                    <button class="music-option" data-music-type="default">
-                        <i class="fas fa-music"></i>
+                    
+                    <!-- NEW: Change Permanent Default URL -->
+                    <button class="music-option" data-music-type="change-default">
+                        <i class="fas fa-cog"></i>
                         <div class="option-details">
-                            <strong>Default Track</strong>
-                            <span>Use the app's default music.</span>
+                            <strong>Change Default URL</strong>
+                            <span>App စဖွင့်ရင် ဖွင့်ပေးမယ့် သီချင်းလင့်ခ်ကို ပြောင်းပါ။</span>
                         </div>
                     </button>
+                    
+                    <!-- Play Current Default Track -->
+                    <button class="music-option" data-music-type="default">
+                        <i class="fas fa-play"></i>
+                        <div class="option-details">
+                            <strong>Play Current Default Track</strong>
+                            <span id="current-default-url-display"></span>
+                        </div>
+                    </button>
+                    
+                    <!-- Temporary Custom URL -->
                     <button class="music-option" data-music-type="url">
                         <i class="fas fa-link"></i>
                         <div class="option-details">
-                            <strong>Custom URL</strong>
-                            <span>Insert a direct link to an audio file.</span>
+                            <strong>Temporary Custom URL</strong>
+                            <span>တစ်ခါသုံး Music Link ကို ထည့်သွင်းပါ။ (App ပြန်ဖွင့်ရင် Default ပြန်ပြောင်းပါမည်)</span>
                         </div>
                     </button>
                     <label for="music-upload-input" class="music-option">
                         <i class="fas fa-upload"></i>
                         <div class="option-details">
                             <strong>Upload File (Local)</strong>
-                            <span>Upload an audio file from your device.</span>
+                            <span>Device ထဲမှ Audio File တင်ပါ။</span>
                         </div>
                     </label>
                     <input type="file" id="music-upload-input" accept="audio/*" style="display: none;">
@@ -215,10 +233,10 @@
             </div>
         </div>
 
-        <!-- 5. URL Input Nested Modal (Same as before) -->
+        <!-- 5. URL Input Nested Modal (For Temporary URL) -->
         <div id="url-input-modal" class="modal nested-modal">
             <div class="modal-content">
-                <h3>Enter Music URL</h3>
+                <h3>Enter Temporary Music URL</h3>
                 <input type="url" id="music-url-input" placeholder="e.g.: https://example.com/song.mp3">
                 <div class="modal-actions">
                     <button id="close-url-modal-btn" class="secondary-btn">Cancel</button>
@@ -226,6 +244,22 @@
                 </div>
             </div>
         </div>
+        
+        <!-- 6. Default URL Input Nested Modal (NEW) -->
+        <div id="default-url-input-modal" class="modal nested-modal">
+            <div class="modal-content">
+                <h3>Set New Default Music URL</h3>
+                <input type="url" id="default-music-url-input" placeholder="New Autoplay URL">
+                <div class="modal-actions">
+                    <button id="close-default-url-modal-btn" class="secondary-btn">Cancel</button>
+                    <button id="set-default-url-btn" class="primary-btn">Set as Default & Play</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 7. Custom Notification/Toast (NEW) -->
+        <div id="custom-toast" class="custom-toast"></div>
+        
     </div>
 
     <!-- Script MUST be loaded last -->
