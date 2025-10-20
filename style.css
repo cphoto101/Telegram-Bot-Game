@@ -1,4 +1,4 @@
-/* --- Root Variables & Base Setup --- */
+/* --- Root Variables & Base Setup (Enhanced) --- */
 :root {
     /* Fallback Telegram Theme Variables */
     --tg-theme-bg-color: #f4f4f4;
@@ -11,10 +11,15 @@
     --tg-theme-destructive-text-color: #ff3b30;
     --tg-theme-accent: #ff8a00; /* Custom Accent Color for Admin/Highlights */
 
-    /* Modern UI Variables */
-    --card-radius: 15px;
-    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08); /* More noticeable, modern shadow */
-    --shadow-header: 0 2px 4px rgba(0, 0, 0, 0.05); 
+    /* UI Spacing & Geometry Variables */
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 15px;
+    --spacing-lg: 20px;
+    --card-radius: 12px; /* Slightly reduced for a cleaner, modern look */
+    /* Light shadow for Telegram-style elevation */
+    --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.08); 
+    --shadow-header: 0 1px 2px rgba(0, 0, 0, 0.05); 
 }
 
 body {
@@ -44,25 +49,25 @@ body {
 .fixed-header-area {
     width: 100%;
     background-color: var(--tg-theme-bg-color);
-    padding-top: 5px; 
-    box-shadow: var(--shadow-header); /* Lighter shadow for fixed header */
+    padding-top: var(--spacing-xs); 
+    box-shadow: var(--shadow-header); 
     z-index: 10;
 }
 
 .content {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 0 15px; 
-    padding-bottom: 70px; 
+    padding: 0 var(--spacing-md); 
+    padding-bottom: 70px; /* Space for bottom nav */
     -webkit-overflow-scrolling: touch;
-    padding-top: 130px; /* Header space */
     transition: padding-top 0.3s;
 }
 
-/* Header will be hidden for profile screen */
-#profile-screen {
-    padding-top: 10px; 
+/* Header Padding dynamically managed by JS */
+#home-screen {
+    padding-top: var(--spacing-sm); 
 }
+
 .screen {
     display: none;
 }
@@ -72,7 +77,7 @@ body {
 
 /* --- Header Styles --- */
 .main-header {
-    padding: 5px 15px 0 15px;
+    padding: var(--spacing-xs) var(--spacing-md) 0 var(--spacing-md);
 }
 .header-content {
     display: flex;
@@ -80,31 +85,31 @@ body {
     align-items: center;
 }
 .app-title-fixed {
-    font-size: 1.25rem;
-    font-weight: 800; /* Bolder for modern feel */
+    font-size: 1.3rem; /* Slightly larger */
+    font-weight: 700; 
     color: var(--tg-theme-text-color);
 }
-.header-icons i {
-    font-size: 1.2rem;
+.header-icons .header-icon {
+    font-size: 1.3rem;
     cursor: pointer;
-    margin-left: 15px;
+    margin-left: var(--spacing-md);
     color: var(--tg-theme-link-color);
     transition: opacity 0.2s;
 }
-.header-icons i:active {
+.header-icons .header-icon:active {
     opacity: 0.6;
 }
 
-/* --- Music Status Bar (Tapped to play effect) --- */
+/* --- Music Status Bar --- */
 .music-status-bar {
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 500;
-    padding: 6px 15px;
+    padding: var(--spacing-xs) var(--spacing-md);
     color: var(--tg-theme-hint-color);
     background-color: var(--tg-theme-secondary-bg-color);
     cursor: pointer;
-    margin: 5px 15px;
+    margin: var(--spacing-xs) var(--spacing-md);
     border-radius: 8px;
     transition: background-color 0.2s;
 }
@@ -113,20 +118,19 @@ body {
 }
 
 
-/* --- Filter Tabs --- */
+/* --- Filter Tabs (Cleaner Underline) --- */
 .post-filter-tabs {
     display: flex;
-    justify-content: flex-start; /* Align left */
-    padding: 10px 15px;
-    margin-bottom: 5px;
-    gap: 20px;
+    justify-content: flex-start;
+    padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--spacing-lg);
     background-color: var(--tg-theme-bg-color);
 }
 .filter-tab {
     background: transparent;
     border: none;
     color: var(--tg-theme-hint-color);
-    padding: 5px 0px;
+    padding: var(--spacing-xs) 0;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
@@ -134,49 +138,49 @@ body {
     transition: color 0.2s;
 }
 .filter-tab.active {
-    color: var(--tg-theme-text-color); /* Active tab is prominent */
+    color: var(--tg-theme-text-color);
 }
 .filter-tab.active::after {
     content: '';
     position: absolute;
-    bottom: -8px;
+    bottom: -5px; /* Adjust closer to text */
     left: 0;
     width: 100%;
     height: 3px;
     background-color: var(--tg-theme-link-color);
-    border-radius: 2px;
+    border-radius: 1.5px;
 }
 
-/* --- Post Card Styles (Modern Elevation) --- */
+/* --- Post Card Styles --- */
 .posts-container {
-    padding-top: 10px;
+    padding-top: var(--spacing-sm);
 }
 .post-card {
     background-color: var(--tg-theme-secondary-bg-color);
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: var(--card-radius); /* Larger radius */
-    box-shadow: var(--shadow-light); /* Elevated shadow */
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--card-radius); 
+    box-shadow: var(--shadow-subtle); 
     word-wrap: break-word;
     white-space: pre-wrap;
     transition: transform 0.1s;
 }
 .post-card:active {
-    transform: scale(0.99); /* Subtle press effect */
+    transform: scale(0.995); 
 }
 .post-content {
     font-size: 1rem;
     line-height: 1.5;
-    margin-bottom: 10px;
+    margin-bottom: var(--spacing-sm);
 }
 .post-actions {
     display: flex;
-    justify-content: flex-start; /* Align actions left */
-    gap: 15px;
+    justify-content: flex-start;
+    gap: var(--spacing-md);
     align-items: center;
-    border-top: 1px solid rgba(153, 153, 153, 0.1);
-    padding-top: 8px;
-    margin-top: 5px;
+    border-top: 1px solid rgba(153, 153, 153, 0.15); /* Slightly darker separator */
+    padding-top: var(--spacing-sm);
+    margin-top: var(--spacing-xs);
 }
 .like-btn, .delete-btn {
     background: transparent;
@@ -184,15 +188,12 @@ body {
     cursor: pointer;
     font-size: 0.9rem;
     font-weight: 600;
-    padding: 8px 10px;
-    border-radius: 8px;
-    transition: background-color 0.2s, color 0.2s;
-}
-.like-btn {
+    padding: 0; /* Remove excess padding */
     color: var(--tg-theme-hint-color);
+    transition: color 0.2s, opacity 0.2s;
 }
 .like-btn.liked {
-    color: var(--tg-theme-destructive-text-color); /* Red for liked */
+    color: var(--tg-theme-destructive-text-color);
 }
 .delete-btn {
     color: var(--tg-theme-destructive-text-color);
@@ -210,7 +211,7 @@ body {
     bottom: 0;
     width: 100%;
     z-index: 20;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.08); /* Subtle shadow */
 }
 .nav-item {
     display: flex;
@@ -220,53 +221,70 @@ body {
     background: transparent;
     border: none;
     color: var(--tg-theme-hint-color);
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     padding: 5px 0;
     transition: color 0.2s, transform 0.1s;
 }
 .nav-item i {
-    font-size: 1.4rem; /* Slightly larger icon */
+    font-size: 1.4rem;
     margin-bottom: 2px;
 }
 .nav-item.active {
     color: var(--tg-theme-link-color);
 }
-.nav-item:active {
+
+/* --- Floating Action Button (FAB) (NEW) --- */
+.fab {
+    position: fixed;
+    right: var(--spacing-lg);
+    bottom: 75px; /* Above the bottom navigation */
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--tg-theme-link-color);
+    color: var(--tg-theme-button-text-color);
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-size: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 25;
+    transition: transform 0.2s, background-color 0.2s;
+}
+.fab:active {
     transform: scale(0.95);
+    background-color: color-mix(in srgb, var(--tg-theme-link-color), black 10%);
 }
 
-/* --- Profile Screen Styles (Enhanced Cards) --- */
+/* --- Profile Screen Styles --- */
 .profile-header {
-    padding: 10px 0 15px 0;
+    padding: var(--spacing-sm) 0 var(--spacing-lg) 0;
     text-align: center;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    color: var(--tg-theme-text-color);
 }
 
 .elevated-card {
     background-color: var(--tg-theme-secondary-bg-color);
     border-radius: var(--card-radius);
-    box-shadow: var(--shadow-light); 
-    padding: 20px;
+    box-shadow: var(--shadow-subtle); 
+    padding: var(--spacing-lg);
 }
 
 .profile-header-card {
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    margin-bottom: var(--spacing-lg);
 }
 
 .profile-avatar-container {
-    margin-bottom: 10px;
+    margin-bottom: var(--spacing-sm);
 }
 .profile-avatar {
     width: 90px;
     height: 90px;
     border-radius: 50%;
-    border: 3px solid var(--tg-theme-link-color); /* Border for emphasis */
+    border: 3px solid var(--tg-theme-link-color); 
     background-color: #ccc;
     display: flex;
     justify-content: center;
@@ -275,16 +293,13 @@ body {
     font-weight: 600;
     color: #fff;
     overflow: hidden;
-    margin: 0 auto 10px auto;
+    margin: 0 auto var(--spacing-sm) auto;
 }
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+
 .username-display {
     color: var(--tg-theme-hint-color);
     font-size: 0.9rem;
+    margin-top: var(--spacing-xs);
 }
 .profile-status {
     background-color: var(--tg-theme-link-color);
@@ -293,43 +308,33 @@ body {
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 600;
-    margin-top: 8px;
+    margin-top: var(--spacing-sm);
 }
 
 /* List Group (Settings/Info Items) */
 .list-group {
-    margin-bottom: 20px;
+    margin-bottom: var(--spacing-lg);
 }
 .group-title {
     color: var(--tg-theme-hint-color);
     font-size: 0.85rem;
     text-transform: uppercase;
-    margin: 0 0 10px 5px;
-    font-weight: 500;
+    margin: 0 0 var(--spacing-sm) var(--spacing-xs);
+    font-weight: 600;
 }
 
-/* Elevated List Items - grouped look */
+/* Elevated List Items */
 .elevated-list {
     background-color: var(--tg-theme-secondary-bg-color);
     border-radius: var(--card-radius);
-    box-shadow: var(--shadow-light); 
-    overflow: hidden; /* Contains the rounded corners for items */
+    box-shadow: var(--shadow-subtle); 
+    overflow: hidden; 
 }
 .info-item {
     display: flex;
     align-items: center;
-    padding: 12px 15px;
-    margin-bottom: 0;
+    padding: var(--spacing-sm) var(--spacing-md);
     transition: background-color 0.1s;
-}
-/* Remove border radius from individual items when grouped */
-.elevated-list .info-item:first-of-type {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-}
-.elevated-list .info-item:last-of-type {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
 }
 
 /* Separator for list items */
@@ -338,8 +343,8 @@ body {
 }
 
 .info-item i {
-    font-size: 1.2rem;
-    margin-right: 15px;
+    font-size: 1.3rem;
+    margin-right: var(--spacing-md);
     color: var(--tg-theme-link-color);
 }
 
@@ -353,36 +358,37 @@ body {
 }
 .info-subtitle {
     display: block;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--tg-theme-hint-color);
+    margin-top: 2px;
 }
 .copy-item {
     cursor: pointer;
 }
 .copy-item:active {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgba(0, 0, 0, 0.03);
 }
 .copy-icon {
-    font-size: 1.1rem !important; /* Slightly larger copy icon */
+    font-size: 1.1rem !important;
     color: var(--tg-theme-hint-color) !important;
 }
 .close-item i {
     color: var(--tg-theme-destructive-text-color) !important;
 }
 
-/* --- Modal Styles (Improved Transition) --- */
+/* --- Modal Styles (Enhanced Slide-Up) --- */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Darker backdrop */
+    background-color: rgba(0, 0, 0, 0.5); 
     display: none;
     justify-content: center;
     align-items: flex-end; 
     z-index: 50;
-    opacity: 0; /* Control opacity for fade effect */
+    opacity: 0; 
     transition: opacity 0.3s ease-in-out;
 }
 .modal.active {
@@ -393,11 +399,11 @@ body {
     background-color: var(--tg-theme-secondary-bg-color);
     width: 100%;
     max-width: 500px;
-    padding: 20px;
-    border-top-left-radius: 20px; /* More rounded */
-    border-top-right-radius: 20px;
+    padding: var(--spacing-lg);
+    border-top-left-radius: 16px; 
+    border-top-right-radius: 16px;
     transform: translateY(100%);
-    transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); /* Smoother slide up */
+    transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); 
 }
 .modal.active .modal-content {
     transform: translateY(0);
@@ -405,7 +411,7 @@ body {
 
 .modal h3 {
     margin-top: 0;
-    margin-bottom: 15px;
+    margin-bottom: var(--spacing-md);
     font-size: 1.3rem;
     font-weight: 700;
 }
@@ -414,16 +420,20 @@ body {
 #post-input, #music-url-input {
     width: 100%;
     min-height: 100px;
-    padding: 12px;
+    padding: var(--spacing-sm);
     border: 1px solid var(--tg-theme-hint-color);
-    border-radius: 10px;
+    border-radius: var(--card-radius);
     box-sizing: border-box;
-    margin-bottom: 15px;
+    margin-bottom: var(--spacing-md);
     background-color: var(--tg-theme-bg-color);
     color: var(--tg-theme-text-color);
     font-size: 1rem;
     resize: vertical;
     transition: border-color 0.2s;
+}
+#music-url-input {
+    min-height: auto;
+    height: 48px;
 }
 #post-input:focus, #music-url-input:focus {
     border-color: var(--tg-theme-link-color);
@@ -432,13 +442,13 @@ body {
 .modal-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    gap: var(--spacing-sm);
 }
 
 .primary-btn, .secondary-btn {
-    padding: 12px 20px;
+    padding: 10px var(--spacing-md);
     border: none;
-    border-radius: 10px;
+    border-radius: 8px; /* Slightly smaller radius for buttons */
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
@@ -449,31 +459,24 @@ body {
     background-color: var(--tg-theme-button-color);
     color: var(--tg-theme-button-text-color);
 }
-.primary-btn:active {
-    opacity: 0.8;
-}
-
 .secondary-btn {
     background-color: var(--tg-theme-bg-color);
     color: var(--tg-theme-text-color);
     border: 1px solid var(--tg-theme-hint-color);
-}
-.secondary-btn:active {
-    background-color: var(--tg-theme-secondary-bg-color);
 }
 
 /* Music Modal Specific */
 .music-option-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
 }
 .music-option {
     display: flex;
     align-items: center;
     width: 100%;
-    padding: 15px;
+    padding: var(--spacing-md);
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     background-color: var(--tg-theme-bg-color);
@@ -481,24 +484,8 @@ body {
     text-align: left;
     transition: background-color 0.2s, box-shadow 0.2s;
 }
-.music-option i {
-    font-size: 1.3rem;
-    margin-right: 15px;
-    color: var(--tg-theme-link-color);
-}
 .music-option:active {
     background-color: var(--tg-theme-secondary-bg-color);
-    box-shadow: 0 0 5px rgba(0, 122, 255, 0.3);
-}
-.option-details strong {
-    display: block;
-    font-size: 1rem;
-    color: var(--tg-theme-text-color);
-}
-.option-details span {
-    display: block;
-    font-size: 0.8rem;
-    color: var(--tg-theme-hint-color);
 }
 
 /* --- Custom Toast Notification --- */
@@ -507,12 +494,12 @@ body {
     bottom: 80px; 
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.85); /* Slightly darker for better contrast */
     color: white;
     padding: 10px 20px;
-    border-radius: 25px; /* Pill shape */
+    border-radius: 25px; 
     text-align: center;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
@@ -522,9 +509,9 @@ body {
     opacity: 1;
     visibility: visible;
 }
-.loading-text {
+.initial-loading-text {
     text-align: center; 
     color: var(--tg-theme-hint-color); 
-    padding: 20px;
+    padding: var(--spacing-lg);
     }
     
