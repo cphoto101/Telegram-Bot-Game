@@ -1,5 +1,5 @@
 // ********** SET YOUR ADMIN CHAT ID HERE **********
-// ဤနေရာတွင် သင့်၏ Telegram Chat ID ကို ထည့်သွင်းပါ။
+// Set your Telegram Chat ID here.
 const ADMIN_CHAT_ID = 1924452453; 
 // *************************************************
 
@@ -7,6 +7,7 @@ const ADMIN_CHAT_ID = 1924452453;
 const POSTS_STORAGE_KEY = 'tma_community_posts_v4'; 
 const LIKES_STORAGE_KEY = 'tma_user_likes_v4'; 
 const CUSTOM_MUSIC_KEY = 'tma_custom_music_url_v4'; 
+const PROFILE_IMAGE_KEY = 'tma_custom_profile_image_v1'; // New key for custom photo
 
 // --- Global Variables ---
 const defaultMusicUrl = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3';
@@ -16,6 +17,7 @@ let musicStatusSpan;
 let volumeToggleIcon;
 let currentUserId = 0; 
 let currentUserName = 'Guest';
+let is_admin = false; // Track admin status globally
 
 // ===========================================
 //          HELPER FUNCTIONS
@@ -39,11 +41,11 @@ function formatTime(timestamp) {
     const date = new Date(timestamp);
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
     
-    if (diffInMinutes < 1) return 'ယခုလေးတင်';
-    if (diffInMinutes < 60) return `${diffInMinutes} မိနစ်ခန့်က`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} နာရီခန့်က`;
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} hours ago`;
     
-    return date.toLocaleTimeString('my-MM', { hour: '2-digit', minute: '2-digit' }) + ', ' + date.toLocaleDateString('my-MM');
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) + ', ' + date.toLocaleDateString('en-US');
 }
 
 // ===========================================
@@ -84,7 +86,7 @@ function createPostElement(post, currentUserId) {
     postElement.setAttribute('data-post-id', post.id);
 
     const deleteButton = isAdmin 
-        ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> ဖျက်မည်</button>` 
+        ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
 
     postElement.innerHTML = `
@@ -121,9 +123,26 @@ function loadPosts(userId) {
         console.error("Error loading posts:", e);
         const container = document.getElementById('posts-container');
         if (container) {
-             container.innerHTML = '<p style="text-align: center; color: #ff5252;">Post များတင်ရာတွင် အမှားအယွင်းရှိနေပါသည်။</p>';
+             container.innerHTML = '<p style="text-align: center; color: #ff5252;">Error loading community posts.</p>';
         }
     }
+}
+
+// --- CORE FIX: Post Deletion Logic ---
+
+function performDeletePost(postId, userId) {
+    // Check for Admin privilege
+    if (userId !== ADMIN_CHAT_ID) return; 
+    
+    let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
+    const updatedPosts = posts.filter(p => p.id !== postId);
+    savePosts(updatedPosts);
+
+    let likes = getLikes();
+    delete likes[postId];
+    saveLikes(likes);
+
+    loadPosts(userId); // Reload UI
 }
 
 function addPostEventListeners(userId) {
@@ -131,16 +150,20 @@ function addPostEventListeners(userId) {
         button.onclick = (e) => toggleLike(e, userId);
     });
 
+    // Fix: Handle confirmation outside the core deletion logic
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.onclick = (e) => {
+            const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
+            
             if (window.Telegram.WebApp.showConfirm) {
-                window.Telegram.WebApp.showConfirm('ဒီ Post ကို ဖျက်မှာ သေချာပါသလား?', (ok) => {
-                    if (ok) deletePost(e, userId);
+                // Use TMA native confirmation
+                window.Telegram.WebApp.showConfirm('Are you sure you want to delete this post?', (ok) => {
+                    if (ok) performDeletePost(postId, userId);
                 });
             } else {
-                // Fallback for non-TMA environment or older versions
+                // Fallback confirmation
                 if (confirm('Are you sure you want to delete this post?')) {
-                     deletePost(e, userId);
+                     performDeletePost(postId, userId);
                 }
             }
         };
@@ -172,24 +195,9 @@ function toggleLike(e, userId) {
     loadPosts(userId); 
 }
 
-function deletePost(e, userId) {
-    if (userId !== ADMIN_CHAT_ID) return; 
-    
-    const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
-
-    let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
-    const updatedPosts = posts.filter(p => p.id !== postId);
-    savePosts(updatedPosts);
-
-    let likes = getLikes();
-    delete likes[postId];
-    saveLikes(likes);
-
-    loadPosts(userId);
-}
 
 // ===========================================
-//          MODAL & MUSIC LOGIC (FIXED)
+//          MODAL & MUSIC LOGIC 
 // ===========================================
 
 function openModal(modalId) {
@@ -230,21 +238,21 @@ function setupMusicPlayer(autoplayAttempt = false) {
             // Success
         }).catch(e => {
             console.warn("Autoplay was prevented. Tap volume icon to start.", e);
-            updateMusicStatus('သီချင်းရပ်နားထားပါသည်။ (ဖွင့်ရန် နှိပ်ပါ)');
+            updateMusicStatus('Music Paused (Tap to Play)');
         });
     }
 
     // Event listeners for status update and error handling
     audioPlayer.onplay = () => {
         const fileName = currentMusicUrl.split('/').pop().split('?')[0]; 
-        updateMusicStatus(`ဖွင့်နေသည်: ${fileName.substring(0, 30)}...`);
+        updateMusicStatus(`Playing: ${fileName.substring(0, 30)}...`);
         if(volumeToggleIcon) {
             volumeToggleIcon.classList.remove('fa-volume-off');
             volumeToggleIcon.classList.add('fa-volume-up');
         }
     };
     audioPlayer.onpause = () => {
-        updateMusicStatus('သီချင်းရပ်နားထားပါသည်။ (ဖွင့်ရန် နှိပ်ပါ)');
+        updateMusicStatus('Music Paused (Tap to Play)');
         if(volumeToggleIcon) {
             volumeToggleIcon.classList.remove('fa-volume-up');
             volumeToggleIcon.classList.add('fa-volume-off');
@@ -253,16 +261,16 @@ function setupMusicPlayer(autoplayAttempt = false) {
     audioPlayer.onerror = (e) => {
         console.error("Audio error:", e);
         if (currentMusicUrl !== defaultMusicUrl) {
-             updateMusicStatus('Error: Custom Music URL အမှား။ မူလသီချင်းသို့ ပြောင်းလဲလိုက်ပါပြီ။');
+             updateMusicStatus('Error: Custom Music URL failed. Reverting to default.');
              setCustomMusic(defaultMusicUrl); // Revert to default
         } else {
-             updateMusicStatus('Error: သီချင်းဖွင့်မရပါ။ (ကွန်ယက်စစ်ပါ)');
+             updateMusicStatus('Error: Failed to play audio. (Check network)');
         }
     };
 
     // Initial status 
     if (audioPlayer.paused) {
-        updateMusicStatus('သီချင်းရပ်နားထားပါသည်။ (ဖွင့်ရန် နှိပ်ပါ)');
+        updateMusicStatus('Music Paused (Tap to Play)');
     }
 }
 
@@ -271,9 +279,8 @@ function toggleVolume() {
 
     if (audioPlayer.paused) {
         audioPlayer.play().catch(e => {
-            console.error("Failed to play on user click (Interaction needed):", e);
-            // Show a temporary message if play fails after click
-            updateMusicStatus('ဖွင့်မရပါ! URL စစ်ဆေးပါ သို့ ရွေးချယ်ပါ။');
+            console.error("Failed to play on user click:", e);
+            updateMusicStatus('Failed to Play! Check URL or select a different track.');
         });
     } else {
         audioPlayer.pause();
@@ -295,7 +302,7 @@ function setCustomMusic(url) {
 
     audioPlayer.play().catch(e => {
         console.error("Failed to play music immediately after setting URL:", e);
-        updateMusicStatus('သီချင်းပြောင်းလဲပြီးပါပြီ။ ဖွင့်ရန် နှိပ်ပါ');
+        updateMusicStatus('Music track updated. Tap to play.');
     });
     
     closeModal('music-modal');
@@ -332,7 +339,7 @@ function addMusicEventListeners() {
             setCustomMusic(url);
             urlInput.value = ''; 
         } else {
-            console.error("သီချင်း URL ထည့်သွင်းပေးပါ။");
+            console.error("Please enter a music URL.");
         }
     };
     
@@ -349,7 +356,7 @@ function addMusicEventListeners() {
 }
 
 // ===========================================
-//          ADMIN POST LOGIC (NEW)
+//          ADMIN POST LOGIC
 // ===========================================
 
 function setupAdminPostLogic(isAdmin) {
@@ -400,6 +407,72 @@ function setupAdminPostLogic(isAdmin) {
     }
 }
 
+// ===========================================
+//          PROFILE PHOTO LOGIC (NEW)
+// ===========================================
+
+function setupCustomPhotoLogic() {
+    const fileInput = document.getElementById('custom-photo-upload-input');
+    const uploadBtn = document.getElementById('upload-photo-btn');
+
+    // Click handler for the info-item to trigger the hidden file input
+    if (uploadBtn && fileInput) {
+        uploadBtn.addEventListener('click', () => fileInput.click());
+    }
+    
+    if (fileInput) {
+        fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const dataUrl = event.target.result;
+                    localStorage.setItem(PROFILE_IMAGE_KEY, dataUrl);
+                    // Rerender profile info to show the new image immediately
+                    updateProfileDisplay(currentUserId, currentUserName, is_admin); 
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+    }
+}
+
+function updateProfileDisplay(userId, fullName, is_admin) {
+    const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
+    const username = tgUser ? tgUser.username : null;
+    
+    // Update text content
+    if (document.getElementById('profile-display-name')) document.getElementById('profile-display-name').textContent = fullName || 'Name Not Available';
+    if (document.getElementById('profile-display-username')) document.getElementById('profile-display-username').textContent = username ? `@${username}` : 'N/A';
+    if (document.getElementById('telegram-chat-id')) document.getElementById('telegram-chat-id').textContent = userId.toString();
+    
+    const adminStatusEl = document.getElementById('admin-status');
+    if (adminStatusEl) adminStatusEl.textContent = is_admin ? 'Administrator' : 'Regular User';
+
+    // **PROFILE PICTURE LOGIC (UPDATED) - Priority: Custom > Telegram > Initials**
+    const customPhotoUrl = localStorage.getItem(PROFILE_IMAGE_KEY);
+    const tgPhotoUrl = tgUser ? tgUser.photo_url : null;
+    const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
+    
+    if (profileAvatarPlaceholder) {
+        const imageUrl = customPhotoUrl || tgPhotoUrl;
+
+        if (imageUrl) {
+            profileAvatarPlaceholder.innerHTML = `<img src="${imageUrl}" alt="${fullName || 'Profile Photo'}" onerror="this.onerror=null; this.src='https://placehold.co/80x80/333/fff?text=${(fullName.charAt(0) || 'U').toUpperCase()}'">`;
+            profileAvatarPlaceholder.style.backgroundColor = 'transparent';
+            profileAvatarPlaceholder.textContent = '';
+        } else {
+            // Fallback to initials and color
+            const userIdStr = userId.toString();
+            const userColor = stringToColor(userIdStr);
+            const initial = (fullName.charAt(0) || 'U').toUpperCase();
+            profileAvatarPlaceholder.innerHTML = ''; 
+            profileAvatarPlaceholder.style.backgroundColor = userColor;
+            profileAvatarPlaceholder.textContent = initial;
+        }
+    }
+}
+
 
 // ===========================================
 //          NAVIGATION & MAIN ENTRY
@@ -435,8 +508,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. TMA Integration & Profile Data Initialization
     // ---------------------------------------------
     
-    let is_admin = false;
-
     if (typeof window.Telegram.WebApp !== 'undefined') {
         const tg = window.Telegram.WebApp;
         tg.ready();
@@ -449,38 +520,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentUserId = user.id || 0;
                 const firstName = user.first_name || '';
                 const lastName = user.last_name || '';
-                const username = user.username;
-                const photoUrl = user.photo_url; 
                 const fullName = `${firstName} ${lastName}`.trim();
                 
                 currentUserName = fullName || 'User'; 
                 is_admin = (currentUserId === ADMIN_CHAT_ID);
 
-                // --- PROFILE DATA FILLING ---
-                if (document.getElementById('profile-display-name')) document.getElementById('profile-display-name').textContent = fullName || 'အမည် မရရှိပါ';
-                if (document.getElementById('profile-display-username')) document.getElementById('profile-display-username').textContent = username ? `@${username}` : 'N/A';
-                if (document.getElementById('telegram-chat-id')) document.getElementById('telegram-chat-id').textContent = currentUserId.toString();
-                
-                const adminStatusEl = document.getElementById('admin-status');
-                if (adminStatusEl) adminStatusEl.textContent = is_admin ? 'အုပ်ချုပ်သူ (Admin)' : 'ရိုးရိုးအသုံးပြုသူ';
-
-                // **PROFILE PICTURE LOGIC (FIXED)**
-                const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
-                if (profileAvatarPlaceholder) {
-                    if (photoUrl) {
-                        profileAvatarPlaceholder.innerHTML = `<img src="${photoUrl}" alt="${fullName || 'Profile Photo'}" onerror="this.onerror=null; this.src='https://placehold.co/80x80/333/fff?text=${(fullName.charAt(0) || 'U').toUpperCase()}'">`;
-                        profileAvatarPlaceholder.style.backgroundColor = 'transparent';
-                        profileAvatarPlaceholder.textContent = '';
-                    } else {
-                        // Fallback to initials and color
-                        const userIdStr = currentUserId.toString();
-                        const userColor = stringToColor(userIdStr);
-                        const initial = (fullName.charAt(0) || 'U').toUpperCase();
-                        profileAvatarPlaceholder.innerHTML = ''; 
-                        profileAvatarPlaceholder.style.backgroundColor = userColor;
-                        profileAvatarPlaceholder.textContent = initial;
-                    }
-                }
+                // Update Profile Display
+                updateProfileDisplay(currentUserId, currentUserName, is_admin);
 
                 // Close App Button
                 const closeBtn = document.getElementById('tma-close-btn');
@@ -494,6 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     } else {
         console.warn("Mini App launched outside Telegram. Using default user ID 0.");
+        updateProfileDisplay(currentUserId, currentUserName, is_admin);
     }
 
     // ---------------------------------------------
@@ -509,4 +556,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Setup new Admin Post UI
     setupAdminPostLogic(is_admin);
-});
+
+    // Setup Custom Photo Upl
