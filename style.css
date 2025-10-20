@@ -1,5 +1,6 @@
 /* Telegram Web App Theme Variables (Optional but good practice) */
 :root {
+    /* These values are placeholders and will be overwritten by Telegram WebApp SDK themeParams */
     --tg-theme-bg-color: #f4f4f4;
     --tg-theme-text-color: #1a1a1a;
     --tg-theme-link-color: #007aff;
@@ -41,12 +42,13 @@ body {
     z-index: 1010; /* Above content, below modals */
     /* Ensure the background color covers the entire area even on scroll */
     padding-bottom: 10px; /* Spacing at the bottom of the fixed area */
+    box-sizing: border-box; /* Include padding in the element's total width and height */
 }
 
 /* Compensate the content for the fixed header height */
-/* This height must match the total height of the fixed-header-area */
+/* The value 155px is kept as it compensates for the header (40px) + music status (40px) + filter tabs (40px) + margins/paddings (~35px) */
 .app-container > .content {
-    padding-top: 155px; /* Adjust this value if the fixed header elements' heights change */
+    padding-top: 155px; 
 }
 
 /* ==================================== */
@@ -68,16 +70,10 @@ body {
     font-size: 1.6rem; /* Slightly larger */
     font-weight: 900; /* Extra Bold */
     margin: 0;
-    /* Use a strong, contrasting color */
     color: var(--tg-theme-text-color, #1a1a1a); 
-    /* Add a subtle shadow for depth and "coolness" */
     text-shadow: 
         1px 1px 0 var(--tg-theme-secondary-bg-color),
         2px 2px 5px rgba(0, 0, 0, 0.1); 
-    /* Optionally: if you want a subtle gradient effect for extra pop */
-    /* background-image: linear-gradient(45deg, var(--tg-theme-link-color), var(--tg-theme-button-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent; */
 }
 
 
@@ -296,6 +292,7 @@ body {
 }
 .modal.active {
     opacity: 1;
+    display: flex; /* Ensure display is flex when active */
 }
 .modal-content {
     background-color: var(--tg-theme-secondary-bg-color);
@@ -416,6 +413,8 @@ body {
     font-weight: 700;
     color: #ffffff;
     overflow: hidden;
+    /* Fallback background color using stringToColor logic from JS */
+    background-color: #555555; 
 }
 .profile-avatar img {
     width: 100%;
@@ -527,4 +526,4 @@ body {
 .custom-toast.show {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
-    }
+        }
