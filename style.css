@@ -1,24 +1,25 @@
 /* --- Root Variables & Base Setup (Enhanced) --- */
 :root {
     /* Fallback Telegram Theme Variables */
-    --tg-theme-bg-color: #f4f4f4;
-    --tg-theme-text-color: #1a1a1a;
+    --tg-theme-bg-color: #f0f2f5; /* Lighter background for a cleaner feel */
+    --tg-theme-text-color: #1c1c1e;
     --tg-theme-link-color: #007aff;
     --tg-theme-hint-color: #999;
     --tg-theme-button-color: #007aff;
     --tg-theme-button-text-color: #ffffff;
     --tg-theme-secondary-bg-color: #ffffff;
     --tg-theme-destructive-text-color: #ff3b30;
-    --tg-theme-accent: #ff8a00; /* Custom Accent Color for Admin/Highlights */
+    --tg-theme-accent: #ff8a00; /* Admin/Highlight Color */
 
     /* UI Spacing & Geometry Variables */
     --spacing-xs: 5px;
     --spacing-sm: 10px;
-    --spacing-md: 15px;
-    --spacing-lg: 20px;
-    --card-radius: 12px; /* Slightly reduced for a cleaner, modern look */
-    /* Light shadow for Telegram-style elevation */
-    --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.08); 
+    --spacing-md: 16px; /* Standardized to 8-point grid multiple */
+    --spacing-lg: 24px;
+    --card-radius: 12px; 
+    
+    /* Subtle shadow for a clean 'lifted' look */
+    --shadow-subtle: 0 1px 4px rgba(0, 0, 0, 0.08); 
     --shadow-header: 0 1px 2px rgba(0, 0, 0, 0.05); 
 }
 
@@ -63,11 +64,6 @@ body {
     transition: padding-top 0.3s;
 }
 
-/* Header Padding dynamically managed by JS */
-#home-screen {
-    padding-top: var(--spacing-sm); 
-}
-
 .screen {
     display: none;
 }
@@ -75,7 +71,7 @@ body {
     display: block;
 }
 
-/* --- Header Styles --- */
+/* --- Header Styles (More Compact) --- */
 .main-header {
     padding: var(--spacing-xs) var(--spacing-md) 0 var(--spacing-md);
 }
@@ -83,57 +79,52 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 40px; /* Compact height */
 }
 .app-title-fixed {
-    font-size: 1.3rem; /* Slightly larger */
+    font-size: 1.3rem; 
     font-weight: 700; 
     color: var(--tg-theme-text-color);
 }
 .header-icons .header-icon {
-    font-size: 1.3rem;
+    font-size: 1.2rem; /* Slightly smaller icons */
     cursor: pointer;
     margin-left: var(--spacing-md);
     color: var(--tg-theme-link-color);
     transition: opacity 0.2s;
 }
-.header-icons .header-icon:active {
-    opacity: 0.6;
-}
 
-/* --- Music Status Bar --- */
+/* --- Music Status Bar (Less intrusive) --- */
 .music-status-bar {
     text-align: center;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 500;
     padding: var(--spacing-xs) var(--spacing-md);
     color: var(--tg-theme-hint-color);
-    background-color: var(--tg-theme-secondary-bg-color);
+    background-color: color-mix(in srgb, var(--tg-theme-secondary-bg-color), var(--tg-theme-link-color) 5%); /* Slightly off-white */
     cursor: pointer;
     margin: var(--spacing-xs) var(--spacing-md);
     border-radius: 8px;
     transition: background-color 0.2s;
 }
-.music-status-bar:active {
-    background-color: var(--tg-theme-bg-color);
-}
 
 
-/* --- Filter Tabs (Cleaner Underline) --- */
+/* --- Filter Tabs (Cleaner & Compact) --- */
 .post-filter-tabs {
     display: flex;
     justify-content: flex-start;
     padding: var(--spacing-sm) var(--spacing-md);
     gap: var(--spacing-lg);
     background-color: var(--tg-theme-bg-color);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Subtle separator */
 }
 .filter-tab {
     background: transparent;
     border: none;
     color: var(--tg-theme-hint-color);
     padding: var(--spacing-xs) 0;
-    font-size: 1rem;
+    font-size: 0.95rem; /* Slightly smaller text */
     font-weight: 600;
-    cursor: pointer;
     position: relative;
     transition: color 0.2s;
 }
@@ -141,19 +132,14 @@ body {
     color: var(--tg-theme-text-color);
 }
 .filter-tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: -5px; /* Adjust closer to text */
-    left: 0;
-    width: 100%;
-    height: 3px;
+    bottom: -5px; 
+    height: 2px; /* Thinner line */
     background-color: var(--tg-theme-link-color);
-    border-radius: 1.5px;
 }
 
-/* --- Post Card Styles --- */
+/* --- Post Card Styles (Added Author Info) --- */
 .posts-container {
-    padding-top: var(--spacing-sm);
+    padding-top: var(--spacing-md);
 }
 .post-card {
     background-color: var(--tg-theme-secondary-bg-color);
@@ -164,354 +150,98 @@ body {
     word-wrap: break-word;
     white-space: pre-wrap;
     transition: transform 0.1s;
+    /* Added flex for user info */
+    display: flex;
+    flex-direction: column;
 }
-.post-card:active {
-    transform: scale(0.995); 
+.post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    color: var(--tg-theme-text-color);
+}
+.post-author-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-right: var(--spacing-sm);
 }
 .post-content {
     font-size: 1rem;
     line-height: 1.5;
     margin-bottom: var(--spacing-sm);
+    margin-top: var(--spacing-xs);
+    /* Ensure content takes full width */
+    width: 100%;
 }
 .post-actions {
-    display: flex;
-    justify-content: flex-start;
-    gap: var(--spacing-md);
-    align-items: center;
-    border-top: 1px solid rgba(153, 153, 153, 0.15); /* Slightly darker separator */
+    justify-content: space-between; /* Space out elements */
     padding-top: var(--spacing-sm);
     margin-top: var(--spacing-xs);
 }
+.post-timestamp {
+    font-size: 0.75rem; 
+    color: var(--tg-theme-hint-color); 
+}
 .like-btn, .delete-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
-    padding: 0; /* Remove excess padding */
-    color: var(--tg-theme-hint-color);
-    transition: color 0.2s, opacity 0.2s;
+    padding: 0;
 }
-.like-btn.liked {
-    color: var(--tg-theme-destructive-text-color);
-}
-.delete-btn {
-    color: var(--tg-theme-destructive-text-color);
+.like-btn i {
+    margin-right: 5px;
 }
 
-/* --- Bottom Navigation --- */
+/* --- Bottom Navigation (Refined) --- */
 .bottom-nav {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    height: 60px;
-    background-color: var(--tg-theme-secondary-bg-color);
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    z-index: 20;
-    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.08); /* Subtle shadow */
-}
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--tg-theme-hint-color);
-    font-size: 0.75rem;
-    padding: 5px 0;
-    transition: color 0.2s, transform 0.1s;
+    height: 65px; /* Slightly taller for better touch target */
+    box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1); 
 }
 .nav-item i {
-    font-size: 1.4rem;
-    margin-bottom: 2px;
+    font-size: 1.5rem; /* Larger icon */
+    margin-bottom: 1px;
 }
-.nav-item.active {
-    color: var(--tg-theme-link-color);
+.nav-item span {
+    font-size: 0.7rem;
 }
 
-/* --- Floating Action Button (FAB) (NEW) --- */
+/* --- Floating Action Button (FAB) --- */
 .fab {
-    position: fixed;
-    right: var(--spacing-lg);
-    bottom: 75px; /* Above the bottom navigation */
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background-color: var(--tg-theme-link-color);
+    background-color: var(--tg-theme-accent); /* Use accent color for admin action */
     color: var(--tg-theme-button-text-color);
-    border: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    font-size: 1.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    z-index: 25;
-    transition: transform 0.2s, background-color 0.2s;
+    width: 50px; /* Slightly smaller FAB */
+    height: 50px;
+    font-size: 1.3rem;
+    bottom: 75px; 
 }
 .fab:active {
-    transform: scale(0.95);
-    background-color: color-mix(in srgb, var(--tg-theme-link-color), black 10%);
+    background-color: color-mix(in srgb, var(--tg-theme-accent), black 10%);
 }
 
 /* --- Profile Screen Styles --- */
 .profile-header {
-    padding: var(--spacing-sm) 0 var(--spacing-lg) 0;
-    text-align: center;
-    font-size: 1.5rem;
-    font-weight: 700;
-}
-
-.elevated-card {
-    background-color: var(--tg-theme-secondary-bg-color);
-    border-radius: var(--card-radius);
-    box-shadow: var(--shadow-subtle); 
-    padding: var(--spacing-lg);
-}
-
-.profile-header-card {
-    margin-bottom: var(--spacing-lg);
-}
-
-.profile-avatar-container {
-    margin-bottom: var(--spacing-sm);
+    font-size: 1.6rem;
 }
 .profile-avatar {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
     border: 3px solid var(--tg-theme-link-color); 
-    background-color: #ccc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2.2rem;
-    font-weight: 600;
-    color: #fff;
-    overflow: hidden;
-    margin: 0 auto var(--spacing-sm) auto;
 }
-
-.username-display {
-    color: var(--tg-theme-hint-color);
-    font-size: 0.9rem;
-    margin-top: var(--spacing-xs);
-}
-.profile-status {
-    background-color: var(--tg-theme-link-color);
-    color: var(--tg-theme-button-text-color);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-top: var(--spacing-sm);
-}
-
-/* List Group (Settings/Info Items) */
 .list-group {
     margin-bottom: var(--spacing-lg);
+    padding: 0 var(--spacing-xs); /* Adjust list group title indent */
 }
 .group-title {
-    color: var(--tg-theme-hint-color);
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    margin: 0 0 var(--spacing-sm) var(--spacing-xs);
-    font-weight: 600;
-}
-
-/* Elevated List Items */
-.elevated-list {
-    background-color: var(--tg-theme-secondary-bg-color);
-    border-radius: var(--card-radius);
-    box-shadow: var(--shadow-subtle); 
-    overflow: hidden; 
+    margin-left: var(--spacing-md);
 }
 .info-item {
-    display: flex;
-    align-items: center;
-    padding: var(--spacing-sm) var(--spacing-md);
-    transition: background-color 0.1s;
-}
-
-/* Separator for list items */
-.info-item:not(:last-child) {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05); 
-}
-
-.info-item i {
-    font-size: 1.3rem;
-    margin-right: var(--spacing-md);
-    color: var(--tg-theme-link-color);
-}
-
-.info-details {
-    flex-grow: 1;
+    padding: 14px var(--spacing-md); /* Better padding for list items */
 }
 .info-title {
-    display: block;
-    font-size: 1rem;
-    font-weight: 500;
-}
-.info-subtitle {
-    display: block;
-    font-size: 0.85rem;
-    color: var(--tg-theme-hint-color);
-    margin-top: 2px;
-}
-.copy-item {
-    cursor: pointer;
-}
-.copy-item:active {
-    background-color: rgba(0, 0, 0, 0.03);
-}
-.copy-icon {
-    font-size: 1.1rem !important;
-    color: var(--tg-theme-hint-color) !important;
-}
-.close-item i {
-    color: var(--tg-theme-destructive-text-color) !important;
-}
-
-/* --- Modal Styles (Enhanced Slide-Up) --- */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); 
-    display: none;
-    justify-content: center;
-    align-items: flex-end; 
-    z-index: 50;
-    opacity: 0; 
-    transition: opacity 0.3s ease-in-out;
-}
-.modal.active {
-    display: flex;
-    opacity: 1;
-}
-.modal-content {
-    background-color: var(--tg-theme-secondary-bg-color);
-    width: 100%;
-    max-width: 500px;
-    padding: var(--spacing-lg);
-    border-top-left-radius: 16px; 
-    border-top-right-radius: 16px;
-    transform: translateY(100%);
-    transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); 
-}
-.modal.active .modal-content {
-    transform: translateY(0);
-}
-
-.modal h3 {
-    margin-top: 0;
-    margin-bottom: var(--spacing-md);
-    font-size: 1.3rem;
-    font-weight: 700;
-}
-
-/* Modal Inputs & Buttons */
-#post-input, #music-url-input {
-    width: 100%;
-    min-height: 100px;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--tg-theme-hint-color);
-    border-radius: var(--card-radius);
-    box-sizing: border-box;
-    margin-bottom: var(--spacing-md);
-    background-color: var(--tg-theme-bg-color);
-    color: var(--tg-theme-text-color);
-    font-size: 1rem;
-    resize: vertical;
-    transition: border-color 0.2s;
-}
-#music-url-input {
-    min-height: auto;
-    height: 48px;
-}
-#post-input:focus, #music-url-input:focus {
-    border-color: var(--tg-theme-link-color);
-    outline: none;
-}
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-sm);
-}
-
-.primary-btn, .secondary-btn {
-    padding: 10px var(--spacing-md);
-    border: none;
-    border-radius: 8px; /* Slightly smaller radius for buttons */
-    cursor: pointer;
-    font-size: 1rem;
     font-weight: 600;
-    transition: background-color 0.2s, opacity 0.2s;
 }
 
+/* --- Modal Styles --- */
+.modal-content {
+    border-top-left-radius: 20px; 
+    border-top-right-radius: 20px;
+    padding: var(--spacing-lg);
+}
 .primary-btn {
     background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-}
-.secondary-btn {
-    background-color: var(--tg-theme-bg-color);
-    color: var(--tg-theme-text-color);
-    border: 1px solid var(--tg-theme-hint-color);
-}
-
-/* Music Modal Specific */
-.music-option-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-lg);
-}
-.music-option {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding: var(--spacing-md);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    background-color: var(--tg-theme-bg-color);
-    color: var(--tg-theme-text-color);
-    text-align: left;
-    transition: background-color 0.2s, box-shadow 0.2s;
-}
-.music-option:active {
-    background-color: var(--tg-theme-secondary-bg-color);
-}
-
-/* --- Custom Toast Notification --- */
-.custom-toast {
-    position: fixed;
-    bottom: 80px; 
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.85); /* Slightly darker for better contrast */
-    color: white;
-    padding: 10px 20px;
-    border-radius: 25px; 
-    text-align: center;
-    font-size: 0.9rem;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
-    z-index: 100;
-}
-.custom-toast.show {
-    opacity: 1;
-    visibility: visible;
-}
-.initial-loading-text {
-    text-align: center; 
-    color: var(--tg-theme-hint-color); 
-    padding: var(--spacing-lg);
     }
-    
