@@ -1,17 +1,17 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zebec Zaro TMA</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- Note: style.css is required for aesthetics but assumed to be present -->
+    <link rel="stylesheet" href="style.css"> 
     <!-- Font Awesome 6 for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script> 
     
-    <!-- CRITICAL INLINE CSS FOR LOADING SCREEN AND SCREEN SWITCHING FIX -->
+    <!-- CRITICAL INLINE CSS for screen switching and base layout -->
     <style>
         /* Base Styles for Mobile/TMA compatibility */
         body {
@@ -27,45 +27,6 @@
             -webkit-user-select: none;
             user-select: none;
         }
-
-        /* --- LOADING OVERLAY FIX --- */
-        #loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--tg-theme-bg-color, #ffffff);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999; /* မျက်နှာပြင်ပေါ်မှာ အမြဲရှိနေစေဖို့ */
-            opacity: 1;
-            transition: opacity 0.3s ease-in-out;
-        }
-        #loading-overlay.active {
-            display: flex;
-            pointer-events: auto; /* ဖန်သားပြင်ကို ထိန်းချုပ်ထားရန် */
-        }
-        #loading-overlay:not(.active) {
-            pointer-events: none; /* အောက်က content ကို နှိပ်လို့ရအောင် */
-        }
-        
-        .spinner {
-            border: 4px solid var(--tg-theme-button-color, #007aff);
-            border-top: 4px solid transparent;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* --- END LOADING OVERLAY FIX --- */
 
         .app-container {
             flex-grow: 1;
@@ -90,7 +51,7 @@
             display: block;
         }
 
-        /* Basic Nav Styling (Assumed from style.css but needed for visibility) */
+        /* Basic Nav Styling (Ensuring navigation appears correctly) */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -108,11 +69,7 @@
 </head>
 <body>
 
-    <!-- 0. Loading Overlay (အက်ပ်စတင်ချိန်တွင် ပြသမည်) -->
-    <div id="loading-overlay" class="active">
-        <div class="spinner"></div>
-        <p>Loading Zebec Zaro...</p>
-    </div>
+    <!-- 0. Loading Overlay REMOVED as requested. App contents load immediately. -->
 
     <div class="app-container">
         <!-- Main Content Area: Scrollable area -->
@@ -122,10 +79,9 @@
             <div id="home-screen" class="screen active">
                 <header class="main-header">
                     <div class="header-content">
-                        <!-- နာမည်ကို Zebec Zaro သို့ ပြောင်းလဲခြင်း -->
                         <h2>Zebec Zaro Feed</h2> 
                         <div class="header-icons">
-                            <!-- Admin Only Post Button -->
+                            <!-- Admin Only Post Button (Hidden by default, shown by JS if admin) -->
                             <i class="fas fa-plus post-add-btn" id="post-add-button" style="display: none;"></i> 
                             
                             <!-- Music Button -->
@@ -141,13 +97,10 @@
 
                 <div class="social-feed-section">
                     
-                    <div id="admin-message" class="admin-message" style="display: none;">
-                        <i class="fas fa-info-circle"></i> 
-                        <span>Only the Admin can post announcements.</span>
-                    </div>
+                    <!-- Admin Message REMOVED. Non-admins should not know about the posting feature. -->
 
                     <div id="posts-container" class="posts-container">
-                        <!-- Posts will be injected here -->
+                        <!-- Posts will be injected here without Name and Time -->
                     </div>
                 </div>
             </div> 
@@ -275,4 +228,3 @@
 </body>
 </html>
 
-  
