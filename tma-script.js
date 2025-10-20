@@ -6,13 +6,11 @@ const ADMIN_CHAT_ID = 1924452453;
 // --- LOCAL STORAGE KEYS ---
 const POSTS_STORAGE_KEY = 'tma_community_posts_v4'; 
 const LIKES_STORAGE_KEY = 'tma_user_likes_v4'; 
-const CUSTOM_MUSIC_KEY = 'tma_custom_music_url_v4'; // Temporary music key
+const TEMP_MUSIC_KEY = 'tma_temp_music_url_v4'; // Temporary music key
 
 // --- Global Variables ---
 // Default Music URL ကို hardcode လုပ်ထားခြင်း
 const INITIAL_DEFAULT_URL = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3'; 
-// လက်ရှိဖွင့်နေတဲ့ Music URL (Local Storage ကနေ ယူ၊ မရှိရင် Initial Value)
-let currentMusicUrl = localStorage.getItem(CUSTOM_MUSIC_KEY) || INITIAL_DEFAULT_URL; 
 
 let audioPlayer;
 let musicStatusSpan;
@@ -30,6 +28,9 @@ let tg = null;
 //          HELPER FUNCTIONS
 // ===========================================
 
+/**
+ * Chat ID ပေါ်မူတည်၍ ရောင်စုံဖန်တီးပေးခြင်း (Profile Avatar အတွက်)
+ */
 function stringToColor(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -58,21 +59,31 @@ function showToast(message) {
 }
 
 /**
- * Chat ID Copy Function: Single-Tap Copy
+ * Chat ID Copy Function: One-Tap Copy
  */
 function copyChatId(chatId) {
     const tempInput = document.createElement('textarea');
-    // Chat ID ကိုပဲ ကူးရန်
     tempInput.value = chatId.toString();
     document.body.appendChild(tempInput);
     tempInput.select();
     
     try {
-        const successful = document.execCommand('copy');
-        if (successful) {
-            showToast('Chat ID ကူးယူပြီးပါပြီ။');
+        // Use modern clipboard API if available, fallback to execCommand
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(chatId.toString()).then(() => {
+                showToast('Chat ID ကူးယူပြီးပါပြီ။');
+            }).catch(() => {
+                // Fallback attempt
+                if (document.execCommand('copy')) {
+                    showToast('Chat ID ကူးယူပြီးပါပြီ။ (Legacy Copy)');
+                } else {
+                    showToast('ကူးယူမရပါ၊ စာသားကို ကိုယ်တိုင်ရွေးချယ်ကူးယူပေးပါ။');
+                }
+            });
+        } else if (document.execCommand('copy')) {
+             showToast('Chat ID ကူးယူပြီးပါပြီ။');
         } else {
-            showToast('ကူးယူမရပါ၊ စာသားကို ကိုယ်တိုင်ရွေးချယ်ကူးယူပေးပါ။');
+             showToast('ကူးယူမရပါ၊ စာသားကို ကိုယ်တိုင်ရွေးချယ်ကူးယူပေးပါ။');
         }
     } catch (err) {
         showToast('ကူးယူမရပါ၊ စာသားကို ကိုယ်တိုင်ရွေးချယ်ကူးယူပေးပါ။');
@@ -81,20 +92,32 @@ function copyChatId(chatId) {
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC
+//          DATA STORAGE HANDLERS (with error handling)
 // ===========================================
+
+function getPosts() {
+    try {
+        const posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
+        return Array.isArray(posts) ? posts : []; // Ensure it returns an array
+    } catch (e) {
+        console.error("Error loading posts:", e);
+        return [];
+    }
+}
 
 function savePosts(posts) {
     try {
         localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts));
     } catch (e) {
         console.error("Error saving posts:", e);
+        showToast("Error saving data. Storage full?");
     }
 }
 
 function getLikes() {
     try {
-        return JSON.parse(localStorage.getItem(LIKES_STORAGE_KEY) || '{}');
+        const likes = JSON.parse(localStorage.getItem(LIKES_STORAGE_KEY) || '{}');
+        return typeof likes === 'object' && likes !== null ? likes : {}; // Ensure it returns an object
     } catch (e) {
         console.error("Error loading likes:", e);
         return {};
@@ -106,30 +129,39 @@ function saveLikes(likes) {
         localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(likes));
     } catch (e) {
         console.error("Error saving likes:", e);
+        showToast("Error saving likes. Storage full?");
     }
 }
+
+// ===========================================
+//          POSTS & LIKES LOGIC
+// ===========================================
 
 function createPostElement(post, currentUserId) {
     const likes = getLikes();
     const userIdStr = currentUserId.toString(); 
-    const isLiked = likes[post.id] && likes[post.id].map(String).includes(userIdStr);
+    // likes[postId] is an array of user IDs who liked it
+    const postLikesArray = likes[post.id] ? likes[post.id].map(String) : [];
+    const isLiked = postLikesArray.includes(userIdStr);
     const isAdmin = (currentUserId === ADMIN_CHAT_ID);
+    
     const postElement = document.createElement('div');
     postElement.className = 'post-card';
     postElement.setAttribute('data-post-id', post.id);
+
+    // Update the displayed like count based on the array length (most accurate)
+    const displayLikesCount = postLikesArray.length; 
 
     const deleteButton = isAdmin 
         ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
 
     postElement.innerHTML = `
-        <div class="post-header">
-        </div>
         <p class="post-content">${post.content}</p>
         <div class="post-actions">
             <button class="like-btn ${isLiked ? 'liked' : ''}" data-post-id="${post.id}">
                 <i class="fas fa-heart"></i> 
-                Like (${post.likesCount || 0})
+                Like (${displayLikesCount})
             </button>
             ${deleteButton}
         </div>
@@ -139,48 +171,44 @@ function createPostElement(post, currentUserId) {
 
 function loadPosts(userId) {
     currentUserId = userId; 
-    try {
-        let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
-        const container = document.getElementById('posts-container');
-        
-        if (currentPostFilter === 'new-posts') {
-            posts.sort((a, b) => b.timestamp - a.timestamp); 
-            posts = posts.slice(0, NEW_POSTS_LIMIT);
-        } else if (currentPostFilter === 'old-posts') {
-            posts.sort((a, b) => a.timestamp - b.timestamp); 
-        }
-        
-        if (container) {
-            container.innerHTML = ''; 
-            if (posts.length === 0) {
-                 container.innerHTML = '<p style="text-align: center; color: var(--tg-theme-hint-color); padding: 20px;">ဤနေရာတွင် Post မရှိသေးပါ။</p>';
-            } else {
-                posts.forEach(post => {
-                    container.appendChild(createPostElement(post, userId));
-                });
-            }
-        }
-        addPostEventListeners(userId);
-    } catch (e) {
-        console.error("Error loading posts:", e);
-        const container = document.getElementById('posts-container');
-        if (container) {
-             container.innerHTML = '<p style="text-align: center; color: var(--tg-theme-link-color);">Error loading community posts.</p>';
-        }
+    let posts = getPosts();
+    const container = document.getElementById('posts-container');
+    
+    if (!container) return;
+
+    if (currentPostFilter === 'new-posts') {
+        posts.sort((a, b) => b.timestamp - a.timestamp); 
+        posts = posts.slice(0, NEW_POSTS_LIMIT);
+    } else if (currentPostFilter === 'old-posts') {
+        posts.sort((a, b) => a.timestamp - b.timestamp); 
     }
+    
+    container.innerHTML = ''; 
+    if (posts.length === 0) {
+         container.innerHTML = '<p style="text-align: center; color: var(--tg-theme-hint-color); padding: 20px;">ဤနေရာတွင် Post မရှိသေးပါ။</p>';
+    } else {
+        posts.forEach(post => {
+            container.appendChild(createPostElement(post, userId));
+        });
+    }
+    addPostEventListeners(userId);
 }
 
 function performDeletePost(postId, userId) {
-    if (userId !== ADMIN_CHAT_ID) return; 
+    if (userId !== ADMIN_CHAT_ID) {
+        showToast("Admin သာ ဖျက်ခွင့်ရှိပါသည်။");
+        return;
+    }
     
-    let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
+    let posts = getPosts();
     const updatedPosts = posts.filter(p => p.id !== postId);
     savePosts(updatedPosts);
 
     let likes = getLikes();
     delete likes[postId];
     saveLikes(likes);
-
+    
+    showToast(`Post ID ${postId} ကို ဖျက်လိုက်ပါပြီ။`);
     loadPosts(userId); 
 }
 
@@ -193,13 +221,14 @@ function addPostEventListeners(userId) {
         button.onclick = (e) => {
             const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
             
+            // Use TMA confirmation dialog
             if (tg && tg.showConfirm) {
                 tg.showConfirm('ဤ Post ကို ဖျက်ရန် သေချာပါသလား?', (ok) => {
                     if (ok) performDeletePost(postId, userId);
                 });
             } else {
-                console.warn("Using console confirmation fallback.");
-                performDeletePost(postId, userId); 
+                // Fallback for non-TMA environment
+                if (confirm('Delete this post?')) performDeletePost(postId, userId);
             }
         };
     });
@@ -209,26 +238,33 @@ function toggleLike(e, userId) {
     const postId = parseInt(e.currentTarget.getAttribute('data-post-id'));
     const userIdStr = userId.toString();
     
-    let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
+    let posts = getPosts();
     let likes = getLikes();
     const postIndex = posts.findIndex(p => p.id === postId);
 
     if (postIndex === -1) return;
 
+    // likes[postId] is expected to be an array of user IDs (strings)
     likes[postId] = likes[postId] ? likes[postId].map(String) : []; 
     const isLiked = likes[postId].includes(userIdStr);
 
     if (isLiked) {
+        // Unlike
         likes[postId] = likes[postId].filter(id => id !== userIdStr);
-        posts[postIndex].likesCount = (posts[postIndex].likesCount || 1) - 1;
+        showToast("Like ဖျက်လိုက်ပါပြီ။");
     } else {
+        // Like
         likes[postId].push(userIdStr);
-        posts[postIndex].likesCount = (posts[postIndex].likesCount || 0) + 1;
+        showToast("Like ပေးလိုက်ပါပြီ။");
     }
+    
+    // Update the post's likesCount property based on the canonical source (likes object)
+    posts[postIndex].likesCount = likes[postId].length; 
 
     saveLikes(likes);
     savePosts(posts);
     
+    // Refresh the view
     loadPosts(currentUserId); 
 }
 
@@ -258,21 +294,37 @@ function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.style.display = 'flex';
-        modal.classList.add('active'); 
+        // Add a slight delay for better transition visual
+        setTimeout(() => modal.classList.add('active'), 10); 
     }
 }
 
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
-        modal.style.display = 'none';
         modal.classList.remove('active');
+        // Remove display after transition
+        setTimeout(() => modal.style.display = 'none', 300); 
     }
 }
 
 function updateMusicStatus(isPlaying) {
     if (musicStatusSpan) {
-        musicStatusSpan.textContent = isPlaying ? 'Music Playing' : 'Music Paused (Tap to Start)';
+        const url = audioPlayer.src;
+        let statusText;
+        
+        if (isPlaying) {
+            statusText = 'Music Playing';
+        } else {
+            statusText = 'Music Paused (Tap to Start)';
+        }
+        
+        musicStatusSpan.textContent = statusText;
+        
+        if(volumeToggleIcon) {
+            volumeToggleIcon.classList.toggle('fa-volume-up', isPlaying);
+            volumeToggleIcon.classList.toggle('fa-volume-off', !isPlaying);
+        }
     }
 }
 
@@ -283,45 +335,50 @@ function setupMusicPlayer() {
     audioPlayer = document.getElementById('audio-player');
     musicStatusSpan = document.getElementById('current-music-status');
     volumeToggleIcon = document.getElementById('volume-toggle');
+    const musicStatusBar = document.querySelector('.music-status-bar');
 
     if (!audioPlayer) return;
 
-    // Local Storage မှ Temporary URL ကိုယူ၊ မရှိရင် hardcode default ကို ယူ
-    audioPlayer.src = currentMusicUrl;
+    // Get last temporary URL, fallback to default
+    let initialUrl = localStorage.getItem(TEMP_MUSIC_KEY) || INITIAL_DEFAULT_URL;
+    audioPlayer.src = initialUrl;
     audioPlayer.loop = true;
-
-    // Autoplay မလုပ်ပါ၊ User click မှ စမည်။
+    
+    // Play/Pause ကို Status Bar နှင့် Volume Icon နှစ်ခုလုံးက နေ control လုပ်နိုင်သည်
+    if(musicStatusBar) musicStatusBar.onclick = toggleVolume; 
+    if(volumeToggleIcon) volumeToggleIcon.onclick = toggleVolume; 
     
     audioPlayer.onplay = () => {
         updateMusicStatus(true);
-        if(volumeToggleIcon) {
-            volumeToggleIcon.classList.remove('fa-volume-off');
-            volumeToggleIcon.classList.add('fa-volume-up');
-        }
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
     };
     audioPlayer.onpause = () => {
         updateMusicStatus(false);
-        if(volumeToggleIcon) {
-            volumeToggleIcon.classList.remove('fa-volume-up');
-            volumeToggleIcon.classList.add('fa-volume-off');
-        }
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
     };
     audioPlayer.onerror = (e) => {
         console.error("Audio error:", e);
+        audioPlayer.pause();
         updateMusicStatus(false);
-        musicStatusSpan.textContent = 'Error: Failed to load music.';
+        musicStatusSpan.textContent = 'Error: Failed to load music. Check URL.';
+        showToast("Music Load Error. Playing stopped.");
     };
 
-    updateMusicStatus(!audioPlayer.paused); 
+    // Initial state setup
+    updateMusicStatus(false); 
 }
 
 function toggleVolume() {
     if (!audioPlayer) return;
 
     if (audioPlayer.paused) {
-        audioPlayer.play().catch(e => {
+        // Play() returns a Promise which might reject if user interaction is missing.
+        audioPlayer.play().then(() => {
+            // Success: updateMusicStatus is handled by onplay event
+        }).catch(e => {
             console.error("Failed to play on user click:", e);
-            musicStatusSpan.textContent = 'Failed to Play! Check track.';
+            musicStatusSpan.textContent = 'Error: Cannot play without direct user interaction.';
+            showToast('Media Playback Error: Please tap the screen first to allow playback.');
         });
     } else {
         audioPlayer.pause();
@@ -329,23 +386,23 @@ function toggleVolume() {
 }
 
 /**
- * Music URL သတ်မှတ်ခြင်း (Temporary Only)
+ * Music URL သတ်မှတ်ခြင်း (Temporary Only, Autoplay No)
  */
-function setMusicUrl(url) {
+function setMusicUrl(url, sourceName) {
     if (!url || !audioPlayer) return;
     
-    currentMusicUrl = url;
-    localStorage.setItem(CUSTOM_MUSIC_KEY, url); // Temporary URL ကို သိမ်းထား
+    // Temporary URL ကို သိမ်းထား (Next session အတွက် default အနေနဲ့ မှတ်ထားဖို့)
+    localStorage.setItem(TEMP_MUSIC_KEY, url); 
     
     audioPlayer.src = url;
     audioPlayer.load();
 
-    // URL အသစ်ပြောင်းရင် ဖွင့်မထားရ၊ Pause ပေးထားရမည်။
+    // URL အသစ်ပြောင်းရင် ဖွင့်မထားရ၊ Pause ပေးထားရမည်။
     audioPlayer.pause(); 
     
     closeModal('music-modal');
     closeModal('url-input-modal');
-    showToast("Music source updated. Tap play icon to start.");
+    showToast(`${sourceName} အသစ် သတ်မှတ်ပြီးပါပြီ။ Play Icon ကို နှိပ်ပြီး ဖွင့်ပါ။`);
 }
 
 
@@ -355,8 +412,6 @@ function addMusicEventListeners() {
          openModal('music-modal');
     }
     
-    // Volume Icon: Toggle Play/Pause
-    if(volumeToggleIcon) volumeToggleIcon.onclick = toggleVolume; 
     document.getElementById('cancel-music-modal-btn').onclick = () => closeModal('music-modal');
     
     // Music Option Clicks (Default & URL)
@@ -365,12 +420,14 @@ function addMusicEventListeners() {
             const type = e.currentTarget.getAttribute('data-music-type');
             
             if (type === 'default') {
-                // Default ကို ဖွင့်လျှင် Temporary URL ကို ဖျက်
-                localStorage.removeItem(CUSTOM_MUSIC_KEY); 
-                setMusicUrl(INITIAL_DEFAULT_URL); // Hardcoded default URL ကို သုံး
+                // Default ကို ဖွင့်လျှင် Temporary URL ကိုလည်း default URL အဖြစ် ပြောင်းလဲသတ်မှတ်
+                setMusicUrl(INITIAL_DEFAULT_URL, "Default Track"); 
             } else if (type === 'url') {
                 closeModal('music-modal'); 
                 openModal('url-input-modal'); 
+                // Input ကို ရှင်းပေး
+                const urlInput = document.getElementById('music-url-input');
+                if (urlInput) urlInput.value = ''; 
             }
         };
     });
@@ -383,11 +440,10 @@ function addMusicEventListeners() {
     document.getElementById('play-url-btn').onclick = () => {
         const urlInput = document.getElementById('music-url-input');
         const url = urlInput ? urlInput.value.trim() : '';
-        if (url) {
-            setMusicUrl(url); 
-            urlInput.value = ''; 
+        if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+            setMusicUrl(url, "Custom URL"); 
         } else {
-            showToast("URL မထည့်ရသေးပါ!");
+            showToast("မှန်ကန်သော URL လင့်ခ် ထည့်ပါ။");
         }
     };
     
@@ -397,8 +453,10 @@ function addMusicEventListeners() {
         const file = e.target.files[0];
         if (file) {
             const url = URL.createObjectURL(file);
-            setMusicUrl(url); 
+            setMusicUrl(url, file.name); 
         }
+        // Input ကို ရှင်းပေးခြင်းဖြင့် တူညီသောဖိုင်ကို ထပ်ရွေးနိုင်မည်
+        e.target.value = null; 
     };
 }
 
@@ -413,7 +471,7 @@ function setupAdminPostLogic(isAdmin) {
     const postInput = document.getElementById('post-input');
 
     if (isAdmin) {
-        if (postAddButton) postAddButton.style.display = 'block';
+        if (postAddButton) postAddButton.style.display = 'inline-block';
 
         if (postAddButton) postAddButton.onclick = () => openModal('post-modal');
         if (cancelPostBtn) cancelPostBtn.onclick = () => closeModal('post-modal');
@@ -421,10 +479,10 @@ function setupAdminPostLogic(isAdmin) {
         if (submitPostBtn && postInput) {
             submitPostBtn.onclick = () => {
                 const content = postInput.value.trim();
-                if (content) {
-                    let posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
+                if (content.length > 5) { // Minimum post length
+                    let posts = getPosts();
                     const newPost = {
-                        id: Date.now(),
+                        id: Date.now(), // Use timestamp as unique ID
                         authorId: currentUserId,
                         authorName: currentUserName, 
                         isAdmin: true,
@@ -435,6 +493,7 @@ function setupAdminPostLogic(isAdmin) {
                     posts.push(newPost);
                     savePosts(posts);
                     postInput.value = ''; 
+                    
                     // Post အသစ်တင်ရင် New Posts tab ကို ပြန်ပြမည်
                     if (currentPostFilter !== 'new-posts') {
                         document.getElementById('new-posts-tab').click(); 
@@ -442,8 +501,9 @@ function setupAdminPostLogic(isAdmin) {
                         loadPosts(currentUserId);
                     }
                     closeModal('post-modal'); 
+                    showToast("Post တင်ပြီးပါပြီ။");
                 } else {
-                    showToast("Post content cannot be empty.");
+                    showToast("Post content သည် အနည်းဆုံး စာလုံး ၅ လုံး ရှိရပါမည်။");
                 }
             };
         }
@@ -468,16 +528,19 @@ function updateProfileDisplay(userId, fullName, is_admin) {
     
     const adminStatusEl = document.getElementById('admin-status');
     if (adminStatusEl) adminStatusEl.textContent = is_admin ? 'Administrator' : 'Regular User';
-
+    if (adminStatusEl) adminStatusEl.style.backgroundColor = is_admin ? '#ff8a00' : 'var(--tg-theme-link-color)'; // Admin Color: Orange
+    
     const tgPhotoUrl = tgUser ? tgUser.photo_url : null;
     const profileAvatarPlaceholder = document.getElementById('profile-avatar-placeholder');
 
     if (profileAvatarPlaceholder) {
         if (tgPhotoUrl) {
+            // Image found, load it
             profileAvatarPlaceholder.innerHTML = `<img src="${tgPhotoUrl}" alt="${fullName || 'Profile Photo'}" onerror="this.onerror=null; this.src='https://placehold.co/80x80/333/fff?text=${(fullName.charAt(0) || 'U').toUpperCase()}'">`;
             profileAvatarPlaceholder.style.backgroundColor = 'transparent';
             profileAvatarPlaceholder.textContent = '';
         } else {
+            // No image, use color/initials fallback
             const userIdStr = userId.toString();
             const userColor = stringToColor(userIdStr);
             const initial = (fullName.charAt(0) || 'U').toUpperCase();
@@ -506,77 +569,4 @@ function setupNavigation() {
     const navItems = document.querySelectorAll('.bottom-nav .nav-item');
 
     navItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault(); 
-            const targetScreenId = item.getAttribute('data-screen');
-            navItems.forEach(nav => nav.classList.remove('active'));
-            item.classList.add('active');
-            switchScreen(targetScreenId);
-        });
-    });
-}
-
-
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // ---------------------------------------------
-    // 1. TMA Integration & Profile Data Initialization
-    // ---------------------------------------------
-    
-    if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
-        tg = window.Telegram.WebApp; 
-        
-        try {
-            tg.ready();
-            tg.expand(); 
-            
-            const user = tg.initDataUnsafe.user;
-            
-            if (user) {
-                currentUserId = user.id || 0;
-                const firstName = user.first_name || '';
-                const lastName = user.last_name || '';
-                const fullName = `${firstName} ${lastName}`.trim();
-                
-                currentUserName = fullName || 'User'; 
-                is_admin = (currentUserId === ADMIN_CHAT_ID);
-
-                const closeBtn = document.getElementById('tma-close-btn');
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', () => tg.close());
-                }
-            } 
-        } catch (e) {
-             console.error("TMA Initialization Error:", e);
-        }
-    } else {
-        console.warn("Mini App launched outside Telegram. Using default user ID 0.");
-        is_admin = (currentUserId === ADMIN_CHAT_ID); 
-    }
-
-    // ---------------------------------------------
-    // 2. Setup All Features
-    // ---------------------------------------------
-    
-    updateProfileDisplay(currentUserId, currentUserName, is_admin); 
-    
-    // Chat ID Copy Event Listener (Fixed)
-    const chatIdCopyBtn = document.getElementById('chat-id-copy-btn');
-    if (chatIdCopyBtn) {
-        chatIdCopyBtn.addEventListener('click', () => {
-            copyChatId(currentUserId);
-        });
-    }
-
-    setupPostFilters(); 
-    loadPosts(currentUserId); 
-    setupNavigation();
-    
-    // Music Player Setup: No Autoplay
-    setupMusicPlayer(); 
-    addMusicEventListeners();
-
-    setupAdminPostLogic(is_admin);
-
-    console.log("App loaded. Chat ID copy feature enabled.");
-});
+        item.addE
