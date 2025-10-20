@@ -269,6 +269,7 @@ h3 {
     padding: 15px;
     border-radius: var(--border-radius);
     margin-bottom: 5px;
+    cursor: pointer; /* Ensure clickability for custom photo upload */
 }
 
 .info-item i {
