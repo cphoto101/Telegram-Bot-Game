@@ -8,7 +8,8 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script> 
     
     <link rel="stylesheet" href="style.css"> 
-</head>
+    
+    </head>
 <body>
 
     <div class="app-container">
@@ -102,20 +103,23 @@
         </div> 
         
         <button class="fab" id="post-add-button" title="New Admin Post" style="display: none;">
-            <i class="fas fa-bullhorn"></i> </button>
+            <i class="fas fa-bullhorn"></i> 
+        </button>
 
         <nav class="bottom-nav" role="navigation">
             <button class="nav-item active" data-screen="home-screen" aria-label="Home">
-                <i class="fas fa-house-chimney"></i> <span>Home</span>
+                <i class="fas fa-house-chimney"></i> 
+                <span>Home</span>
             </button>
             <button class="nav-item" data-screen="profile-screen" aria-label="Profile">
-                <i class="fas fa-user-gear"></i> <span>Profile</span>
+                <i class="fas fa-user-gear"></i> 
+                <span>Profile</span>
             </button>
         </nav>
 
         <audio id="audio-player" controls style="display: none;"></audio>
 
-        <div id="post-modal" class="modal" role="dialog" aria-modal="true">
+        <div id="post-modal" class="modal" role="dialog" aria-modal="true" style="display: none;">
             <div class="modal-content post-modal-content">
                 <h3>New Admin Announcement</h3>
                 <textarea id="post-input" placeholder="Enter your announcement here (max 500 chars)..."></textarea>
@@ -126,7 +130,7 @@
             </div>
         </div>
 
-        <div id="music-modal" class="modal" role="dialog" aria-modal="true">
+        <div id="music-modal" class="modal" role="dialog" aria-modal="true" style="display: none;">
             <div class="modal-content">
                 <h3>Select Background Music Source</h3>
                 <div class="music-option-list">
@@ -161,7 +165,7 @@
             </div>
         </div>
 
-        <div id="url-input-modal" class="modal nested-modal" role="dialog" aria-modal="true">
+        <div id="url-input-modal" class="modal nested-modal" role="dialog" aria-modal="true" style="display: none;">
             <div class="modal-content">
                 <h3>Enter Music URL</h3>
                 <input type="url" id="music-url-input" placeholder="e.g.: https://example.com/song.mp3">
@@ -178,5 +182,4 @@
 
     <script src="tma-script.js"></script>
 </body>
-    </html>
-    
+</html>
