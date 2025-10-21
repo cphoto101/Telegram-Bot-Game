@@ -116,7 +116,7 @@ function saveLikes(likes) {
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC (MODIFIED)
+//          POSTS & LIKES LOGIC (MODIFIED: Admin Tag Removed)
 // ===========================================
 
 /** Creates the HTML element for a single post. 
@@ -125,7 +125,7 @@ function saveLikes(likes) {
 function createPostElement(post, userId) {
     const likes = getLikes();
     const userIdStr = userId.toString(); 
-    const postIdStr = post.id.toString(); // Use string key for consistency
+    const postIdStr = post.id.toString(); 
     const postLikesArray = Array.isArray(likes[postIdStr]) ? likes[postIdStr].map(String) : []; 
     const isLiked = postLikesArray.includes(userIdStr);
     const isAdmin = (userId === ADMIN_CHAT_ID); 
@@ -140,8 +140,7 @@ function createPostElement(post, userId) {
         ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
 
-    // NOTE: post-header is kept for layout consistency but is empty of text.
-    // The content is now directly under post-header.
+    // NOTE: post-header is kept but kept empty to avoid any name/time/admin display.
     postElement.innerHTML = `
         <div class="post-header">
             </div>
@@ -206,7 +205,6 @@ function performDeletePost(postId, userId) {
 
 /** Toggles a like on a post. (FIXED LOGIC) */
 function toggleLike(e, userId) {
-    // Ensure post ID is handled consistently as a number then converted to string key
     const postIdAttr = e.currentTarget.getAttribute('data-post-id');
     const postId = parseInt(postIdAttr); 
     if (isNaN(postId)) {
@@ -219,7 +217,6 @@ function toggleLike(e, userId) {
     
     let likes = getLikes();
     
-    // Ensure the array exists and contains strings for this postId
     likes[postIdStr] = Array.isArray(likes[postIdStr]) ? likes[postIdStr].map(String) : []; 
     
     const isLiked = likes[postIdStr].includes(userIdStr);
@@ -531,8 +528,6 @@ function setupProfileListeners() {
     
     const closeBtn = document.getElementById('tma-close-btn');
     if (closeBtn) closeBtn.onclick = () => tg && tg.close ? tg.close() : showToast("Mini App Close API Not Available.");
-    
-    // NOTE: Invite Friends logic was removed in the previous step and is verified absent here.
 }
 
 
@@ -549,7 +544,6 @@ function switchScreen(targetScreenId) {
     document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
         item.classList.toggle('active', item.getAttribute('data-screen') === targetScreenId);
     });
-
     const fixedHeaderArea = document.querySelector('.fixed-header-area');
     const fab = document.getElementById('post-add-button');
     const contentArea = document.querySelector('.content');
@@ -651,3 +645,4 @@ function setupTMA() {
 
 // Start the entire application logic after DOM is fully loaded
 document.addEventListener('DOMContentLoaded', setupTMA); 
+    
