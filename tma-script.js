@@ -1,5 +1,6 @@
 // ********** SET YOUR ADMIN CHAT ID HERE **********
 const ADMIN_CHAT_ID = 1924452453; 
+const ADMIN_CHAT_ID = 6513916873; ; 
 // *************************************************
 
 // --- LOCAL STORAGE KEYS ---
