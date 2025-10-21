@@ -2,9 +2,7 @@
 // IMPORTANT: Use an array for multiple admins. Add your Admin ID(s) inside the square brackets.
 // Get the ID from any user and add it here.
 const ADMIN_CHAT_IDS = [
-    1924452453, // Admin 1: (Your current ID)
-    6513916873,
-    0,
+    1924452453, // Admin 1: (Your current ID) - Please REPLACE this with your actual ID
     // Add additional Admin IDs here:
     // 123456789, // Admin 2 ID example
     // 987654321  // Admin 3 ID example
@@ -17,6 +15,7 @@ const LIKES_STORAGE_KEY = 'tma_user_likes_v5';
 const TEMP_MUSIC_KEY = 'tma_temp_music_url_v5'; 
 
 // --- Global Variables ---
+// Initial default music URL (can be changed)
 const INITIAL_DEFAULT_URL = 'https://archive.org/download/lofi-chill-1-20/lofi_chill_03_-_sleepwalker.mp3'; 
 let audioPlayer;
 let musicStatusSpan;
@@ -24,7 +23,7 @@ let volumeToggleIcon;
 let currentUserId = 0; 
 let currentUserName = 'Guest';
 let currentUserUsername = 'anonymous'; 
-let is_admin = false; 
+let is_admin = false; // Set dynamically based on currentUserId's presence in ADMIN_CHAT_IDS
 let currentPostFilter = 'new-posts'; 
 let isMusicMuted = false; 
 let tg = null;
@@ -33,6 +32,7 @@ let tg = null;
 //          HELPER FUNCTIONS
 // ===========================================
 
+/** Generates a consistent, bright color for user initials. */
 function stringToColor(str) {
     let hash = 0; for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
     let color = '#';
@@ -44,6 +44,7 @@ function stringToColor(str) {
     return color;
 }
 
+/** Displays a temporary notification message at the bottom. */
 function showToast(message) {
     const toast = document.getElementById('custom-toast');
     if (!toast) return;
@@ -56,6 +57,7 @@ function showToast(message) {
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 }
 
+/** Copies text to the clipboard using modern or legacy methods. */
 function copyToClipboard(text, successMsg = 'Copied successfully.') {
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => showToast(successMsg)).catch(() => performLegacyCopy(text));
@@ -85,6 +87,7 @@ function performLegacyCopy(text) {
 //          DATA STORAGE HANDLERS
 // ===========================================
 
+/** Retrieves all posts from local storage. */
 function getPosts() {
     try {
         const posts = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY) || '[]');
@@ -96,6 +99,7 @@ function getPosts() {
     }
 }
 
+/** Saves the current post list to local storage. */
 function savePosts(posts) {
     try {
         localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts));
@@ -105,6 +109,7 @@ function savePosts(posts) {
     }
 }
 
+/** Retrieves user like data (postId: [userIds]) from local storage. */
 function getLikes() {
     try {
         const likes = JSON.parse(localStorage.getItem(LIKES_STORAGE_KEY) || '{}');
@@ -115,6 +120,7 @@ function getLikes() {
     }
 }
 
+/** Saves the current like data to local storage. */
 function saveLikes(likes) {
     try {
         localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(likes));
@@ -127,13 +133,12 @@ function saveLikes(likes) {
 //          POSTS & LIKES LOGIC (V4.2 FIX: Multi-Admin Check)
 // ===========================================
 
-/** Checks if the given userId is one of the admins. */
+/** Checks if the given userId is one of the admins (using the global ADMIN_CHAT_IDS array). */
 function isAdminUser(userId) {
-    // Convert userId to number (just in case) and check inclusion in the global ADMIN_CHAT_IDS array
     return ADMIN_CHAT_IDS.includes(parseInt(userId));
 }
 
-/** Creates the HTML element for a single post. Admin Tag is removed via CSS/HTML. */
+/** Creates the HTML element for a single post. */
 function createPostElement(post, userId) {
     const likes = getLikes();
     const userIdStr = userId.toString(); 
@@ -141,7 +146,7 @@ function createPostElement(post, userId) {
     const postLikesArray = Array.isArray(likes[postIdStr]) ? likes[postIdStr].map(String) : []; 
     const isLiked = postLikesArray.includes(userIdStr);
     
-    // V4.2 FIX: Use the new check function
+    // Check if the current app user is an Admin
     const isAdmin = isAdminUser(userId); 
     
     const postElement = document.createElement('div');
@@ -155,7 +160,7 @@ function createPostElement(post, userId) {
         ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
 
-    // post-header is hidden via CSS to remove Admin/Time display
+    // post-header is hidden via CSS to remove Admin/Time display, ensuring a clean feed for all
     postElement.innerHTML = `
         <div class="post-header">
             </div>
@@ -171,7 +176,7 @@ function createPostElement(post, userId) {
     return postElement;
 }
 
-/** Loads and renders posts based on the current filter. (V4.1 Fix included) */
+/** Loads and renders all posts (V4.1 Fix: Post Limit Removed). */
 function loadPosts(userId) {
     currentUserId = userId; 
     let posts = getPosts();
@@ -193,6 +198,7 @@ function loadPosts(userId) {
     if (posts.length === 0) {
          container.innerHTML = '<p class="initial-loading-text">No posts found yet. Be the first to post!</p>';
     } else {
+        // Renders ALL posts, ensuring Admin posts are visible to all users
         posts.forEach(post => container.appendChild(createPostElement(post, userId)));
     }
     addPostEventListeners(userId);
@@ -200,7 +206,6 @@ function loadPosts(userId) {
 
 /** Permanently deletes a post and its associated likes. */
 function performDeletePost(postId, userId) {
-    // V4.2 FIX: Use the new check function
     if (!isAdminUser(userId)) { 
         showToast("Only Admins can delete posts.");
         return;
@@ -295,32 +300,32 @@ function setupPostFilters() {
 }
 
 // ===========================================
-//          MODAL & MUSIC LOGIC (FIXED)
+//          MODAL & MUSIC LOGIC 
 // ===========================================
 
-/** FIX: Use style.display and classList for clean transition and hiding */
+/** Opens a modal with CSS transition. */
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     
-    modal.style.display = 'flex'; // Show the modal container
+    modal.style.display = 'flex'; 
     document.body.style.overflow = 'hidden'; 
 
-    requestAnimationFrame(() => modal.classList.add('active')); // Start animation
+    requestAnimationFrame(() => modal.classList.add('active')); 
     
     const fab = document.getElementById('post-add-button');
     if (fab) fab.style.display = 'none'; 
 }
 
-/** FIX: Wait for transition to complete before setting display to none */
+/** Closes a modal with CSS transition. */
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     
-    modal.classList.remove('active'); // Start animation out
+    modal.classList.remove('active'); 
     
     setTimeout(() => {
-        modal.style.display = 'none'; // Hide the modal container after animation
+        modal.style.display = 'none'; 
         document.body.style.overflow = ''; 
 
         const homeScreen = document.getElementById('home-screen');
@@ -328,7 +333,7 @@ function closeModal(modalId) {
             const fab = document.getElementById('post-add-button');
             if (fab) fab.style.display = 'flex'; 
         }
-    }, 400); // Duration matches CSS transition
+    }, 400); 
 }
 
 function updateMusicStatus(isPlaying) {
@@ -347,7 +352,7 @@ function updateMusicStatus(isPlaying) {
     }
 }
 
-/** FIX: Added robust error handling for play attempts */
+/** Toggles volume or attempts to play music. */
 function toggleVolume() {
     if (!audioPlayer) return;
 
@@ -357,7 +362,6 @@ function toggleVolume() {
              showToast(isMusicMuted ? "Music started (Muted)." : "Music started playing.");
         }).catch(e => {
             console.error("Failed to play on user click:", e);
-            // FIX: Display a clear user message if play fails (e.g., policy or bad link)
             showToast('Playback Failed. Tap screen first, or check music link.');
         });
     } else {
@@ -368,7 +372,7 @@ function toggleVolume() {
     }
 }
 
-/** FIX: Better error handling on audio source change */
+/** Initializes the music player with saved URL or default. */
 function setupMusicPlayer() { 
     audioPlayer = document.getElementById('audio-player');
     musicStatusSpan = document.getElementById('current-music-status');
@@ -386,7 +390,7 @@ function setupMusicPlayer() {
     audioPlayer.onplay = () => updateMusicStatus(true);
     audioPlayer.onpause = () => updateMusicStatus(false);
     
-    // FIX: Comprehensive Error Handler for Music Loading
+    // Comprehensive Error Handler for Music Loading
     audioPlayer.onerror = (e) => {
         console.error("Audio error:", e);
         audioPlayer.pause();
@@ -482,7 +486,7 @@ function setupAdminPostLogic(isAdmin) {
                         id: Date.now(), 
                         authorId: currentUserId,
                         authorName: currentUserName || 'Admin', 
-                        isAdmin: true,
+                        isAdmin: true, // Mark as Admin post for historical reference
                         content: content,
                         timestamp: Date.now(), 
                     };
@@ -553,7 +557,7 @@ function setupProfileListeners() {
 
 
 // ===========================================
-//          NAVIGATION & MAIN ENTRY (V4.2 FIX)
+//          NAVIGATION & MAIN ENTRY
 // ===========================================
 
 function switchScreen(targetScreenId) {
@@ -599,7 +603,7 @@ function main() {
         currentUserName = nameParts.length > 0 ? nameParts.join(' ') : 'Anonymous User';
         currentUserUsername = user.username || null;
         
-        // V4.2 FIX: Set is_admin based on the array check
+        // Determine admin status using the multi-admin array check
         is_admin = isAdminUser(currentUserId); 
     }
     
@@ -653,8 +657,8 @@ function setupTMA() {
         // Fallback for testing outside Telegram (Mock Data)
         console.warn("Telegram WebApp SDK not found. Running in fallback mode.");
         
-        // V4.2 FIX: Ensure mock data reflects multi-admin structure (using an ID that IS one of the admins)
-        const mockAdminId = ADMIN_CHAT_IDS[0] || 123456789; // Use the first ID or a fallback
+        // Use the first ID in the admin array for mock testing if available, otherwise fallback
+        const mockAdminId = ADMIN_CHAT_IDS.length > 0 ? ADMIN_CHAT_IDS[0] : 123456789; 
         
         tg = {
             initDataUnsafe: { user: { id: mockAdminId, first_name: "Local", last_name: "Tester", username: "local_tester", photo_url: null } },
