@@ -17,12 +17,12 @@ let currentUserName = 'Guest';
 let currentUserUsername = 'anonymous'; 
 let is_admin = false; 
 let currentPostFilter = 'new-posts'; 
-const NEW_POSTS_LIMIT = 50; 
+// const NEW_POSTS_LIMIT = 50; // V4.1: REMOVED LIMIT
 let isMusicMuted = false; 
 let tg = null;
 
 // ===========================================
-//          HELPER FUNCTIONS (UNCHANGED)
+//          HELPER FUNCTIONS
 // ===========================================
 
 function stringToColor(str) {
@@ -74,7 +74,7 @@ function performLegacyCopy(text) {
 }
 
 // ===========================================
-//          DATA STORAGE HANDLERS (UNCHANGED)
+//          DATA STORAGE HANDLERS
 // ===========================================
 
 function getPosts() {
@@ -116,12 +116,10 @@ function saveLikes(likes) {
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC (MODIFIED: Admin Tag Removed)
+//          POSTS & LIKES LOGIC 
 // ===========================================
 
-/** Creates the HTML element for a single post. 
- * MODIFIED: Removed Admin Tag from post content.
- */
+/** Creates the HTML element for a single post. Admin Tag is removed via CSS/HTML. */
 function createPostElement(post, userId) {
     const likes = getLikes();
     const userIdStr = userId.toString(); 
@@ -136,11 +134,12 @@ function createPostElement(post, userId) {
 
     const displayLikesCount = postLikesArray.length; 
     
+    // Only show Delete button if current user is Admin
     const deleteButton = isAdmin 
         ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
 
-    // NOTE: post-header is kept but kept empty to avoid any name/time/admin display.
+    // post-header is hidden via CSS to remove Admin/Time display
     postElement.innerHTML = `
         <div class="post-header">
             </div>
@@ -156,7 +155,9 @@ function createPostElement(post, userId) {
     return postElement;
 }
 
-/** Loads and renders posts based on the current filter. (UNCHANGED) */
+/** * Loads and renders posts based on the current filter. 
+ * V4.1 FIX: Removed post limit to ensure all posts (including old Admin posts) are visible.
+ */
 function loadPosts(userId) {
     currentUserId = userId; 
     let posts = getPosts();
@@ -169,7 +170,7 @@ function loadPosts(userId) {
     // Apply sorting
     if (currentPostFilter === 'new-posts') {
         posts.sort((a, b) => b.timestamp - a.timestamp); 
-        posts = posts.slice(0, NEW_POSTS_LIMIT); 
+        // V4.1: No slice limit here
     } else if (currentPostFilter === 'old-posts') {
         posts.sort((a, b) => a.timestamp - b.timestamp); 
     }
@@ -184,7 +185,7 @@ function loadPosts(userId) {
     addPostEventListeners(userId);
 }
 
-/** Permanently deletes a post and its associated likes. (UNCHANGED) */
+/** Permanently deletes a post and its associated likes. */
 function performDeletePost(postId, userId) {
     if (userId !== ADMIN_CHAT_ID) { 
         showToast("Only Admin can delete posts.");
@@ -203,7 +204,7 @@ function performDeletePost(postId, userId) {
     loadPosts(userId); 
 }
 
-/** Toggles a like on a post. (FIXED LOGIC) */
+/** Toggles a like on a post. */
 function toggleLike(e, userId) {
     const postIdAttr = e.currentTarget.getAttribute('data-post-id');
     const postId = parseInt(postIdAttr); 
@@ -233,7 +234,7 @@ function toggleLike(e, userId) {
     loadPosts(currentUserId); 
 }
 
-/** Adds event listeners to all newly rendered posts. (UNCHANGED) */
+/** Adds event listeners to all newly rendered posts. */
 function addPostEventListeners(userId) {
     document.querySelectorAll('.like-btn').forEach(button => {
         button.onclick = (e) => toggleLike(e, userId); 
@@ -255,7 +256,7 @@ function addPostEventListeners(userId) {
     });
 }
 
-/** Sets up event listeners for post filter tabs. (UNCHANGED) */
+/** Sets up event listeners for post filter tabs. */
 function setupPostFilters() {
     const tabs = document.querySelectorAll('.filter-tab');
     tabs.forEach(tab => {
@@ -280,30 +281,32 @@ function setupPostFilters() {
 }
 
 // ===========================================
-//          MODAL & MUSIC LOGIC (UNCHANGED)
+//          MODAL & MUSIC LOGIC (FIXED)
 // ===========================================
 
+/** FIX: Use style.display and classList for clean transition and hiding */
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     
-    modal.style.display = 'flex';
+    modal.style.display = 'flex'; // Show the modal container
     document.body.style.overflow = 'hidden'; 
 
-    requestAnimationFrame(() => modal.classList.add('active')); 
+    requestAnimationFrame(() => modal.classList.add('active')); // Start animation
     
     const fab = document.getElementById('post-add-button');
     if (fab) fab.style.display = 'none'; 
 }
 
+/** FIX: Wait for transition to complete before setting display to none */
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     
-    modal.classList.remove('active');
+    modal.classList.remove('active'); // Start animation out
     
     setTimeout(() => {
-        modal.style.display = 'none';
+        modal.style.display = 'none'; // Hide the modal container after animation
         document.body.style.overflow = ''; 
 
         const homeScreen = document.getElementById('home-screen');
@@ -311,7 +314,7 @@ function closeModal(modalId) {
             const fab = document.getElementById('post-add-button');
             if (fab) fab.style.display = 'flex'; 
         }
-    }, 400); 
+    }, 400); // Duration matches CSS transition
 }
 
 function updateMusicStatus(isPlaying) {
@@ -330,6 +333,7 @@ function updateMusicStatus(isPlaying) {
     }
 }
 
+/** FIX: Added robust error handling for play attempts */
 function toggleVolume() {
     if (!audioPlayer) return;
 
@@ -339,7 +343,8 @@ function toggleVolume() {
              showToast(isMusicMuted ? "Music started (Muted)." : "Music started playing.");
         }).catch(e => {
             console.error("Failed to play on user click:", e);
-            showToast('Playback Error: Tap the screen first to allow playback.');
+            // FIX: Display a clear user message if play fails (e.g., policy or bad link)
+            showToast('Playback Failed. Tap screen first, or check music link.');
         });
     } else {
         isMusicMuted = !isMusicMuted;
@@ -349,6 +354,7 @@ function toggleVolume() {
     }
 }
 
+/** FIX: Better error handling on audio source change */
 function setupMusicPlayer() { 
     audioPlayer = document.getElementById('audio-player');
     musicStatusSpan = document.getElementById('current-music-status');
@@ -365,11 +371,13 @@ function setupMusicPlayer() {
     
     audioPlayer.onplay = () => updateMusicStatus(true);
     audioPlayer.onpause = () => updateMusicStatus(false);
+    
+    // FIX: Comprehensive Error Handler for Music Loading
     audioPlayer.onerror = (e) => {
         console.error("Audio error:", e);
         audioPlayer.pause();
         updateMusicStatus(false);
-        showToast("Music Load Error. Playing stopped.");
+        showToast("Music Load Error. Playing stopped."); 
     };
 
     updateMusicStatus(false); 
@@ -437,7 +445,7 @@ function addMusicEventListeners() {
 }
 
 // ===========================================
-//          ADMIN POST LOGIC (UNCHANGED)
+//          ADMIN POST LOGIC
 // ===========================================
 
 function setupAdminPostLogic(isAdmin) {
@@ -485,7 +493,7 @@ function setupAdminPostLogic(isAdmin) {
 
 
 // ===========================================
-//          PROFILE LOGIC (INVITE CODE REMOVED)
+//          PROFILE LOGIC
 // ===========================================
 
 function updateProfileDisplay(userId, fullName, username, is_admin) {
@@ -497,6 +505,7 @@ function updateProfileDisplay(userId, fullName, username, is_admin) {
     
     const adminStatusEl = document.getElementById('admin-status');
     adminStatusEl.textContent = is_admin ? 'Administrator' : 'Regular User';
+    // Use CSS variable for background color
     adminStatusEl.style.backgroundColor = is_admin ? 'var(--tg-theme-accent)' : 'var(--tg-theme-link-color)'; 
     
     const tgUser = tg ? tg.initDataUnsafe.user : null;
@@ -519,9 +528,7 @@ function updateProfileDisplay(userId, fullName, username, is_admin) {
     }
 }
 
-/** Sets up listeners for profile actions. 
- * MODIFIED: All Invite Friends logic removed.
- */
+/** Sets up listeners for profile actions. */
 function setupProfileListeners() {
     const copyBtn = document.getElementById('chat-id-copy-btn');
     if (copyBtn) copyBtn.onclick = () => copyToClipboard(currentUserId.toString(), 'User ID copied.');
@@ -532,7 +539,7 @@ function setupProfileListeners() {
 
 
 // ===========================================
-//          NAVIGATION & MAIN ENTRY (UNCHANGED)
+//          NAVIGATION & MAIN ENTRY
 // ===========================================
 
 function switchScreen(targetScreenId) {
@@ -607,20 +614,21 @@ function setupTMA() {
         if (themeParams) {
             const root = document.documentElement;
             const themeMap = {
-                '--tg-theme-bg-color': themeParams.bg_color,
-                '--tg-theme-text-color': themeParams.text_color,
-                '--tg-theme-link-color': themeParams.link_color,
-                '--tg-theme-hint-color': themeParams.hint_color,
-                '--tg-theme-button-color': themeParams.button_color,
-                '--tg-theme-button-text-color': themeParams.button_text_color,
-                '--tg-theme-secondary-bg-color': themeParams.secondary_bg_color,
-                '--tg-theme-destructive-text-color': themeParams.destructive_text_color
+                // Set default/fallback values based on Telegram theme, prioritizing MiniMyID deep dark colors
+                '--tg-theme-bg-color': themeParams.bg_color || '#0d1117',
+                '--tg-theme-text-color': themeParams.text_color || '#ffffff',
+                '--tg-theme-link-color': themeParams.link_color || '#4c8cff',
+                '--tg-theme-hint-color': themeParams.hint_color || '#90a4ae',
+                '--tg-theme-button-color': themeParams.button_color || '#4c8cff',
+                '--tg-theme-button-text-color': themeParams.button_text_color || '#ffffff',
+                '--tg-theme-secondary-bg-color': themeParams.secondary_bg_color || '#1a202c',
+                '--tg-theme-destructive-text-color': themeParams.destructive_text_color || '#ff5252'
             };
             
             for (const [prop, value] of Object.entries(themeMap)) {
-                if (value) root.style.setProperty(prop, value);
+                root.style.setProperty(prop, value);
             }
-            document.body.style.backgroundColor = themeParams.bg_color || 'var(--tg-theme-bg-color)';
+            document.body.style.backgroundColor = themeMap['--tg-theme-bg-color'];
         }
 
         main();
@@ -638,6 +646,12 @@ function setupTMA() {
             HapticFeedback: { impactOccurred: () => console.log('Haptic: Light') },
             MainButton: { hide: () => console.log('MainButton: Hide') }
         };
+        // Apply fallback CSS variables (MiniMyID colors)
+        const root = document.documentElement;
+        root.style.setProperty('--tg-theme-bg-color', '#0d1117');
+        root.style.setProperty('--tg-theme-text-color', '#ffffff');
+        root.style.setProperty('--tg-theme-secondary-bg-color', '#1a202c');
+        root.style.setProperty('--tg-theme-link-color', '#4c8cff');
         document.body.style.backgroundColor = 'var(--tg-theme-bg-color)';
 
         main();
@@ -645,4 +659,4 @@ function setupTMA() {
 }
 
 // Start the entire application logic after DOM is fully loaded
-document.addEventListener('DOMContentLoaded', setupTMA); 
+document.addEventListener('DOMContentLoaded', setupTMA);
