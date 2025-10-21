@@ -1,13 +1,13 @@
 /* --- Root Variables & Base Setup (Modern Standard) --- */
 :root {
     /* Fallback Telegram Theme Variables (Will be overwritten by TMA SDK) */
-    --tg-theme-bg-color: #f0f2f5; 
-    --tg-theme-text-color: #1c1c1e;
+    --tg-theme-bg-color: #0b0c0e; /* Darker background for high contrast */
+    --tg-theme-text-color: #f0f2f5; /* Light text for dark mode */
     --tg-theme-link-color: #007aff;
     --tg-theme-hint-color: #999;
     --tg-theme-button-color: #007aff;
     --tg-theme-button-text-color: #ffffff;
-    --tg-theme-secondary-bg-color: #ffffff; /* Typically Card/List background */
+    --tg-theme-secondary-bg-color: #1c1c1e; /* Dark card/list background */
     --tg-theme-destructive-text-color: #ff3b30;
     --tg-theme-accent: #ff8a00; /* Admin/Highlight Color */
 
@@ -16,11 +16,12 @@
     --spacing-sm: 10px;
     --spacing-md: 16px; 
     --spacing-lg: 24px;
-    --card-radius: 14px; /* Slightly larger radius for a modern feel */
+    --card-radius: 16px; /* Slightly rounder for premium feel */
     
-    /* Sleeker Shadow for modern 'elevated' look */
-    --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.06); 
-    --shadow-header: 0 1px 4px rgba(0, 0, 0, 0.08); 
+    /* Sleeker Shadow for modern 'elevated' look (Adapted for Dark Mode) */
+    --shadow-subtle: 0 6px 15px rgba(0, 0, 0, 0.3); /* Deeper shadow */
+    --shadow-header: 0 1px 4px rgba(0, 0, 0, 0.2); 
+    --shadow-nav: 0 -4px 10px rgba(0, 0, 0, 0.5); 
 }
 
 /* Ensure Telegram theme variables are correctly applied to the body */
@@ -50,7 +51,6 @@ body {
 /* --- Content & Screen Management --- */
 .fixed-header-area {
     width: 100%;
-    /* Use secondary background for better contrast if primary is too dark */
     background-color: var(--tg-theme-secondary-bg-color);
     padding-top: var(--spacing-xs); 
     box-shadow: var(--shadow-header); 
@@ -83,12 +83,12 @@ body {
     height: 40px; 
 }
 .app-title-fixed {
-    font-size: 1.4rem; /* Slightly bolder */
-    font-weight: 700; 
+    font-size: 1.5rem; /* Bolder title */
+    font-weight: 800; 
     color: var(--tg-theme-text-color);
 }
 .header-icons .header-icon {
-    font-size: 1.3rem; /* Slightly larger icon */
+    font-size: 1.3rem; 
     cursor: pointer;
     margin-left: var(--spacing-md);
     color: var(--tg-theme-link-color);
@@ -101,12 +101,16 @@ body {
     font-size: 0.85rem;
     font-weight: 500;
     padding: var(--spacing-sm) var(--spacing-md);
-    color: var(--tg-theme-text-color); /* Use text color for status */
-    background-color: var(--tg-theme-bg-color); /* Use subtle background for status bar */
-    border-radius: 8px;
+    color: var(--tg-theme-text-color);
+    background-color: var(--tg-theme-bg-color); 
+    border-radius: 10px;
     margin: var(--spacing-xs) var(--spacing-md);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05); /* Subtle light border for dark mode */
     cursor: pointer;
+    transition: background-color 0.2s;
+}
+.music-status-bar:active {
+    background-color: var(--tg-theme-secondary-bg-color);
 }
 
 /* --- Filter Tabs (Modern Bottom Border Style) --- */
@@ -116,14 +120,14 @@ body {
     padding: var(--spacing-sm) var(--spacing-md);
     gap: var(--spacing-lg);
     background-color: var(--tg-theme-secondary-bg-color);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05); 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
 }
 .filter-tab {
     background: transparent;
     border: none;
     color: var(--tg-theme-hint-color);
     padding: var(--spacing-xs) 0;
-    font-size: 1rem; /* Slightly larger text */
+    font-size: 1rem; 
     font-weight: 600;
     position: relative;
     transition: color 0.2s;
@@ -137,7 +141,7 @@ body {
     left: 0;
     right: 0;
     bottom: -5px; 
-    height: 3px; /* Thicker line */
+    height: 3px; 
     background-color: var(--tg-theme-link-color);
     border-radius: 2px;
 }
@@ -145,11 +149,11 @@ body {
 /* --- Post Card Styles (Clean Card Look - Fixed Alignment) --- */
 .posts-container {
     padding-top: var(--spacing-md);
-    padding-bottom: var(--spacing-md); /* Add padding at the bottom for separation */
+    padding-bottom: var(--spacing-md); 
 }
 .post-card {
     background-color: var(--tg-theme-secondary-bg-color);
-    padding: var(--spacing-lg); /* More internal padding */
+    padding: var(--spacing-lg); 
     margin-bottom: var(--spacing-md);
     border-radius: var(--card-radius); 
     box-shadow: var(--shadow-subtle); 
@@ -157,31 +161,32 @@ body {
     white-space: pre-wrap;
     display: flex;
     flex-direction: column;
-    text-align: left; /* FIX: Ensure text is left-aligned */
-    transition: transform 0.1s;
+    text-align: left; 
+    transition: transform 0.1s, background-color 0.2s;
 }
 .post-card:active {
-    transform: scale(0.99); /* subtle click effect */
+    transform: scale(0.99); 
+    background-color: color-mix(in srgb, var(--tg-theme-secondary-bg-color), var(--tg-theme-text-color) 5%);
 }
 
 .post-header {
-    display: none; /* Hidden to fully remove the Admin/Time line */
+    display: none; /* Full removal of Admin/Time line */
 }
 
 .post-content {
-    font-size: 1.05rem; /* Slightly larger text */
+    font-size: 1.05rem; 
     line-height: 1.6;
-    margin-top: 0; /* Remove top margin since header is gone */
-    margin-bottom: var(--spacing-md); /* Increase bottom margin before actions */
+    margin-top: 0; 
+    margin-bottom: var(--spacing-md); 
 }
 
 .post-actions {
     display: flex;
-    justify-content: flex-start; /* Move actions to the left */
-    gap: var(--spacing-lg); /* Spacing between like and delete */
+    justify-content: flex-start; 
+    gap: var(--spacing-lg); 
     align-items: center;
     padding-top: var(--spacing-sm);
-    border-top: 1px solid rgba(0, 0, 0, 0.05); /* Subtle separator */
+    border-top: 1px solid rgba(255, 255, 255, 0.05); /* Subtle white separator for dark mode */
 }
 
 .like-btn, .delete-btn {
@@ -200,9 +205,6 @@ body {
     margin-right: 5px;
     font-size: 1.1rem;
 }
-.like-btn:active, .delete-btn:active {
-    transform: scale(0.95);
-}
 .like-btn.liked {
     color: var(--tg-theme-destructive-text-color); 
 }
@@ -218,12 +220,20 @@ body {
     align-items: center;
     height: 65px; 
     background-color: var(--tg-theme-secondary-bg-color);
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1); /* Stronger shadow */
+    box-shadow: var(--shadow-nav); 
     z-index: 100;
 }
 .nav-item {
-    /* ... existing styles ... */
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--tg-theme-hint-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     padding: 5px 10px;
+    transition: color 0.2s;
 }
 .nav-item.active {
     color: var(--tg-theme-link-color);
@@ -246,19 +256,20 @@ body {
     color: var(--tg-theme-button-text-color);
     border: none;
     border-radius: 50%;
-    width: 55px; /* Slightly larger */
+    width: 55px; 
     height: 55px;
     font-size: 1.4rem;
     cursor: pointer;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Elevated look */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); 
     z-index: 90;
     transition: background-color 0.2s, transform 0.1s;
 }
 .fab:active {
     transform: scale(0.95);
+    background-color: color-mix(in srgb, var(--tg-theme-accent), var(--tg-theme-text-color) 10%);
 }
 
-/* --- Profile Screen & List Styles (Sleeker List Group) --- */
+/* --- Profile Screen & List Styles --- */
 .profile-header {
     font-size: 1.6rem;
     font-weight: 700;
@@ -267,7 +278,6 @@ body {
 }
 
 .profile-header-card {
-    /* Reverted to a simpler look, relying on the background and padding */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -277,19 +287,14 @@ body {
     border-radius: var(--card-radius);
     box-shadow: var(--shadow-subtle);
 }
-
-.profile-avatar {
-    /* ... unchanged sizes ... */
-}
-/* ... other profile styles unchanged ... */
+/* ... other profile styles ... */
 
 .group-title {
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--tg-theme-hint-color);
-    margin-left: 0; /* Align group title with list card edge */
     margin-bottom: var(--spacing-sm);
-    padding-left: var(--spacing-md); /* Add padding to title for visual alignment */
+    padding-left: var(--spacing-md); 
 }
 .elevated-list {
     background-color: var(--tg-theme-secondary-bg-color);
@@ -298,28 +303,39 @@ body {
     overflow: hidden;
 }
 .info-item {
-    /* ... existing styles ... */
-    padding: 16px var(--spacing-md); /* More vertical space */
+    display: flex;
+    align-items: center;
+    padding: 16px var(--spacing-md); 
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     transition: background-color 0.1s;
 }
 .info-item:active {
-    background-color: color-mix(in srgb, var(--tg-theme-secondary-bg-color), var(--tg-theme-link-color) 5%);
+    background-color: color-mix(in srgb, var(--tg-theme-secondary-bg-color), var(--tg-theme-text-color) 5%);
 }
+
 .info-title {
-    font-weight: 500; /* Slightly lighter weight for titles */
+    font-weight: 500; 
     font-size: 1rem;
 }
 .info-subtitle {
     font-size: 0.85rem;
 }
 
-/* --- Modal Styles (Polished Slide-up effect) --- */
-/* ... modal styles unchanged as they are already modern ... */
+/* --- Modal Styles --- */
+.modal {
+    /* ... existing styles ... */
+}
+.modal-content {
+    background-color: var(--tg-theme-secondary-bg-color);
+    width: 100%;
+    /* ... other styles ... */
+}
 
 /* Button Styles (Refined) */
 .primary-btn, .secondary-btn {
-    padding: 12px 25px; /* Bigger touch target */
-    border-radius: 10px; /* Slightly rounder */
+    padding: 12px 25px; 
+    border-radius: 10px; 
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
@@ -334,16 +350,17 @@ body {
     border: none;
 }
 .secondary-btn {
-    background-color: var(--tg-theme-bg-color); /* Use lighter background for secondary */
+    background-color: var(--tg-theme-bg-color); 
     color: var(--tg-theme-text-color);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border for dark mode */
 }
 
 /* Music Option Styling */
 .music-option {
-    padding: var(--spacing-md); /* Better padding */
+    padding: var(--spacing-md); 
+    background-color: var(--tg-theme-bg-color); /* Use a shade darker for better contrast */
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .music-option:active {
-    background-color: var(--tg-theme-secondary-bg-color);
-        }
-    
+    background-color: color-mix(in srgb, var(--tg-theme-bg-color), var(--tg-theme-link-color) 5%);
+}
