@@ -1,6 +1,13 @@
-// ********** SET YOUR ADMIN CHAT ID HERE **********
-const ADMIN_CHAT_ID = 1924452453; 
-const ADMIN_CHAT_ID = 6513916873; ; 
+// ********** SET YOUR ADMIN CHAT ID(s) HERE **********
+// IMPORTANT: Use an array for multiple admins. Add your Admin ID(s) inside the square brackets.
+// Get the ID from any user and add it here.
+const ADMIN_CHAT_IDS = [
+    1924452453, // Admin 1: (Your current ID)
+    6513916873,
+    // Add additional Admin IDs here:
+    // 123456789, // Admin 2 ID example
+    // 987654321  // Admin 3 ID example
+]; 
 // *************************************************
 
 // --- LOCAL STORAGE KEYS ---
@@ -18,7 +25,6 @@ let currentUserName = 'Guest';
 let currentUserUsername = 'anonymous'; 
 let is_admin = false; 
 let currentPostFilter = 'new-posts'; 
-// const NEW_POSTS_LIMIT = 50; // V4.1: REMOVED LIMIT
 let isMusicMuted = false; 
 let tg = null;
 
@@ -117,8 +123,14 @@ function saveLikes(likes) {
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC 
+//          POSTS & LIKES LOGIC (V4.2 FIX: Multi-Admin Check)
 // ===========================================
+
+/** Checks if the given userId is one of the admins. */
+function isAdminUser(userId) {
+    // Convert userId to number (just in case) and check inclusion in the global ADMIN_CHAT_IDS array
+    return ADMIN_CHAT_IDS.includes(parseInt(userId));
+}
 
 /** Creates the HTML element for a single post. Admin Tag is removed via CSS/HTML. */
 function createPostElement(post, userId) {
@@ -127,7 +139,9 @@ function createPostElement(post, userId) {
     const postIdStr = post.id.toString(); 
     const postLikesArray = Array.isArray(likes[postIdStr]) ? likes[postIdStr].map(String) : []; 
     const isLiked = postLikesArray.includes(userIdStr);
-    const isAdmin = (userId === ADMIN_CHAT_ID); 
+    
+    // V4.2 FIX: Use the new check function
+    const isAdmin = isAdminUser(userId); 
     
     const postElement = document.createElement('div');
     postElement.className = 'post-card';
@@ -135,7 +149,7 @@ function createPostElement(post, userId) {
 
     const displayLikesCount = postLikesArray.length; 
     
-    // Only show Delete button if current user is Admin
+    // Only show Delete button if current user is an Admin
     const deleteButton = isAdmin 
         ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
@@ -156,9 +170,7 @@ function createPostElement(post, userId) {
     return postElement;
 }
 
-/** * Loads and renders posts based on the current filter. 
- * V4.1 FIX: Removed post limit to ensure all posts (including old Admin posts) are visible.
- */
+/** Loads and renders posts based on the current filter. (V4.1 Fix included) */
 function loadPosts(userId) {
     currentUserId = userId; 
     let posts = getPosts();
@@ -171,7 +183,6 @@ function loadPosts(userId) {
     // Apply sorting
     if (currentPostFilter === 'new-posts') {
         posts.sort((a, b) => b.timestamp - a.timestamp); 
-        // V4.1: No slice limit here
     } else if (currentPostFilter === 'old-posts') {
         posts.sort((a, b) => a.timestamp - b.timestamp); 
     }
@@ -188,8 +199,9 @@ function loadPosts(userId) {
 
 /** Permanently deletes a post and its associated likes. */
 function performDeletePost(postId, userId) {
-    if (userId !== ADMIN_CHAT_ID) { 
-        showToast("Only Admin can delete posts.");
+    // V4.2 FIX: Use the new check function
+    if (!isAdminUser(userId)) { 
+        showToast("Only Admins can delete posts.");
         return;
     }
     
@@ -540,7 +552,7 @@ function setupProfileListeners() {
 
 
 // ===========================================
-//          NAVIGATION & MAIN ENTRY
+//          NAVIGATION & MAIN ENTRY (V4.2 FIX)
 // ===========================================
 
 function switchScreen(targetScreenId) {
@@ -585,7 +597,9 @@ function main() {
         const nameParts = [user.first_name, user.last_name].filter(Boolean);
         currentUserName = nameParts.length > 0 ? nameParts.join(' ') : 'Anonymous User';
         currentUserUsername = user.username || null;
-        is_admin = currentUserId === ADMIN_CHAT_ID;
+        
+        // V4.2 FIX: Set is_admin based on the array check
+        is_admin = isAdminUser(currentUserId); 
     }
     
     // Setup
@@ -638,8 +652,11 @@ function setupTMA() {
         // Fallback for testing outside Telegram (Mock Data)
         console.warn("Telegram WebApp SDK not found. Running in fallback mode.");
         
+        // V4.2 FIX: Ensure mock data reflects multi-admin structure (using an ID that IS one of the admins)
+        const mockAdminId = ADMIN_CHAT_IDS[0] || 123456789; // Use the first ID or a fallback
+        
         tg = {
-            initDataUnsafe: { user: { id: ADMIN_CHAT_ID + 100, first_name: "Local", last_name: "Tester", username: "local_tester", photo_url: null } },
+            initDataUnsafe: { user: { id: mockAdminId, first_name: "Local", last_name: "Tester", username: "local_tester", photo_url: null } },
             themeParams: {},
             ready: () => console.log('TMA Mock Ready'),
             close: () => console.log('TMA Mock Close'),
