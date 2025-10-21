@@ -1,27 +1,27 @@
-/* --- Root Variables & Base Setup (Modern Standard) --- */
+/* --- Root Variables & Base Setup (MiniMyID Inspired) --- */
 :root {
-    /* Fallback Telegram Theme Variables (Will be overwritten by TMA SDK) */
-    --tg-theme-bg-color: #0b0c0e; /* Darker background for high contrast */
-    --tg-theme-text-color: #f0f2f5; /* Light text for dark mode */
-    --tg-theme-link-color: #007aff;
-    --tg-theme-hint-color: #999;
-    --tg-theme-button-color: #007aff;
+    /* Custom Deep Dark Theme Colors */
+    --tg-theme-bg-color: #0d1117; /* Very Dark Navy/Black */
+    --tg-theme-text-color: #ffffff; 
+    --tg-theme-link-color: #4c8cff; /* Bright blue for links/accents */
+    --tg-theme-hint-color: #90a4ae; /* Muted light gray */
+    --tg-theme-button-color: #4c8cff;
     --tg-theme-button-text-color: #ffffff;
-    --tg-theme-secondary-bg-color: #1c1c1e; /* Dark card/list background */
-    --tg-theme-destructive-text-color: #ff3b30;
-    --tg-theme-accent: #ff8a00; /* Admin/Highlight Color */
+    --tg-theme-secondary-bg-color: #1a202c; /* Dark card/list background */
+    --tg-theme-destructive-text-color: #ff5252;
+    --tg-theme-accent: #ffb74d; /* Warm Orange for Admin/FAB */
 
     /* UI Spacing & Geometry Variables */
     --spacing-xs: 5px;
     --spacing-sm: 10px;
     --spacing-md: 16px; 
     --spacing-lg: 24px;
-    --card-radius: 16px; /* Slightly rounder for premium feel */
+    --card-radius: 20px; /* Very rounded for modern card look */
     
-    /* Sleeker Shadow for modern 'elevated' look (Adapted for Dark Mode) */
-    --shadow-subtle: 0 6px 15px rgba(0, 0, 0, 0.3); /* Deeper shadow */
-    --shadow-header: 0 1px 4px rgba(0, 0, 0, 0.2); 
-    --shadow-nav: 0 -4px 10px rgba(0, 0, 0, 0.5); 
+    /* Sleeker Shadow with a subtle glow for the dark theme */
+    --shadow-subtle: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 10px rgba(76, 140, 255, 0.1); 
+    --shadow-header: 0 1px 6px rgba(0, 0, 0, 0.5); 
+    --shadow-nav: 0 -4px 15px rgba(0, 0, 0, 0.7); 
 }
 
 /* Ensure Telegram theme variables are correctly applied to the body */
@@ -65,34 +65,15 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
-.screen {
-    display: none;
-}
-.screen.active {
-    display: block;
-}
-
 /* --- Header Styles (Sleek Look) --- */
-.main-header {
-    padding: var(--spacing-xs) var(--spacing-md) 0 var(--spacing-md);
-}
-.header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 40px; 
-}
 .app-title-fixed {
-    font-size: 1.5rem; /* Bolder title */
+    font-size: 1.5rem; 
     font-weight: 800; 
     color: var(--tg-theme-text-color);
 }
 .header-icons .header-icon {
     font-size: 1.3rem; 
-    cursor: pointer;
-    margin-left: var(--spacing-md);
     color: var(--tg-theme-link-color);
-    transition: opacity 0.2s;
 }
 
 /* --- Music Status Bar (Refined) --- */
@@ -101,266 +82,101 @@ body {
     font-size: 0.85rem;
     font-weight: 500;
     padding: var(--spacing-sm) var(--spacing-md);
-    color: var(--tg-theme-text-color);
+    color: var(--tg-theme-hint-color); /* Muted status text */
     background-color: var(--tg-theme-bg-color); 
     border-radius: 10px;
     margin: var(--spacing-xs) var(--spacing-md);
-    border: 1px solid rgba(255, 255, 255, 0.05); /* Subtle light border for dark mode */
+    border: 1px solid rgba(255, 255, 255, 0.1); 
     cursor: pointer;
-    transition: background-color 0.2s;
-}
-.music-status-bar:active {
-    background-color: var(--tg-theme-secondary-bg-color);
 }
 
 /* --- Filter Tabs (Modern Bottom Border Style) --- */
 .post-filter-tabs {
-    display: flex;
-    justify-content: flex-start;
-    padding: var(--spacing-sm) var(--spacing-md);
-    gap: var(--spacing-lg);
     background-color: var(--tg-theme-secondary-bg-color);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
-}
-.filter-tab {
-    background: transparent;
-    border: none;
-    color: var(--tg-theme-hint-color);
-    padding: var(--spacing-xs) 0;
-    font-size: 1rem; 
-    font-weight: 600;
-    position: relative;
-    transition: color 0.2s;
-}
-.filter-tab.active {
-    color: var(--tg-theme-text-color);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15); 
 }
 .filter-tab.active::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -5px; 
-    height: 3px; 
     background-color: var(--tg-theme-link-color);
-    border-radius: 2px;
 }
 
-/* --- Post Card Styles (Clean Card Look - Fixed Alignment) --- */
-.posts-container {
-    padding-top: var(--spacing-md);
-    padding-bottom: var(--spacing-md); 
-}
+/* --- Post Card Styles (High Contrast Card - FIX: Alignment) --- */
 .post-card {
     background-color: var(--tg-theme-secondary-bg-color);
     padding: var(--spacing-lg); 
     margin-bottom: var(--spacing-md);
     border-radius: var(--card-radius); 
     box-shadow: var(--shadow-subtle); 
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    display: flex;
-    flex-direction: column;
-    text-align: left; 
-    transition: transform 0.1s, background-color 0.2s;
+    text-align: left; /* FIX: Ensure text is left-aligned */
 }
 .post-card:active {
     transform: scale(0.99); 
-    background-color: color-mix(in srgb, var(--tg-theme-secondary-bg-color), var(--tg-theme-text-color) 5%);
-}
-
-.post-header {
-    display: none; /* Full removal of Admin/Time line */
-}
-
-.post-content {
-    font-size: 1.05rem; 
-    line-height: 1.6;
-    margin-top: 0; 
-    margin-bottom: var(--spacing-md); 
+    background-color: color-mix(in srgb, var(--tg-theme-secondary-bg-color), #4c8cff 10%); /* Subtle blue press */
 }
 
 .post-actions {
-    display: flex;
-    justify-content: flex-start; 
-    gap: var(--spacing-lg); 
-    align-items: center;
-    padding-top: var(--spacing-sm);
-    border-top: 1px solid rgba(255, 255, 255, 0.05); /* Subtle white separator for dark mode */
+    border-top: 1px solid rgba(255, 255, 255, 0.15); 
 }
 
-.like-btn, .delete-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 0.95rem;
-    color: var(--tg-theme-hint-color);
-    padding: 0;
-    display: flex;
-    align-items: center;
-    font-weight: 500;
-    transition: color 0.2s, transform 0.1s;
-}
-.like-btn i, .delete-btn i {
-    margin-right: 5px;
-    font-size: 1.1rem;
-}
 .like-btn.liked {
     color: var(--tg-theme-destructive-text-color); 
 }
 
 /* --- Bottom Navigation (Sleek Floating Style) --- */
 .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    height: 65px; 
     background-color: var(--tg-theme-secondary-bg-color);
     box-shadow: var(--shadow-nav); 
-    z-index: 100;
-}
-.nav-item {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--tg-theme-hint-color);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5px 10px;
-    transition: color 0.2s;
 }
 .nav-item.active {
     color: var(--tg-theme-link-color);
 }
-.nav-item i {
-    font-size: 1.5rem; 
-    margin-bottom: 2px;
-}
-.nav-item span {
-    font-size: 0.75rem;
-    font-weight: 600;
-}
 
 /* --- Floating Action Button (FAB) --- */
 .fab {
-    position: fixed;
-    right: var(--spacing-md);
-    bottom: 75px; 
-    background-color: var(--tg-theme-accent); 
-    color: var(--tg-theme-button-text-color);
-    border: none;
-    border-radius: 50%;
-    width: 55px; 
-    height: 55px;
-    font-size: 1.4rem;
-    cursor: pointer;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); 
-    z-index: 90;
-    transition: background-color 0.2s, transform 0.1s;
-}
-.fab:active {
-    transform: scale(0.95);
-    background-color: color-mix(in srgb, var(--tg-theme-accent), var(--tg-theme-text-color) 10%);
+    background-color: var(--tg-theme-accent); /* Warm orange FAB */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 183, 77, 0.4); /* Orange glow */
 }
 
 /* --- Profile Screen & List Styles --- */
-.profile-header {
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-bottom: var(--spacing-lg);
-    padding-left: var(--spacing-md);
-}
-
-.profile-header-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: var(--spacing-lg) var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
+.profile-header-card, .elevated-list {
     background-color: var(--tg-theme-secondary-bg-color);
     border-radius: var(--card-radius);
     box-shadow: var(--shadow-subtle);
 }
-/* ... other profile styles ... */
 
-.group-title {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--tg-theme-hint-color);
-    margin-bottom: var(--spacing-sm);
-    padding-left: var(--spacing-md); 
-}
-.elevated-list {
-    background-color: var(--tg-theme-secondary-bg-color);
-    border-radius: var(--card-radius);
-    box-shadow: var(--shadow-subtle);
-    overflow: hidden;
-}
 .info-item {
-    display: flex;
-    align-items: center;
-    padding: 16px var(--spacing-md); 
-    cursor: pointer;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    transition: background-color 0.1s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 .info-item:active {
-    background-color: color-mix(in srgb, var(--tg-theme-secondary-bg-color), var(--tg-theme-text-color) 5%);
+    background-color: color-mix(in srgb, var(--tg-theme-secondary-bg-color), var(--tg-theme-link-color) 10%);
 }
 
-.info-title {
-    font-weight: 500; 
-    font-size: 1rem;
-}
-.info-subtitle {
-    font-size: 0.85rem;
+.profile-status {
+    /* Use Admin accent or Link color */
+    background-color: var(--tg-theme-accent); 
 }
 
-/* --- Modal Styles --- */
-.modal {
-    /* ... existing styles ... */
-}
+/* --- Modal Styles (Consistent Dark Look) --- */
 .modal-content {
     background-color: var(--tg-theme-secondary-bg-color);
-    width: 100%;
-    /* ... other styles ... */
+    border-radius: var(--card-radius) var(--card-radius) 0 0;
+    box-shadow: var(--shadow-nav);
 }
 
-/* Button Styles (Refined) */
-.primary-btn, .secondary-btn {
-    padding: 12px 25px; 
-    border-radius: 10px; 
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
-}
-.primary-btn:active, .secondary-btn:active {
-    transform: scale(0.98);
-}
+/* Button Styles */
 .primary-btn {
     background-color: var(--tg-theme-button-color);
-    color: var(--tg-theme-button-text-color);
-    border: none;
 }
 .secondary-btn {
     background-color: var(--tg-theme-bg-color); 
     color: var(--tg-theme-text-color);
-    border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border for dark mode */
+    border: 1px solid rgba(255, 255, 255, 0.15); 
 }
 
 /* Music Option Styling */
 .music-option {
-    padding: var(--spacing-md); 
-    background-color: var(--tg-theme-bg-color); /* Use a shade darker for better contrast */
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: var(--tg-theme-bg-color); 
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .music-option:active {
-    background-color: color-mix(in srgb, var(--tg-theme-bg-color), var(--tg-theme-link-color) 5%);
-}
+    background-color: color-mix(in srgb, var(--tg-theme-bg-color), var(--tg-theme-link-color) 10%);
+    }
