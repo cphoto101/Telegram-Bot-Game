@@ -4,6 +4,7 @@
 const ADMIN_CHAT_IDS = [
     1924452453, // Admin 1: (Your current ID)
     6513916873,
+    0,
     // Add additional Admin IDs here:
     // 123456789, // Admin 2 ID example
     // 987654321  // Admin 3 ID example
