@@ -2,7 +2,10 @@
 // IMPORTANT: Use an array for multiple admins. Add your Admin ID(s) inside the square brackets.
 // Get the ID from any user and add it here.
 const ADMIN_CHAT_IDS = [
-    1924452453, // Admin 1: (Your current ID) - Please REPLACE this with your actual ID
+    1924452453,
+    6440295843,
+    6513916873,
+    // Admin 1: (Your current ID) - Please REPLACE this with your actual ID
     // Add additional Admin IDs here:
     // 123456789, // Admin 2 ID example
     // 987654321  // Admin 3 ID example
