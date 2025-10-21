@@ -116,10 +116,12 @@ function saveLikes(likes) {
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC (Admin Tag Removed)
+//          POSTS & LIKES LOGIC (FIX: Admin Tag Removed)
 // ===========================================
 
-/** Creates the HTML element for a single post. */
+/** Creates the HTML element for a single post. 
+ * FIX: Removed Admin Tag/Post Header. 
+ */
 function createPostElement(post, userId) {
     const likes = getLikes();
     const userIdStr = userId.toString(); 
@@ -139,7 +141,7 @@ function createPostElement(post, userId) {
         ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
 
-    // post-header is intentionally empty to fully remove the Admin/Time display
+    // post-header is intentionally empty (and hidden via CSS) to fully remove the Admin/Time display
     postElement.innerHTML = `
         <div class="post-header">
             </div>
@@ -282,27 +284,29 @@ function setupPostFilters() {
 //          MODAL & MUSIC LOGIC (FIXES INCLUDED)
 // ===========================================
 
+/** FIX: Use style.display and classList for clean transition and hiding */
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     
-    modal.style.display = 'flex'; 
+    modal.style.display = 'flex'; // Show the modal container
     document.body.style.overflow = 'hidden'; 
 
-    requestAnimationFrame(() => modal.classList.add('active')); 
+    requestAnimationFrame(() => modal.classList.add('active')); // Start animation
     
     const fab = document.getElementById('post-add-button');
     if (fab) fab.style.display = 'none'; 
 }
 
+/** FIX: Wait for transition to complete before setting display to none */
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     
-    modal.classList.remove('active');
+    modal.classList.remove('active'); // Start animation out
     
     setTimeout(() => {
-        modal.style.display = 'none';
+        modal.style.display = 'none'; // Hide the modal container after animation
         document.body.style.overflow = ''; 
 
         const homeScreen = document.getElementById('home-screen');
@@ -310,7 +314,7 @@ function closeModal(modalId) {
             const fab = document.getElementById('post-add-button');
             if (fab) fab.style.display = 'flex'; 
         }
-    }, 400); 
+    }, 400); // Duration matches CSS transition
 }
 
 function updateMusicStatus(isPlaying) {
@@ -329,6 +333,7 @@ function updateMusicStatus(isPlaying) {
     }
 }
 
+/** FIX: Added robust error handling for play attempts */
 function toggleVolume() {
     if (!audioPlayer) return;
 
@@ -338,8 +343,8 @@ function toggleVolume() {
              showToast(isMusicMuted ? "Music started (Muted)." : "Music started playing.");
         }).catch(e => {
             console.error("Failed to play on user click:", e);
-            // FIX: Use showToast to notify the user of the error
-            showToast('Playback Error: Tap the screen first or check the music link.');
+            // FIX: Display a clear user message if play fails (e.g., policy or bad link)
+            showToast('Playback Failed. Tap screen first, or check music link.');
         });
     } else {
         isMusicMuted = !isMusicMuted;
@@ -349,6 +354,7 @@ function toggleVolume() {
     }
 }
 
+/** FIX: Better error handling on audio source change */
 function setupMusicPlayer() { 
     audioPlayer = document.getElementById('audio-player');
     musicStatusSpan = document.getElementById('current-music-status');
@@ -365,11 +371,12 @@ function setupMusicPlayer() {
     
     audioPlayer.onplay = () => updateMusicStatus(true);
     audioPlayer.onpause = () => updateMusicStatus(false);
+    
+    // FIX: Comprehensive Error Handler for Music Loading
     audioPlayer.onerror = (e) => {
         console.error("Audio error:", e);
         audioPlayer.pause();
         updateMusicStatus(false);
-        // FIX: Display a user-friendly message for Music Load Error
         showToast("Music Load Error. Playing stopped."); 
     };
 
@@ -544,6 +551,7 @@ function switchScreen(targetScreenId) {
     document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
         item.classList.toggle('active', item.getAttribute('data-screen') === targetScreenId);
     });
+
     const fixedHeaderArea = document.querySelector('.fixed-header-area');
     const fab = document.getElementById('post-add-button');
     const contentArea = document.querySelector('.content');
@@ -651,4 +659,4 @@ function setupTMA() {
 }
 
 // Start the entire application logic after DOM is fully loaded
-document.addEventListener('DOMContentLoaded', setupTMA);
+document.addEventListener('DOMContentLoaded', setupTMA); 
