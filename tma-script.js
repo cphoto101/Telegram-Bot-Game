@@ -136,11 +136,12 @@ function createPostElement(post, userId) {
 
     const displayLikesCount = postLikesArray.length; 
     
+    // Only show Delete button if current user is Admin
     const deleteButton = isAdmin 
         ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
 
-    // NOTE: post-header is kept but kept empty to avoid any name/time/admin display.
+    // NOTE: post-header is hidden via CSS for a clean look
     postElement.innerHTML = `
         <div class="post-header">
             </div>
@@ -287,9 +288,11 @@ function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     
-    modal.style.display = 'flex';
+    // FIX: Set display flex immediately to allow transition from bottom
+    modal.style.display = 'flex'; 
     document.body.style.overflow = 'hidden'; 
 
+    // Use requestAnimationFrame for smooth transition
     requestAnimationFrame(() => modal.classList.add('active')); 
     
     const fab = document.getElementById('post-add-button');
@@ -302,6 +305,7 @@ function closeModal(modalId) {
     
     modal.classList.remove('active');
     
+    // FIX: Wait for transition to complete before setting display to none
     setTimeout(() => {
         modal.style.display = 'none';
         document.body.style.overflow = ''; 
@@ -544,6 +548,7 @@ function switchScreen(targetScreenId) {
     document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
         item.classList.toggle('active', item.getAttribute('data-screen') === targetScreenId);
     });
+
     const fixedHeaderArea = document.querySelector('.fixed-header-area');
     const fab = document.getElementById('post-add-button');
     const contentArea = document.querySelector('.content');
@@ -552,10 +557,12 @@ function switchScreen(targetScreenId) {
 
     if (targetScreenId === 'profile-screen') {
         if (fixedHeaderArea) fixedHeaderArea.style.display = 'none';
+        // Add extra padding to the content area for profile screen to start below the h2
         if (contentArea) contentArea.style.paddingTop = '20px'; 
         if (fab) fab.style.display = 'none';
     } else { // home-screen
         if (fixedHeaderArea) fixedHeaderArea.style.display = 'block';
+        // Add padding to make space for the fixed header + some margin
         if (contentArea) contentArea.style.paddingTop = `${headerHeight + 20}px`; 
         if (fab && is_admin) fab.style.display = 'flex'; 
     }
@@ -570,6 +577,7 @@ function addNavigationListeners() {
 }
 
 function main() {
+    // Check if Telegram SDK is available and get user info
     const user = tg.initDataUnsafe.user;
     if (user && user.id) {
         currentUserId = parseInt(user.id); 
@@ -606,20 +614,21 @@ function setupTMA() {
         if (themeParams) {
             const root = document.documentElement;
             const themeMap = {
-                '--tg-theme-bg-color': themeParams.bg_color,
-                '--tg-theme-text-color': themeParams.text_color,
-                '--tg-theme-link-color': themeParams.link_color,
-                '--tg-theme-hint-color': themeParams.hint_color,
-                '--tg-theme-button-color': themeParams.button_color,
-                '--tg-theme-button-text-color': themeParams.button_text_color,
-                '--tg-theme-secondary-bg-color': themeParams.secondary_bg_color,
-                '--tg-theme-destructive-text-color': themeParams.destructive_text_color
+                // Set default/fallback values based on Telegram theme
+                '--tg-theme-bg-color': themeParams.bg_color || '#0b0c0e',
+                '--tg-theme-text-color': themeParams.text_color || '#f0f2f5',
+                '--tg-theme-link-color': themeParams.link_color || '#007aff',
+                '--tg-theme-hint-color': themeParams.hint_color || '#999',
+                '--tg-theme-button-color': themeParams.button_color || '#007aff',
+                '--tg-theme-button-text-color': themeParams.button_text_color || '#ffffff',
+                '--tg-theme-secondary-bg-color': themeParams.secondary_bg_color || '#1c1c1e',
+                '--tg-theme-destructive-text-color': themeParams.destructive_text_color || '#ff3b30'
             };
             
             for (const [prop, value] of Object.entries(themeMap)) {
-                if (value) root.style.setProperty(prop, value);
+                root.style.setProperty(prop, value);
             }
-            document.body.style.backgroundColor = themeParams.bg_color || 'var(--tg-theme-bg-color)';
+            document.body.style.backgroundColor = themeMap['--tg-theme-bg-color'];
         }
 
         main();
@@ -637,6 +646,11 @@ function setupTMA() {
             HapticFeedback: { impactOccurred: () => console.log('Haptic: Light') },
             MainButton: { hide: () => console.log('MainButton: Hide') }
         };
+        // Apply fallback CSS variables
+        const root = document.documentElement;
+        root.style.setProperty('--tg-theme-bg-color', '#0b0c0e');
+        root.style.setProperty('--tg-theme-text-color', '#f0f2f5');
+        root.style.setProperty('--tg-theme-secondary-bg-color', '#1c1c1e');
         document.body.style.backgroundColor = 'var(--tg-theme-bg-color)';
 
         main();
@@ -645,4 +659,3 @@ function setupTMA() {
 
 // Start the entire application logic after DOM is fully loaded
 document.addEventListener('DOMContentLoaded', setupTMA); 
-    
