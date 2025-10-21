@@ -116,12 +116,10 @@ function saveLikes(likes) {
 }
 
 // ===========================================
-//          POSTS & LIKES LOGIC (MODIFIED: Admin Tag Removed)
+//          POSTS & LIKES LOGIC (Admin Tag Removed)
 // ===========================================
 
-/** Creates the HTML element for a single post. 
- * MODIFIED: Removed Admin Tag from post content.
- */
+/** Creates the HTML element for a single post. */
 function createPostElement(post, userId) {
     const likes = getLikes();
     const userIdStr = userId.toString(); 
@@ -141,7 +139,7 @@ function createPostElement(post, userId) {
         ? `<button class="delete-btn" data-post-id="${post.id}"><i class="fas fa-trash"></i> Delete</button>` 
         : '';
 
-    // NOTE: post-header is hidden via CSS for a clean look
+    // post-header is intentionally empty to fully remove the Admin/Time display
     postElement.innerHTML = `
         <div class="post-header">
             </div>
@@ -281,18 +279,16 @@ function setupPostFilters() {
 }
 
 // ===========================================
-//          MODAL & MUSIC LOGIC (UNCHANGED)
+//          MODAL & MUSIC LOGIC (FIXES INCLUDED)
 // ===========================================
 
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     
-    // FIX: Set display flex immediately to allow transition from bottom
     modal.style.display = 'flex'; 
     document.body.style.overflow = 'hidden'; 
 
-    // Use requestAnimationFrame for smooth transition
     requestAnimationFrame(() => modal.classList.add('active')); 
     
     const fab = document.getElementById('post-add-button');
@@ -305,7 +301,6 @@ function closeModal(modalId) {
     
     modal.classList.remove('active');
     
-    // FIX: Wait for transition to complete before setting display to none
     setTimeout(() => {
         modal.style.display = 'none';
         document.body.style.overflow = ''; 
@@ -343,7 +338,8 @@ function toggleVolume() {
              showToast(isMusicMuted ? "Music started (Muted)." : "Music started playing.");
         }).catch(e => {
             console.error("Failed to play on user click:", e);
-            showToast('Playback Error: Tap the screen first to allow playback.');
+            // FIX: Use showToast to notify the user of the error
+            showToast('Playback Error: Tap the screen first or check the music link.');
         });
     } else {
         isMusicMuted = !isMusicMuted;
@@ -373,7 +369,8 @@ function setupMusicPlayer() {
         console.error("Audio error:", e);
         audioPlayer.pause();
         updateMusicStatus(false);
-        showToast("Music Load Error. Playing stopped.");
+        // FIX: Display a user-friendly message for Music Load Error
+        showToast("Music Load Error. Playing stopped."); 
     };
 
     updateMusicStatus(false); 
@@ -489,7 +486,7 @@ function setupAdminPostLogic(isAdmin) {
 
 
 // ===========================================
-//          PROFILE LOGIC (INVITE CODE REMOVED)
+//          PROFILE LOGIC (UNCHANGED)
 // ===========================================
 
 function updateProfileDisplay(userId, fullName, username, is_admin) {
@@ -501,6 +498,7 @@ function updateProfileDisplay(userId, fullName, username, is_admin) {
     
     const adminStatusEl = document.getElementById('admin-status');
     adminStatusEl.textContent = is_admin ? 'Administrator' : 'Regular User';
+    // Use CSS variable for background color
     adminStatusEl.style.backgroundColor = is_admin ? 'var(--tg-theme-accent)' : 'var(--tg-theme-link-color)'; 
     
     const tgUser = tg ? tg.initDataUnsafe.user : null;
@@ -523,9 +521,7 @@ function updateProfileDisplay(userId, fullName, username, is_admin) {
     }
 }
 
-/** Sets up listeners for profile actions. 
- * MODIFIED: All Invite Friends logic removed.
- */
+/** Sets up listeners for profile actions. */
 function setupProfileListeners() {
     const copyBtn = document.getElementById('chat-id-copy-btn');
     if (copyBtn) copyBtn.onclick = () => copyToClipboard(currentUserId.toString(), 'User ID copied.');
@@ -548,7 +544,6 @@ function switchScreen(targetScreenId) {
     document.querySelectorAll('.bottom-nav .nav-item').forEach(item => {
         item.classList.toggle('active', item.getAttribute('data-screen') === targetScreenId);
     });
-
     const fixedHeaderArea = document.querySelector('.fixed-header-area');
     const fab = document.getElementById('post-add-button');
     const contentArea = document.querySelector('.content');
@@ -557,12 +552,10 @@ function switchScreen(targetScreenId) {
 
     if (targetScreenId === 'profile-screen') {
         if (fixedHeaderArea) fixedHeaderArea.style.display = 'none';
-        // Add extra padding to the content area for profile screen to start below the h2
         if (contentArea) contentArea.style.paddingTop = '20px'; 
         if (fab) fab.style.display = 'none';
     } else { // home-screen
         if (fixedHeaderArea) fixedHeaderArea.style.display = 'block';
-        // Add padding to make space for the fixed header + some margin
         if (contentArea) contentArea.style.paddingTop = `${headerHeight + 20}px`; 
         if (fab && is_admin) fab.style.display = 'flex'; 
     }
@@ -577,7 +570,6 @@ function addNavigationListeners() {
 }
 
 function main() {
-    // Check if Telegram SDK is available and get user info
     const user = tg.initDataUnsafe.user;
     if (user && user.id) {
         currentUserId = parseInt(user.id); 
@@ -614,15 +606,15 @@ function setupTMA() {
         if (themeParams) {
             const root = document.documentElement;
             const themeMap = {
-                // Set default/fallback values based on Telegram theme
-                '--tg-theme-bg-color': themeParams.bg_color || '#0b0c0e',
-                '--tg-theme-text-color': themeParams.text_color || '#f0f2f5',
-                '--tg-theme-link-color': themeParams.link_color || '#007aff',
-                '--tg-theme-hint-color': themeParams.hint_color || '#999',
-                '--tg-theme-button-color': themeParams.button_color || '#007aff',
+                // Set default/fallback values based on Telegram theme, prioritizing MiniMyID deep dark colors
+                '--tg-theme-bg-color': themeParams.bg_color || '#0d1117',
+                '--tg-theme-text-color': themeParams.text_color || '#ffffff',
+                '--tg-theme-link-color': themeParams.link_color || '#4c8cff',
+                '--tg-theme-hint-color': themeParams.hint_color || '#90a4ae',
+                '--tg-theme-button-color': themeParams.button_color || '#4c8cff',
                 '--tg-theme-button-text-color': themeParams.button_text_color || '#ffffff',
-                '--tg-theme-secondary-bg-color': themeParams.secondary_bg_color || '#1c1c1e',
-                '--tg-theme-destructive-text-color': themeParams.destructive_text_color || '#ff3b30'
+                '--tg-theme-secondary-bg-color': themeParams.secondary_bg_color || '#1a202c',
+                '--tg-theme-destructive-text-color': themeParams.destructive_text_color || '#ff5252'
             };
             
             for (const [prop, value] of Object.entries(themeMap)) {
@@ -646,11 +638,12 @@ function setupTMA() {
             HapticFeedback: { impactOccurred: () => console.log('Haptic: Light') },
             MainButton: { hide: () => console.log('MainButton: Hide') }
         };
-        // Apply fallback CSS variables
+        // Apply fallback CSS variables (MiniMyID colors)
         const root = document.documentElement;
-        root.style.setProperty('--tg-theme-bg-color', '#0b0c0e');
-        root.style.setProperty('--tg-theme-text-color', '#f0f2f5');
-        root.style.setProperty('--tg-theme-secondary-bg-color', '#1c1c1e');
+        root.style.setProperty('--tg-theme-bg-color', '#0d1117');
+        root.style.setProperty('--tg-theme-text-color', '#ffffff');
+        root.style.setProperty('--tg-theme-secondary-bg-color', '#1a202c');
+        root.style.setProperty('--tg-theme-link-color', '#4c8cff');
         document.body.style.backgroundColor = 'var(--tg-theme-bg-color)';
 
         main();
@@ -658,4 +651,4 @@ function setupTMA() {
 }
 
 // Start the entire application logic after DOM is fully loaded
-document.addEventListener('DOMContentLoaded', setupTMA); 
+document.addEventListener('DOMContentLoaded', setupTMA);
