@@ -17,7 +17,7 @@ const FIREBASE_CONFIG = {
 
 // ********** SET YOUR ADMIN CHAT ID(s) HERE **********
 const ADMIN_CHAT_IDS = [
-    1924452453, 6440295843, 6513916873,
+    1924452453, 6440295843, 6513916873,8224616646,
 // Admin 1: (Your current ID) - Please REPLACE this with your actual ID
     // 123456789, // Admin 2 ID example
 ]; 
